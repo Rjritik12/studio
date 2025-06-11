@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from 'react';
 import { CreatePostForm } from './components/CreatePostForm';
 import { PostCard } from './components/PostCard';
 import type { Post } from '@/lib/types';
@@ -13,7 +16,7 @@ import {
 } from "@/components/ui/select"
 
 // Mock data for posts - in a real app, this would come from a database
-const mockPosts: Post[] = [
+const initialMockPosts: Post[] = [
   {
     id: '1',
     userName: 'Student123',
@@ -52,11 +55,9 @@ const mockPosts: Post[] = [
 
 
 export default function FeedPage() {
-  // In a real app, posts would be fetched and managed with state
-  // const [posts, setPosts] = useState<Post[]>(mockPosts);
+  const [posts, setPosts] = useState<Post[]>(initialMockPosts);
 
   const handlePostCreate = (newPostData: Omit<Post, 'id' | 'likes' | 'commentsCount' | 'createdAt' | 'expiresAt' | 'userAvatar' | 'userName'>) => {
-    // Mock adding a post
     const newPost: Post = {
       ...newPostData,
       id: String(Date.now()),
@@ -67,9 +68,8 @@ export default function FeedPage() {
       createdAt: Date.now(),
       expiresAt: Date.now() + 3600000 * 48, // Expires in 48 hours
     };
-    // setPosts(prevPosts => [newPost, ...prevPosts]);
-    console.log("New post created (mock):", newPost);
-    alert("New post created (mock). Check console.");
+    setPosts(prevPosts => [newPost, ...prevPosts]);
+    // console.log("New post created:", newPost); // Kept for debugging if needed
   };
 
 
@@ -107,10 +107,10 @@ export default function FeedPage() {
       </div>
 
       <div className="max-w-2xl mx-auto space-y-6">
-        {mockPosts.map(post => (
+        {posts.map(post => (
           <PostCard key={post.id} post={post} />
         ))}
-        {mockPosts.length === 0 && (
+        {posts.length === 0 && (
           <div className="text-center py-10">
             <p className="text-xl text-muted-foreground">No posts yet. Be the first to share!</p>
           </div>
