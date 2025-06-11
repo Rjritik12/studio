@@ -6,7 +6,6 @@ import { CreatePostForm } from './components/CreatePostForm';
 import { PostCard } from './components/PostCard';
 import type { Post } from '@/lib/types';
 import { Input } from '@/components/ui/input';
-// import { Button } from '@/components/ui/button'; // Button is not used directly here anymore
 import { SearchIcon, FilterIcon } from 'lucide-react';
 import {
   Select,
@@ -16,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useToast } from '@/hooks/use-toast'; // Import useToast
 
 // Mock data for posts - in a real app, this would come from a database
 const initialMockPosts: Post[] = [
@@ -59,6 +59,7 @@ const initialMockPosts: Post[] = [
 
 export default function FeedPage() {
   const [posts, setPosts] = useState<Post[]>(initialMockPosts);
+  const { toast } = useToast(); // Initialize useToast
 
   const handlePostCreate = (newPostData: Omit<Post, 'id' | 'likes' | 'commentsCount' | 'createdAt' | 'expiresAt' | 'userAvatar' | 'userName'>) => {
     const newPost: Post = {
@@ -72,6 +73,11 @@ export default function FeedPage() {
       expiresAt: Date.now() + 3600000 * 48, // Expires in 48 hours
     };
     setPosts(prevPosts => [newPost, ...prevPosts]);
+    toast({ // Add toast notification
+      title: "Post Created!",
+      description: "Your post has been added to the feed.",
+      variant: "default", // or "success" if you have such variant
+    });
   };
 
 
