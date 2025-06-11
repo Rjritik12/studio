@@ -67,7 +67,7 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
       setTimeLeft((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
     }, 1000);
     return () => clearInterval(timer);
-  }, [timeLeft, gameOver, selectedAnswer]);
+  }, [timeLeft, gameOver, selectedAnswer, handleAnswer]);
 
   const resetForNextQuestion = useCallback(() => {
     setSelectedAnswer(null);
@@ -80,7 +80,8 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
     }
   }, [currentQuestionIndex, questions]);
 
-  const handleAnswer = (answer: string | null) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleAnswer = useCallback((answer: string | null) => {
     if (selectedAnswer || gameOver) return;
 
     setSelectedAnswer(answer || "Time's up");
@@ -103,7 +104,8 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
         onGameEnd(score + (isCorrect ? 1 : 0));
       }
     }, 2000); 
-  };
+  }, [selectedAnswer, gameOver, currentQuestion, currentQuestionIndex, questions.length, onGameEnd, score, resetForNextQuestion]);
+
 
   const handleLifeline = async (type: Lifeline) => {
     if (lifelines[type].used || gameOver || selectedAnswer || lifelines[type].isLoading) return;
@@ -116,24 +118,28 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
           {
             const correctAnswer = currentQuestion.correctAnswer;
             let wrongOptions = currentQuestion.options.filter(opt => opt !== correctAnswer);
-            if (wrongOptions.length === 0) { 
-                wrongOptions = currentQuestion.options.filter(opt => opt !== correctAnswer);
-            }
-            const optionToKeep = wrongOptions.length > 0 ? wrongOptions[Math.floor(Math.random() * wrongOptions.length)] : currentQuestion.options.find(opt => opt !== correctAnswer); 
+            
+            // Shuffle wrong options to pick one randomly
+            wrongOptions.sort(() => Math.random() - 0.5);
+
+            const optionToKeep = wrongOptions.length > 0 ? wrongOptions[0] : undefined;
             
             const newDisplayedOptions = [correctAnswer];
             if (optionToKeep) {
                 newDisplayedOptions.push(optionToKeep);
             }
             
-            while (newDisplayedOptions.length < 2 && currentQuestion.options.length > newDisplayedOptions.length) {
-                const randomOption = currentQuestion.options[Math.floor(Math.random() * currentQuestion.options.length)];
-                if (!newDisplayedOptions.includes(randomOption)) {
-                    newDisplayedOptions.push(randomOption);
+            // If somehow only one wrong option was available, or some other edge case,
+            // ensure we still have two distinct options if possible.
+            // This part is defensive coding.
+            if (newDisplayedOptions.length < 2 && currentQuestion.options.length > 1) {
+                const remainingOptions = currentQuestion.options.filter(opt => !newDisplayedOptions.includes(opt));
+                if (remainingOptions.length > 0) {
+                    newDisplayedOptions.push(remainingOptions[Math.floor(Math.random() * remainingOptions.length)]);
                 }
             }
-
-            setDisplayedOptions(newDisplayedOptions.sort(() => Math.random() - 0.5));
+            // Ensure unique options and sort
+            setDisplayedOptions([...new Set(newDisplayedOptions)].sort(() => Math.random() - 0.5));
             setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
             break;
           }
@@ -172,7 +178,7 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
               setTimeLeft(TIME_PER_QUESTION);
               setHintText(null);
               setAudiencePollResults(null);
-              setDisplayedOptions(newQuestion.options);
+              setDisplayedOptions(newQuestion.options); // Ensure new options are displayed
               toast({ title: "Question Flipped!", description: "A new question has been loaded." });
               setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
             }
@@ -189,80 +195,62 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
                 break;
             }
             
+            let percentages = new Array(numOptions).fill(0);
             let totalPercentage = 100;
-            let assignedPercentages = 0;
-
-            // Give correct answer a significantly higher chance
-            const correctAnswerIndex = optionsToPoll.indexOf(currentQuestion.correctAnswer);
             
-            const votes = optionsToPoll.map((option, index) => {
-                let voteShare = Math.random() * (100 / numOptions); // basic random share
-                if (index === correctAnswerIndex) {
-                    voteShare += Math.random() * 20 + 20; // Add a boost of 20-40% to correct answer
-                }
-                return { option, voteShare };
-            });
-
-            const totalVoteShare = votes.reduce((sum, v) => sum + v.voteShare, 0);
-
-            if (totalVoteShare === 0) { // Extremely unlikely, but handle
-                 optionsToPoll.forEach((opt, idx) => {
-                    poll[opt] = idx === 0 ? 100 : 0;
-                 });
+            // Give correct answer a base of 30-50%
+            const correctAnswerIndex = optionsToPoll.indexOf(currentQuestion.correctAnswer);
+            if (correctAnswerIndex !== -1) {
+                percentages[correctAnswerIndex] = Math.floor(Math.random() * 21) + 30; // 30 to 50
             } else {
-                for (let i = 0; i < optionsToPoll.length; i++) {
-                    const option = optionsToPoll[i];
-                    if (i === optionsToPoll.length - 1) {
-                        poll[option] = totalPercentage - assignedPercentages;
+                // Fallback if correct answer not in options (should not happen with 50-50)
+                // Give a random option a boost
+                const randomIndex = Math.floor(Math.random() * numOptions);
+                percentages[randomIndex] = Math.floor(Math.random() * 21) + 30;
+            }
+
+            let remainingPercentage = totalPercentage - percentages.reduce((a, b) => a + b, 0);
+            
+            // Distribute remaining percentage among other options
+            for (let i = 0; i < numOptions; i++) {
+                if (percentages[i] === 0) { // If not the pre-assigned correct/boosted answer
+                    if (i === numOptions - 1 - (correctAnswerIndex !== -1 && percentages.filter(p=>p===0).length === 1 ? 0:1) ) { // last one to assign among non-boosted
+                         percentages[i] = remainingPercentage;
                     } else {
-                        const calculatedPercent = Math.round((votes[i].voteShare / totalVoteShare) * totalPercentage);
-                        // Ensure not to over-assign due to rounding on last few items
-                        const maxPossible = totalPercentage - assignedPercentages - (optionsToPoll.length - 1 - i); // Leave at least 1% for remaining
-                        const actualPercent = Math.min(calculatedPercent, maxPossible > 0 ? maxPossible : calculatedPercent );
-                        
-                        poll[option] = actualPercent > 0 ? actualPercent : (calculatedPercent > 0 ? 1: 0); // Ensure at least 1 if calculated >0 and can afford
-                        if (totalPercentage - (assignedPercentages + poll[option]) < (optionsToPoll.length -1 -i)) {
-                           // if assigning this makes it impossible for others to get at least 1%
-                           poll[option] = Math.max(0, (totalPercentage - assignedPercentages) - (optionsToPoll.length -1 - i));
-                        }
-                        assignedPercentages += poll[option];
+                        const randomShare = Math.floor(Math.random() * (remainingPercentage / (numOptions - (percentages.filter(p=>p>0).length) )) +1);
+                        percentages[i] = Math.min(randomShare, remainingPercentage);
+                        remainingPercentage -= percentages[i];
                     }
                 }
             }
-
-            // Final sanity check to ensure sum is 100
-            let currentSum = Object.values(poll).reduce((sum, p) => sum + p, 0);
-            if (currentSum !== 100 && optionsToPoll.length > 0) {
-                const diff = 100 - currentSum;
-                // Add/remove difference from the (first available or correct if possible) option
-                const adjustOption = correctAnswerIndex !== -1 ? optionsToPoll[correctAnswerIndex] : optionsToPoll[0];
-                if (poll[adjustOption] !== undefined) {
-                   poll[adjustOption] += diff;
-                   // Ensure no negative percentages
-                   if(poll[adjustOption] < 0) {
-                        // This case means poll[adjustOption] was small and diff was very negative.
-                        // Redistribute the negativity if possible or set to 0.
-                        // For simplicity, if it goes negative, reset and distribute diff among others
-                        // This part can get complex; aiming for 'good enough' simulation
-                        poll[adjustOption] = 0;
-                        currentSum = Object.values(poll).reduce((sum, p) => sum + p, 0);
-                        if(currentSum !== 100){
-                             const remainingDiff = 100 - currentSum;
-                             const otherOptions = optionsToPoll.filter(opt => opt !== adjustOption);
-                             if(otherOptions.length > 0 && poll[otherOptions[0]] !== undefined){
-                                poll[otherOptions[0]] += remainingDiff;
-                             } else if (optionsToPoll.length > 0 && poll[optionsToPoll[0]] !== undefined && optionsToPoll[0] !== adjustOption){
-                                poll[optionsToPoll[0]] += remainingDiff;
-                             }
-                             // final fallback if all else fails (e.g. single option poll)
-                             else if (poll[adjustOption] !== undefined) poll[adjustOption] = 100;
-                        }
-                   }
-                } else if (poll[optionsToPoll[0]] !== undefined){ // fallback to first option
-                    poll[optionsToPoll[0]] += diff;
+            
+            // Normalize to ensure sum is 100 (due to Math.floor)
+            let currentSum = percentages.reduce((a, b) => a + b, 0);
+            if (currentSum !== totalPercentage) {
+                const diff = totalPercentage - currentSum;
+                // Add/subtract difference from the largest share (or correct answer if available)
+                const adjustIdx = correctAnswerIndex !== -1 ? correctAnswerIndex : percentages.indexOf(Math.max(...percentages));
+                percentages[adjustIdx] += diff;
+            }
+             // Ensure no negative percentages and re-distribute if necessary
+            for(let i = 0; i < numOptions; i++) {
+                if(percentages[i] < 0) {
+                    remainingPercentage = -percentages[i];
+                    percentages[i] = 0;
+                    // Distribute this deficit to others, preferably the correct answer
+                    const targetIdx = correctAnswerIndex !== -1 ? correctAnswerIndex : (i + 1) % numOptions;
+                    percentages[targetIdx] += remainingPercentage; 
                 }
             }
+            currentSum = percentages.reduce((a, b) => a + b, 0);
+             if (currentSum !== totalPercentage && numOptions > 0) {
+                percentages[correctAnswerIndex !== -1 ? correctAnswerIndex : 0] += (totalPercentage - currentSum);
+            }
 
+
+            optionsToPoll.forEach((opt, idx) => {
+                poll[opt] = percentages[idx];
+            });
 
             setAudiencePollResults(poll);
             setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
@@ -306,22 +294,27 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
                 variant="outline"
                 className={cn(
                   "p-4 h-auto text-base justify-start text-left whitespace-normal break-words relative",
-                  "border-2 rounded-lg transition-all duration-200 ease-in-out",
+                  "border-2 rounded-lg transition-all duration-200 ease-in-out flex items-center justify-between", // Added flex for icon positioning
                   selectedAnswer === option && answerStatus === 'correct' && 'bg-green-500 border-green-700 text-white hover:bg-green-600',
                   selectedAnswer === option && answerStatus === 'incorrect' && 'bg-red-500 border-red-700 text-white hover:bg-red-600',
-                  selectedAnswer && selectedAnswer !== option && option === currentQuestion.correctAnswer && 'bg-green-200 border-green-400 text-green-800', 
+                  selectedAnswer && selectedAnswer !== option && option === currentQuestion.correctAnswer && 'bg-green-200 border-green-400 text-green-800 dark:bg-green-700 dark:text-green-100 dark:border-green-600', 
                   !selectedAnswer && 'hover:bg-primary/10 hover:border-primary',
                   selectedAnswer && 'cursor-not-allowed'
                 )}
                 onClick={() => handleAnswer(option)}
                 disabled={!!selectedAnswer || gameOver}
               >
-                {option}
-                {audiencePollResults && audiencePollResults[option] !== undefined && (
-                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold bg-accent/80 text-accent-foreground px-2 py-0.5 rounded">
-                    {audiencePollResults[option]}%
-                  </span>
-                )}
+                <span>{option}</span> 
+                <span className="flex items-center"> {/* Wrapper for icon and poll */}
+                  {selectedAnswer === option && answerStatus === 'correct' && <CheckCircle className="ml-2 h-5 w-5 text-white" />}
+                  {selectedAnswer === option && answerStatus === 'incorrect' && <XCircle className="ml-2 h-5 w-5 text-white" />}
+                  {selectedAnswer && selectedAnswer !== option && option === currentQuestion.correctAnswer && <CheckCircle className="ml-2 h-5 w-5 text-green-700 dark:text-green-200" />}
+                  {audiencePollResults && audiencePollResults[option] !== undefined && (
+                    <span className="ml-2 text-xs font-bold bg-accent/80 text-accent-foreground px-2 py-0.5 rounded">
+                      {audiencePollResults[option]}%
+                    </span>
+                  )}
+                </span>
               </Button>
             ))}
           </div>
@@ -343,15 +336,17 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
             <LifelineButton 
               key={type} 
               type={type} 
-              onClick={handleLifeline} 
-              disabled={!!selectedAnswer || gameOver || lifelines[type].isLoading}
+              onClick={() => handleLifeline(type)} 
+              disabled={!!selectedAnswer || gameOver || lifelines[type].isLoading || lifelines[type].used}
               used={lifelines[type].used} 
             />
           ))}
         </CardContent>
-         <CardFooter className="text-xs text-muted-foreground">
+         <CardFooter className="text-xs text-muted-foreground min-h-[20px]">
             {lifelines['Flip'].isLoading && <span>Flipping question... <Loader2 className="inline h-3 w-3 animate-spin" /></span>}
             {lifelines['AI_Hint'].isLoading && <span>Getting hint... <Loader2 className="inline h-3 w-3 animate-spin" /></span>}
+            {lifelines['50-50'].isLoading && <span>Applying 50-50... <Loader2 className="inline h-3 w-3 animate-spin" /></span>}
+            {lifelines['Audience_Poll'].isLoading && <span>Polling audience... <Loader2 className="inline h-3 w-3 animate-spin" /></span>}
         </CardFooter>
       </Card>
       
@@ -362,10 +357,10 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
       </div>
 
       {gameOver && answerStatus && ( 
-        <Card className="text-center p-6 mt-6 bg-destructive/10 border-destructive">
+        <Card className="text-center p-6 mt-6 bg-destructive/10 border-destructive dark:bg-destructive/20 dark:border-destructive/50">
           <CardTitle className="font-headline text-2xl mb-3 text-destructive flex items-center justify-center"><AlertCircle className="mr-2" />Game Over!</CardTitle>
-          <CardDescription className="text-lg mb-4">Your final score: {score} / {questions.length}</CardDescription>
-          <Button onClick={onGameEnd.bind(null, score)} className="bg-primary hover:bg-primary/90 text-primary-foreground">View Results</Button>
+          <CardDescription className="text-lg mb-4 text-destructive/80 dark:text-destructive/70">Your final score: {score} / {questions.length}</CardDescription>
+          <Button onClick={() => onGameEnd(score)} className="bg-primary hover:bg-primary/90 text-primary-foreground">View Results</Button>
         </Card>
       )}
 
