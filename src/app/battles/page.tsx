@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { SwordsIcon, UsersIcon, ZapIcon, PlayIcon } from "lucide-react";
+import { Swords, Users, Zap, Play } from "lucide-react";
 import Image from "next/image";
 
 export default function BattlesPage() {
@@ -31,10 +31,10 @@ export default function BattlesPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto">
-              <PlayIcon className="mr-2 h-5 w-5" /> Find Random Match
+              <Play className="mr-2 h-5 w-5" /> Find Random Match
             </Button>
             <Button size="lg" variant="outline" className="w-full sm:w-auto">
-              <UsersIcon className="mr-2 h-5 w-5" /> Challenge a Friend
+              <Users className="mr-2 h-5 w-5" /> Challenge a Friend
             </Button>
           </div>
         </div>
@@ -47,9 +47,9 @@ export default function BattlesPage() {
         </CardHeader>
         <CardContent className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {[
-            { icon: SwordsIcon, title: "1v1 Duels", description: "Real-time quiz battles." },
-            { icon: ZapIcon, title: "Power-Ups", description: "Freeze opponent, peek answers, double XP." },
-            { icon: UsersIcon, title: "Leaderboards", description: "Compete for top rankings." },
+            { icon: Swords, title: "1v1 Duels", description: "Real-time quiz battles." },
+            { icon: Zap, title: "Power-Ups", description: "Freeze opponent, peek answers, double XP." },
+            { icon: Users, title: "Leaderboards", description: "Compete for top rankings." },
           ].map(feature => (
             <div key={feature.title} className="flex items-start gap-4 p-4 bg-card-foreground/5 rounded-lg">
               <feature.icon className="h-8 w-8 text-accent flex-shrink-0 mt-1" />

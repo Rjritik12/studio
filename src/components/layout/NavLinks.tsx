@@ -2,17 +2,17 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { HomeIcon, HelpCircleIcon, SwordsIcon, UsersIcon, LayoutGridIcon, UserIcon, BookOpen } from 'lucide-react';
+import { Home, HelpCircle, Swords, Users, LayoutGrid, User, BookOpen } from 'lucide-react';
 import { SidebarMenuButton } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 
 const navItems = [
-  { href: '/', label: 'Dashboard', icon: HomeIcon },
-  { href: '/quiz', label: 'KBC Quiz', icon: HelpCircleIcon },
-  { href: '/battles', label: 'Online Battles', icon: SwordsIcon },
-  { href: '/study-room', label: 'AI Study Room', icon: UsersIcon },
-  { href: '/feed', label: 'Social Feed', icon: LayoutGridIcon },
-  { href: '/profile', label: 'Profile', icon: UserIcon },
+  { href: '/', label: 'Dashboard', icon: Home },
+  { href: '/quiz', label: 'KBC Quiz', icon: HelpCircle },
+  { href: '/battles', label: 'Online Battles', icon: Swords },
+  { href: '/study-room', label: 'AI Study Room', icon: Users },
+  { href: '/feed', label: 'Social Feed', icon: LayoutGrid },
+  { href: '/profile', label: 'Profile', icon: User },
 ];
 
 interface NavLinksProps {

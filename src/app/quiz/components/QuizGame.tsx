@@ -20,7 +20,6 @@ interface QuizGameProps {
   onGameEnd: (score: number) => void;
 }
 
-const TOTAL_QUESTIONS_LADDER = 15;
 const TIME_PER_QUESTION = 30; // seconds
 
 export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGameProps) {
@@ -114,112 +113,137 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
     try {
       switch (type) {
         case '50-50':
-          // eslint-disable-next-line no-case-declarations
-          const correctAnswer = currentQuestion.correctAnswer;
-          // eslint-disable-next-line no-case-declarations
-          let wrongOptions = currentQuestion.options.filter(opt => opt !== correctAnswer);
-          // eslint-disable-next-line no-case-declarations
-          const optionToKeep = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
-          setDisplayedOptions([correctAnswer, optionToKeep].sort(() => Math.random() - 0.5));
-          setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
-          break;
+          {
+            const correctAnswer = currentQuestion.correctAnswer;
+            let wrongOptions = currentQuestion.options.filter(opt => opt !== correctAnswer);
+            const optionToKeep = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
+            setDisplayedOptions([correctAnswer, optionToKeep].sort(() => Math.random() - 0.5));
+            setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
+            break;
+          }
         case 'AI_Hint':
-          // eslint-disable-next-line no-case-declarations
-          const hintInput: HintInput = { question: currentQuestion.question, options: currentQuestion.options, correctAnswer: currentQuestion.correctAnswer };
-          // eslint-disable-next-line no-case-declarations
-          const hintResult = await handleGetQuizHint(hintInput);
-          if ('error' in hintResult) {
-            toast({ title: "Error", description: hintResult.error, variant: "destructive" });
-          } else {
-            setHintText(hintResult.hint);
-            setShowHintDialog(true);
-            setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
-          }
-          break;
-        case 'Flip':
-          // eslint-disable-next-line no-case-declarations
-          const flipInput: FlipQuestionInput = { 
-            topic: currentQuestion.topic || currentTopic, 
-            difficulty: currentQuestion.difficulty || currentDifficulty,
-            existingQuestions: questions.map(q => q.question) 
-          };
-          // eslint-disable-next-line no-case-declarations
-          const flipResult = await handleFlipQuestion(flipInput);
-          if ('error' in flipResult || !flipResult.question) {
-            toast({ title: "Error", description: flipResult.error || "Failed to flip question", variant: "destructive" });
-            setLifelines(prev => ({ ...prev, [type]: { ...prev[type], isLoading: false }})); // Don't mark as used if error
-          } else {
-            // eslint-disable-next-line no-case-declarations
-            const newQuestion = { ...flipResult.question, topic: flipInput.topic, difficulty: flipInput.difficulty };
-            // eslint-disable-next-line no-case-declarations
-            const updatedQuestions = [...questions];
-            updatedQuestions[currentQuestionIndex] = newQuestion;
-            setQuestions(updatedQuestions);
-            // Reset relevant states for the new question
-            setSelectedAnswer(null);
-            setAnswerStatus(null);
-            setTimeLeft(TIME_PER_QUESTION);
-            setHintText(null);
-            setAudiencePollResults(null);
-            setDisplayedOptions(newQuestion.options);
-            toast({ title: "Question Flipped!", description: "A new question has been loaded." });
-            setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
-          }
-          break;
-        case 'Audience_Poll':
-          // Simulate audience poll
-          // eslint-disable-next-line no-case-declarations
-          const poll: Record<string, number> = {};
-          // eslint-disable-next-line no-case-declarations
-          const options = currentQuestion.options;
-          // eslint-disable-next-line no-case-declarations
-          let remainingPercentage = 100;
-          // eslint-disable-next-line no-case-declarations
-          const correctAnswerIndex = options.indexOf(currentQuestion.correctAnswer);
-          
-          // Give correct answer a higher chance (e.g., 40-70%)
-          // eslint-disable-next-line no-case-declarations
-          const correctAnswerPercentage = Math.floor(Math.random() * 31) + 40; // 40 to 70
-          poll[currentQuestion.correctAnswer] = correctAnswerPercentage;
-          remainingPercentage -= correctAnswerPercentage;
-
-          options.forEach((opt, index) => {
-            if (opt !== currentQuestion.correctAnswer) {
-              if (index === options.length - 1 - (correctAnswerIndex === options.length -1 ? 1 : 0) ) { // last non-correct option
-                 poll[opt] = remainingPercentage;
-              } else {
-                // eslint-disable-next-line no-case-declarations
-                const randomShare = Math.floor(Math.random() * (remainingPercentage / (options.length - Object.keys(poll).length )) );
-                poll[opt] = randomShare;
-                remainingPercentage -= randomShare;
-              }
+          {
+            const hintInput: HintInput = { question: currentQuestion.question, options: currentQuestion.options, correctAnswer: currentQuestion.correctAnswer };
+            const hintResult = await handleGetQuizHint(hintInput);
+            if ('error' in hintResult) {
+              toast({ title: "Error", description: hintResult.error, variant: "destructive" });
+              setLifelines(prev => ({ ...prev, [type]: { ...prev[type], isLoading: false }})); // Don't mark as used if error
+            } else {
+              setHintText(hintResult.hint);
+              setShowHintDialog(true);
+              setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
             }
-          });
-           // Ensure sum is 100, distribute any remainder/deficit to non-correct options if necessary.
-          // This logic can be complex; a simpler approach is to just assign random values and normalize.
-          // For simplicity, the above might not always sum to 100 perfectly due to flooring.
-          // A better distribution:
-          // eslint-disable-next-line no-case-declarations
-          const pollValues = options.map(opt => {
-            if (opt === currentQuestion.correctAnswer) return Math.random() * 0.4 + 0.4; // 40-80%
-            return Math.random() * 0.3; // 0-30% for others
-          });
-          // eslint-disable-next-line no-case-declarations
-          const sum = pollValues.reduce((s, v) => s + v, 0);
-          options.forEach((opt, i) => {
-            poll[opt] = Math.round((pollValues[i] / sum) * 100);
-          });
-           // Adjust last element to ensure sum is 100
-          // eslint-disable-next-line no-case-declarations
-          let currentSum = Object.values(poll).reduce((s,v) => s+v, 0);
-          if (options.length > 0) {
-              poll[options[options.length-1]] += (100 - currentSum);
+            break;
           }
+        case 'Flip':
+          {
+            const flipInput: FlipQuestionInput = { 
+              topic: currentQuestion.topic || currentTopic, 
+              difficulty: currentQuestion.difficulty || currentDifficulty,
+              existingQuestions: questions.map(q => q.question) 
+            };
+            const flipResult = await handleFlipQuestion(flipInput);
+            if ('error' in flipResult || !flipResult.question) {
+              toast({ title: "Error", description: flipResult.error || "Failed to flip question", variant: "destructive" });
+              setLifelines(prev => ({ ...prev, [type]: { ...prev[type], isLoading: false }})); // Don't mark as used if error
+            } else {
+              const newQuestion = { ...flipResult.question, topic: flipInput.topic, difficulty: flipInput.difficulty };
+              const updatedQuestions = [...questions];
+              updatedQuestions[currentQuestionIndex] = newQuestion;
+              setQuestions(updatedQuestions);
+              setSelectedAnswer(null);
+              setAnswerStatus(null);
+              setTimeLeft(TIME_PER_QUESTION);
+              setHintText(null);
+              setAudiencePollResults(null);
+              setDisplayedOptions(newQuestion.options);
+              toast({ title: "Question Flipped!", description: "A new question has been loaded." });
+              setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
+            }
+            break;
+          }
+        case 'Audience_Poll':
+          {
+            const poll: Record<string, number> = {};
+            const options = currentQuestion.options;
+            const numOptions = options.length;
+            if (numOptions === 0) {
+                 setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }})); // Mark as used even if no options
+                 break;
+            }
+
+            const rawVotes: Record<string, number> = {};
+
+            options.forEach(opt => {
+              rawVotes[opt] = Math.random() * 20 + 5; // Base votes (e.g., 5 to 25)
+            });
+
+            // Give correct answer a significant boost
+            rawVotes[currentQuestion.correctAnswer] += Math.random() * 30 + 40; // Add 40-70 to correct answer's votes
+
+            let totalRawVotes = 0;
+            options.forEach(opt => {
+              totalRawVotes += rawVotes[opt];
+            });
+            
+            if (totalRawVotes === 0) { // Highly unlikely with current logic but safe to handle
+                 options.forEach((opt, index) => {
+                    poll[opt] = index === 0 ? 100 : 0; // Assign 100% to first if total is 0
+                 });
+                 // And then re-distribute if more than one option
+                 if (numOptions > 0) {
+                    const equalShare = Math.floor(100 / numOptions);
+                    let remainder = 100 % numOptions;
+                    options.forEach((opt, index) => {
+                        poll[opt] = equalShare + (remainder > 0 ? 1 : 0);
+                        if (remainder > 0) remainder--;
+                    });
+                 }
+
+            } else {
+                 options.forEach(opt => {
+                    poll[opt] = Math.round((rawVotes[opt] / totalRawVotes) * 100);
+                 });
+            }
+            
+            // Adjust sum to be exactly 100 due to rounding
+            let currentSum = 0;
+            options.forEach(opt => currentSum += poll[opt]);
+            let diff = 100 - currentSum;
+
+            // Distribute/collect the difference
+            // Add to highest or remove from lowest (but not below 0)
+            if (diff !== 0) {
+                const sortedOptionsByVote = [...options].sort((a, b) => poll[b] - poll[a]);
+                if (diff > 0) { // Need to add to sum
+                    for (let i = 0; i < diff; i++) {
+                        poll[sortedOptionsByVote[i % numOptions]]++;
+                    }
+                } else { // Need to subtract from sum (diff is negative)
+                    for (let i = 0; i < Math.abs(diff); i++) {
+                        const optToAdjust = sortedOptionsByVote[numOptions - 1 - (i % numOptions)]; // Start from lowest
+                        if (poll[optToAdjust] > 0) {
+                            poll[optToAdjust]--;
+                        } else {
+                             // If lowest is 0, try next lowest; this might require more complex loop
+                             // For simplicity, if we hit 0, just add it back to the highest to keep sum 100
+                             poll[sortedOptionsByVote[0]]--;
+                        }
+                    }
+                }
+            }
+            // Final check if sum is still not 100, can happen with all 0s or complex adjustments
+            currentSum = 0;
+            options.forEach(opt => currentSum += poll[opt]);
+            if (currentSum !== 100 && numOptions > 0) {
+                poll[options[0]] += (100-currentSum); // Add any discrepancy to the first option
+            }
 
 
-          setAudiencePollResults(poll);
-          setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
-          break;
+            setAudiencePollResults(poll);
+            setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
+            break;
+          }
       }
     } catch (error) {
         console.error("Lifeline error:", error);
@@ -238,7 +262,7 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
     );
   }
 
-  const progressPercentage = ((currentQuestionIndex + 1) / TOTAL_QUESTIONS_LADDER) * 100;
+  const progressPercentage = questions.length > 0 ? ((currentQuestionIndex + 1) / questions.length) * 100 : 0;
 
   return (
     <div className="space-y-6">
@@ -308,9 +332,9 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
       </Card>
       
       <div>
-        <Label className="text-sm text-muted-foreground">KBC Ladder Progress (out of {TOTAL_QUESTIONS_LADDER} potential questions)</Label>
+        <Label className="text-sm text-muted-foreground">Quiz Progress</Label>
         <Progress value={progressPercentage} className="w-full h-3 mt-1" />
-        <p className="text-xs text-right text-muted-foreground mt-1">Question {currentQuestionIndex + 1} of {TOTAL_QUESTIONS_LADDER > questions.length ? TOTAL_QUESTIONS_LADDER : questions.length}</p>
+        <p className="text-xs text-right text-muted-foreground mt-1">Question {currentQuestionIndex + 1} of {questions.length}</p>
       </div>
 
       {gameOver && answerStatus && ( 
@@ -337,4 +361,3 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
     </div>
   );
 }
-
