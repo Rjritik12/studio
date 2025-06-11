@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Sparkles, Wand2, Lightbulb } from 'lucide-react';
+import { Loader2, Sparkles, Wand2, Lightbulb, AlertCircle } from 'lucide-react';
 import { handleStudySession } from '@/lib/actions';
 import type { Flashcard, StudyRoomData } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -14,19 +14,25 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 function parseFlashcards(flashcardString?: string): Flashcard[] {
   if (!flashcardString || typeof flashcardString !== 'string') return [];
   const cards: Flashcard[] = [];
-  const pairs = flashcardString.split(/\n\s*\n/).filter(pair => pair.trim() !== "");
+  // Regex to split by one or more newlines, trying to catch various AI output styles for card separation.
+  const pairs = flashcardString.split(/\n\s*\n+/).filter(pair => pair.trim() !== "");
 
   for (const pair of pairs) {
-    const qMatch = pair.match(/^(?:Q[uestion\s\d]*:|Question:)\s*(.+)/im);
-    const aMatch = pair.match(/\n(?:A[nswer\s\d]*:|Answer:)\s*(.+)/im);
+    // Regex to find Question: Q: Q. Question. (case insensitive, optional number, optional space after colon/period)
+    const qMatch = pair.match(/^(?:Q[uestion\s\d]*\.?:?)\s*(.+)/im);
+    // Regex to find Answer: A: A. Answer. (case insensitive, optional number, optional space after colon/period)
+    const aMatch = pair.match(/\n(?:A[nswer\s\d]*\.?:?)\s*(.+)/im);
 
     if (qMatch && qMatch[1] && aMatch && aMatch[1]) {
       cards.push({ question: qMatch[1].trim(), answer: aMatch[1].trim() });
     } else {
-      const lines = pair.split('\n');
+      // Fallback for simple two-line Q/A pairs without explicit prefixes
+      const lines = pair.split('\n').map(line => line.trim()).filter(line => line);
       if (lines.length >= 2) {
-        const question = lines[0].replace(/^(Q[uestion\s\d]*:|Question:)\s*/i, "").trim();
-        const answer = lines.slice(1).join('\n').replace(/^(A[nswer\s\d]*:|Answer:)\s*/i, "").trim();
+        // Assume first non-empty line is question, rest is answer.
+        // This is a broad fallback and might need refinement.
+        const question = lines[0].replace(/^(?:Q[uestion\s\d]*\.?:?)\s*/i, "").trim();
+        const answer = lines.slice(1).join('\n').replace(/^(?:A[nswer\s\d]*\.?:?)\s*/i, "").trim();
         if (question && answer) {
           cards.push({ question, answer });
         }
@@ -120,7 +126,7 @@ export function StudyRoomClient() {
           <CardContent className="space-y-6">
             <div>
               <h3 className="font-semibold text-xl text-foreground mb-2">Answer to Your Doubt:</h3>
-              <div className="prose prose-blue dark:prose-invert max-w-none p-4 bg-foreground/5 rounded-md">
+              <div className="prose prose-sm sm:prose lg:prose-lg dark:prose-invert max-w-none p-4 bg-foreground/5 rounded-md">
                 <p className="text-foreground/90 whitespace-pre-wrap">{studyData.answer}</p>
               </div>
             </div>
@@ -128,9 +134,9 @@ export function StudyRoomClient() {
             <div>
                 <h3 className="font-semibold text-xl text-foreground mb-2">Flashcard Recommendation:</h3>
                 <Alert>
-                    <Lightbulb className="h-4 w-4" />
-                    <AlertTitle>Recommendation</AlertTitle>
-                    <AlertDescription className="whitespace-pre-wrap">
+                    <Lightbulb className="h-5 w-5" />
+                    <AlertTitle className="font-semibold">Recommendation</AlertTitle>
+                    <AlertDescription className="whitespace-pre-wrap mt-1">
                         {studyData.flashcardRecommendation}
                     </AlertDescription>
                 </Alert>
@@ -142,10 +148,10 @@ export function StudyRoomClient() {
                 <div className="grid md:grid-cols-2 gap-4">
                   {parsedFlashcards.map((flashcard, index) => (
                     <Card key={index} className="bg-card shadow-md">
-                      <CardHeader className="pb-2">
+                      <CardHeader className="pb-2 pt-4">
                         <CardTitle className="text-md font-medium text-primary">Q: {flashcard.question}</CardTitle>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="pb-4">
                         <p className="text-sm text-foreground/80">A: {flashcard.answer}</p>
                       </CardContent>
                     </Card>
@@ -155,9 +161,15 @@ export function StudyRoomClient() {
             )}
             {studyData.flashcards && parsedFlashcards.length === 0 && (
                  <div>
-                    <h3 className="font-semibold text-xl text-foreground mb-2">Raw Flashcard Data (Could not parse):</h3>
-                    <Textarea value={studyData.flashcards} readOnly rows={5} className="bg-muted/50 text-sm"/>
-                    <p className="text-xs text-muted-foreground mt-1">Could not parse flashcards automatically. Raw data shown above.</p>
+                    <Alert variant="default" className="bg-amber-50 border-amber-300 dark:bg-amber-900/30 dark:border-amber-700">
+                        <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                        <AlertTitle className="font-semibold text-amber-700 dark:text-amber-300">Flashcard Parsing Issue</AlertTitle>
+                        <AlertDescription className="text-amber-700/90 dark:text-amber-300/90 mt-1">
+                            The AI provided flashcard data, but we couldn't automatically parse it into individual cards.
+                            You can see the raw data below to copy or format it manually.
+                        </AlertDescription>
+                    </Alert>
+                    <Textarea value={studyData.flashcards} readOnly rows={6} className="bg-muted/50 text-sm mt-3"/>
                  </div>
             )}
           </CardContent>
@@ -166,4 +178,3 @@ export function StudyRoomClient() {
     </div>
   );
 }
-
