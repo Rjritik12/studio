@@ -116,8 +116,27 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
           {
             const correctAnswer = currentQuestion.correctAnswer;
             let wrongOptions = currentQuestion.options.filter(opt => opt !== correctAnswer);
-            const optionToKeep = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
-            setDisplayedOptions([correctAnswer, optionToKeep].sort(() => Math.random() - 0.5));
+            // Ensure there's at least one wrong option to pick from
+            if (wrongOptions.length === 0) { // Should not happen with 4 options but defensive
+                wrongOptions = currentQuestion.options.filter(opt => opt !== correctAnswer); // Re-filter, though unlikely to change
+            }
+            const optionToKeep = wrongOptions.length > 0 ? wrongOptions[Math.floor(Math.random() * wrongOptions.length)] : currentQuestion.options.find(opt => opt !== correctAnswer); // Fallback
+            
+            const newDisplayedOptions = [correctAnswer];
+            if (optionToKeep) {
+                newDisplayedOptions.push(optionToKeep);
+            }
+            // If somehow optionToKeep is undefined (e.g. only 1 option was wrong, which is impossible in 4-option quiz)
+            // we need to add another random option that isn't the correct answer
+            // This part is highly defensive and unlikely to be hit in a standard KBC quiz
+            while (newDisplayedOptions.length < 2 && currentQuestion.options.length > newDisplayedOptions.length) {
+                const randomOption = currentQuestion.options[Math.floor(Math.random() * currentQuestion.options.length)];
+                if (!newDisplayedOptions.includes(randomOption)) {
+                    newDisplayedOptions.push(randomOption);
+                }
+            }
+
+            setDisplayedOptions(newDisplayedOptions.sort(() => Math.random() - 0.5));
             setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
             break;
           }
@@ -127,7 +146,7 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
             const hintResult = await handleGetQuizHint(hintInput);
             if ('error' in hintResult) {
               toast({ title: "Error", description: hintResult.error, variant: "destructive" });
-              setLifelines(prev => ({ ...prev, [type]: { ...prev[type], isLoading: false }})); // Don't mark as used if error
+              setLifelines(prev => ({ ...prev, [type]: { ...prev[type], isLoading: false }}));
             } else {
               setHintText(hintResult.hint);
               setShowHintDialog(true);
@@ -145,7 +164,7 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
             const flipResult = await handleFlipQuestion(flipInput);
             if ('error' in flipResult || !flipResult.question) {
               toast({ title: "Error", description: flipResult.error || "Failed to flip question", variant: "destructive" });
-              setLifelines(prev => ({ ...prev, [type]: { ...prev[type], isLoading: false }})); // Don't mark as used if error
+              setLifelines(prev => ({ ...prev, [type]: { ...prev[type], isLoading: false }})); 
             } else {
               const newQuestion = { ...flipResult.question, topic: flipInput.topic, difficulty: flipInput.difficulty };
               const updatedQuestions = [...questions];
@@ -165,80 +184,81 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
         case 'Audience_Poll':
           {
             const poll: Record<string, number> = {};
-            const options = currentQuestion.options;
+            const options = displayedOptions.length > 0 ? displayedOptions : currentQuestion.options; // Use currently displayed options if 50-50 was used
             const numOptions = options.length;
+
             if (numOptions === 0) {
-                 setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }})); // Mark as used even if no options
-                 break;
+                setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
+                break;
             }
 
-            const rawVotes: Record<string, number> = {};
-
-            options.forEach(opt => {
-              rawVotes[opt] = Math.random() * 20 + 5; // Base votes (e.g., 5 to 25)
-            });
+            let votes = options.map(option => ({
+                option,
+                vote: Math.random() * 15 + 5 // Base random vote (5-20)
+            }));
 
             // Give correct answer a significant boost
-            rawVotes[currentQuestion.correctAnswer] += Math.random() * 30 + 40; // Add 40-70 to correct answer's votes
-
-            let totalRawVotes = 0;
-            options.forEach(opt => {
-              totalRawVotes += rawVotes[opt];
-            });
+            const correctVoteIndex = votes.findIndex(v => v.option === currentQuestion.correctAnswer);
+            if (correctVoteIndex !== -1) {
+                votes[correctVoteIndex].vote += (Math.random() * 30 + 30); // Add 30-60 to correct answer's vote
+            } else {
+                 // If correct answer is not in the *displayed* options (e.g. after 50-50 removed it, which shouldn't happen)
+                 // distribute the boost among remaining options somewhat. This is an edge case.
+                 // For simplicity, we'll just let the random votes play out.
+            }
             
-            if (totalRawVotes === 0) { // Highly unlikely with current logic but safe to handle
+            const totalVotes = votes.reduce((sum, v) => sum + v.vote, 0);
+
+            if (totalVotes === 0) {
                  options.forEach((opt, index) => {
                     poll[opt] = index === 0 ? 100 : 0; // Assign 100% to first if total is 0
                  });
-                 // And then re-distribute if more than one option
-                 if (numOptions > 0) {
+                 // And then re-distribute if more than one option and they all got 0 votes (unlikely)
+                 if (numOptions > 1) {
                     const equalShare = Math.floor(100 / numOptions);
                     let remainder = 100 % numOptions;
-                    options.forEach((opt, index) => {
+                    options.forEach((opt, i) => {
                         poll[opt] = equalShare + (remainder > 0 ? 1 : 0);
                         if (remainder > 0) remainder--;
                     });
                  }
 
             } else {
-                 options.forEach(opt => {
-                    poll[opt] = Math.round((rawVotes[opt] / totalRawVotes) * 100);
-                 });
+                votes.forEach(v => {
+                    poll[v.option] = Math.round((v.vote / totalVotes) * 100);
+                });
             }
             
             // Adjust sum to be exactly 100 due to rounding
-            let currentSum = 0;
-            options.forEach(opt => currentSum += poll[opt]);
+            let currentSum = Object.values(poll).reduce((sum, p) => sum + p, 0);
             let diff = 100 - currentSum;
 
-            // Distribute/collect the difference
-            // Add to highest or remove from lowest (but not below 0)
+            // Distribute/collect the difference to/from options with highest/lowest votes
+            // to make it seem more natural.
             if (diff !== 0) {
-                const sortedOptionsByVote = [...options].sort((a, b) => poll[b] - poll[a]);
+                const sortedOptionsByVote = options.slice().sort((a,b) => poll[b] - poll[a]);
                 if (diff > 0) { // Need to add to sum
                     for (let i = 0; i < diff; i++) {
-                        poll[sortedOptionsByVote[i % numOptions]]++;
+                         if (sortedOptionsByVote[i % numOptions]) { // Check if option exists
+                           poll[sortedOptionsByVote[i % numOptions]]++;
+                         }
                     }
                 } else { // Need to subtract from sum (diff is negative)
                     for (let i = 0; i < Math.abs(diff); i++) {
-                        const optToAdjust = sortedOptionsByVote[numOptions - 1 - (i % numOptions)]; // Start from lowest
-                        if (poll[optToAdjust] > 0) {
+                        const optToAdjust = sortedOptionsByVote[numOptions - 1 - (i % numOptions)];
+                         if (optToAdjust && poll[optToAdjust] > 0) { // Check if option exists and poll value > 0
                             poll[optToAdjust]--;
-                        } else {
-                             // If lowest is 0, try next lowest; this might require more complex loop
-                             // For simplicity, if we hit 0, just add it back to the highest to keep sum 100
-                             poll[sortedOptionsByVote[0]]--;
-                        }
+                         } else if (sortedOptionsByVote[0]) { // Fallback: adjust the highest if lowest is 0
+                            poll[sortedOptionsByVote[0]]--;
+                         }
                     }
                 }
             }
-            // Final check if sum is still not 100, can happen with all 0s or complex adjustments
-            currentSum = 0;
-            options.forEach(opt => currentSum += poll[opt]);
-            if (currentSum !== 100 && numOptions > 0) {
-                poll[options[0]] += (100-currentSum); // Add any discrepancy to the first option
+            // Final check: if sum is still not 100, assign remainder to the first option available
+            currentSum = Object.values(poll).reduce((sum, p) => sum + p, 0);
+            if (currentSum !== 100 && options.length > 0 && poll[options[0]] !== undefined) {
+                poll[options[0]] += (100-currentSum);
             }
-
 
             setAudiencePollResults(poll);
             setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
