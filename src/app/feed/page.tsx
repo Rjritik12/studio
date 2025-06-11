@@ -15,68 +15,28 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useToast } from '@/hooks/use-toast'; // Import useToast
-
-// Mock data for posts - in a real app, this would come from a database
-const initialMockPosts: Post[] = [
-  {
-    id: '1',
-    userName: 'Student123',
-    userAvatar: 'https://placehold.co/40x40.png?text=S1',
-    content: 'Just finished my notes on Quantum Physics! Anyone want to discuss entanglement? 🤯 #physics #studygram',
-    type: 'note',
-    likes: 15,
-    commentsCount: 3,
-    createdAt: Date.now() - 3600000 * 2, // 2 hours ago
-    expiresAt: Date.now() + 3600000 * 46, // Expires in 46 hours
-    imageUrl: 'https://placehold.co/600x400.png',
-  },
-  {
-    id: '2',
-    userName: 'JEEAspirant',
-    userAvatar: 'https://placehold.co/40x40.png?text=JA',
-    content: 'Stuck on this calculus problem for JEE Advanced. Any hints? 🙏 #jee #maths #doubt',
-    type: 'question',
-    likes: 8,
-    commentsCount: 5,
-    createdAt: Date.now() - 3600000 * 10, // 10 hours ago
-    expiresAt: Date.now() + 3600000 * 38, // Expires in 38 hours
-  },
-  {
-    id: '3',
-    userName: 'BioGeek',
-    userAvatar: 'https://placehold.co/40x40.png?text=BG',
-    content: 'Found an amazing PDF on Cell Biology for NEET. This is a great resource for revision!', // This is now description
-    linkUrl: 'https://example.com/cell-biology.pdf', // New field
-    type: 'link',
-    likes: 22,
-    commentsCount: 1,
-    createdAt: Date.now() - 3600000 * 24, // 24 hours ago
-    expiresAt: Date.now() + 3600000 * 24, // Expires in 24 hours
-  },
-];
-
+import { useToast } from '@/hooks/use-toast';
 
 export default function FeedPage() {
-  const [posts, setPosts] = useState<Post[]>(initialMockPosts);
-  const { toast } = useToast(); // Initialize useToast
+  const [posts, setPosts] = useState<Post[]>([]); // Initialize with an empty array
+  const { toast } = useToast();
 
   const handlePostCreate = (newPostData: Omit<Post, 'id' | 'likes' | 'commentsCount' | 'createdAt' | 'expiresAt' | 'userAvatar' | 'userName'>) => {
     const newPost: Post = {
       ...newPostData,
       id: String(Date.now()),
       userName: 'CurrentUser', // Replace with actual user
-      userAvatar: 'https://placehold.co/40x40.png?text=CU',
+      userAvatar: 'https://placehold.co/40x40.png?text=CU', // Placeholder for current user
       likes: 0,
       commentsCount: 0,
       createdAt: Date.now(),
       expiresAt: Date.now() + 3600000 * 48, // Expires in 48 hours
     };
     setPosts(prevPosts => [newPost, ...prevPosts]);
-    toast({ // Add toast notification
+    toast({
       title: "Post Created!",
       description: "Your post has been added to the feed.",
-      variant: "default", // or "success" if you have such variant
+      variant: "default",
     });
   };
 
