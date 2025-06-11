@@ -1,7 +1,11 @@
+
 "use server";
 
 import { generateQuizQuestions, GenerateQuizQuestionsInput, GenerateQuizQuestionsOutput } from "@/ai/flows/generate-quiz-questions";
 import { tutorStudySession, TutorStudySessionInput, TutorStudySessionOutput } from "@/ai/flows/tutor-study-session";
+import { getQuizQuestionHint, GetQuizQuestionHintInput, GetQuizQuestionHintOutput } from "@/ai/flows/get-quiz-question-hint";
+import { generateSingleQuizQuestion, GenerateSingleQuizQuestionInput, GenerateSingleQuizQuestionOutput } from "@/ai/flows/generate-single-quiz-question";
+
 import { z } from "zod";
 
 const quizSetupSchema = z.object({
@@ -25,6 +29,9 @@ export async function handleQuizSetup(formData: FormData): Promise<GenerateQuizQ
   
   try {
     const quizData = await generateQuizQuestions(validatedFields.data as GenerateQuizQuestionsInput);
+    if (!quizData.questions || quizData.questions.length === 0) {
+      return { error: "No questions were generated. Please try different settings or topic." };
+    }
     return quizData;
   } catch (e) {
     console.error("Error generating quiz questions:", e);
@@ -56,5 +63,28 @@ export async function handleStudySession(formData: FormData): Promise<TutorStudy
   } catch (e) {
     console.error("Error in AI study session:", e);
     return { error: "Failed to process study session. Please try again." };
+  }
+}
+
+export async function handleGetQuizHint(input: GetQuizQuestionHintInput): Promise<GetQuizQuestionHintOutput | { error: string }> {
+  try {
+    const hintData = await getQuizQuestionHint(input);
+    return hintData;
+  } catch (e) {
+    console.error("Error generating hint:", e);
+    return { error: "Failed to generate hint. Please try again." };
+  }
+}
+
+export async function handleFlipQuestion(input: GenerateSingleQuizQuestionInput): Promise<GenerateSingleQuizQuestionOutput | { error: string }> {
+  try {
+    const newQuestionData = await generateSingleQuizQuestion(input);
+    if (!newQuestionData.question) {
+        return { error: "Failed to generate a new question for flip." };
+    }
+    return newQuestionData;
+  } catch (e) {
+    console.error("Error flipping question:", e);
+    return { error: "Failed to flip question. Please try again." };
   }
 }

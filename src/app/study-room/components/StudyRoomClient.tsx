@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, type FormEvent } from 'react';
@@ -5,16 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Sparkles, Wand2 } from 'lucide-react';
+import { Loader2, Sparkles, Wand2, Lightbulb } from 'lucide-react';
 import { handleStudySession } from '@/lib/actions';
 import type { Flashcard, StudyRoomData } from '@/lib/types';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-function parseFlashcards(flashcardString: string): Flashcard[] {
+function parseFlashcards(flashcardString?: string): Flashcard[] {
   if (!flashcardString || typeof flashcardString !== 'string') return [];
-  // Example parsing: "Q: question_text\nA: answer_text\n\nQ: next_question..."
-  // This is a simplified parser, might need adjustment based on actual AI output format
   const cards: Flashcard[] = [];
-  const pairs = flashcardString.split(/\n\s*\n/).filter(pair => pair.trim() !== ""); // Split by double newlines
+  const pairs = flashcardString.split(/\n\s*\n/).filter(pair => pair.trim() !== "");
 
   for (const pair of pairs) {
     const qMatch = pair.match(/^(?:Q[uestion\s\d]*:|Question:)\s*(.+)/im);
@@ -23,7 +23,6 @@ function parseFlashcards(flashcardString: string): Flashcard[] {
     if (qMatch && qMatch[1] && aMatch && aMatch[1]) {
       cards.push({ question: qMatch[1].trim(), answer: aMatch[1].trim() });
     } else {
-      // Fallback for simpler Q/A pairs if primary parsing fails
       const lines = pair.split('\n');
       if (lines.length >= 2) {
         const question = lines[0].replace(/^(Q[uestion\s\d]*:|Question:)\s*/i, "").trim();
@@ -122,11 +121,22 @@ export function StudyRoomClient() {
             <div>
               <h3 className="font-semibold text-xl text-foreground mb-2">Answer to Your Doubt:</h3>
               <div className="prose prose-blue dark:prose-invert max-w-none p-4 bg-foreground/5 rounded-md">
-                <p className="text-foreground/90">{studyData.answer}</p>
+                <p className="text-foreground/90 whitespace-pre-wrap">{studyData.answer}</p>
               </div>
             </div>
+
+            <div>
+                <h3 className="font-semibold text-xl text-foreground mb-2">Flashcard Recommendation:</h3>
+                <Alert>
+                    <Lightbulb className="h-4 w-4" />
+                    <AlertTitle>Recommendation</AlertTitle>
+                    <AlertDescription className="whitespace-pre-wrap">
+                        {studyData.flashcardRecommendation}
+                    </AlertDescription>
+                </Alert>
+            </div>
             
-            {parsedFlashcards.length > 0 && (
+            {studyData.flashcards && parsedFlashcards.length > 0 && (
               <div>
                 <h3 className="font-semibold text-xl text-foreground mb-3">Generated Flashcards:</h3>
                 <div className="grid md:grid-cols-2 gap-4">
@@ -145,7 +155,7 @@ export function StudyRoomClient() {
             )}
             {studyData.flashcards && parsedFlashcards.length === 0 && (
                  <div>
-                    <h3 className="font-semibold text-xl text-foreground mb-2">Raw Flashcard Data:</h3>
+                    <h3 className="font-semibold text-xl text-foreground mb-2">Raw Flashcard Data (Could not parse):</h3>
                     <Textarea value={studyData.flashcards} readOnly rows={5} className="bg-muted/50 text-sm"/>
                     <p className="text-xs text-muted-foreground mt-1">Could not parse flashcards automatically. Raw data shown above.</p>
                  </div>
@@ -156,3 +166,4 @@ export function StudyRoomClient() {
     </div>
   );
 }
+

@@ -22,7 +22,8 @@ export type TutorStudySessionInput = z.infer<typeof TutorStudySessionInputSchema
 
 const TutorStudySessionOutputSchema = z.object({
   answer: z.string().describe('The answer to the student’s doubt.'),
-  flashcards: z.string().describe('The flashcards generated from the student’s notes.'),
+  flashcardRecommendation: z.string().describe('Reasoning on whether flashcards are helpful for the provided notes and why.'),
+  flashcards: z.string().optional().describe('The flashcards generated from the student’s notes, if recommended. Formatted as Q: ... A: ... pairs, separated by double newlines.'),
 });
 export type TutorStudySessionOutput = z.infer<typeof TutorStudySessionOutputSchema>;
 
@@ -34,14 +35,17 @@ const tutorPrompt = ai.definePrompt({
   name: 'tutorPrompt',
   input: {schema: TutorStudySessionInputSchema},
   output: {schema: TutorStudySessionOutputSchema},
-  prompt: `You are an AI tutor helping a student with their studies.
-
-The student has the following doubt: {{{doubt}}}
+  prompt: `You are an AI tutor.
+The student has the following doubt:
+"{{{doubt}}}"
 
 Here are the student's notes:
-{{notes}}
+"{{notes}}"
 
-Answer the student's doubt clearly and concisely. Also, convert the student's notes into a set of flashcards that will help them study effectively. The flashcards should be in a question and answer format.
+Your task is to:
+1.  Address the student's doubt clearly and concisely.
+2.  Analyze the provided notes. Based on their content and nature, decide if creating flashcards would be an effective study strategy for this material. Provide a clear recommendation and explain your reasoning (e.g., "Flashcards are recommended because these notes contain many key terms and definitions." or "Flashcards might not be the most effective for these notes as they are primarily narrative; consider summarizing key points instead.").
+3.  If flashcards are recommended, generate them from the notes. Each flashcard should be in a "Q: [Question]" and "A: [Answer]" format. Separate each flashcard pair with two newlines (\n\n). If not recommended, do not provide flashcards.
 `,
 });
 
@@ -56,3 +60,4 @@ const tutorStudySessionFlow = ai.defineFlow(
     return output!;
   }
 );
+
