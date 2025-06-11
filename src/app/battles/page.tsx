@@ -1,7 +1,10 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Swords, Users, Zap, Play } from "lucide-react";
+import { Swords, Users, Zap, Play, ShieldAlert } from "lucide-react";
 import Image from "next/image";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function BattlesPage() {
   return (
@@ -29,14 +32,30 @@ export default function BattlesPage() {
           <p className="text-lg text-foreground/80">
             Engage in fast-paced 1v1 battles. Answer 5-10 questions, 10 seconds each. Use power-ups, build streaks, and climb the leaderboard!
           </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto">
-              <Play className="mr-2 h-5 w-5" /> Find Random Match
-            </Button>
-            <Button size="lg" variant="outline" className="w-full sm:w-auto">
-              <Users className="mr-2 h-5 w-5" /> Challenge a Friend
-            </Button>
-          </div>
+          <TooltipProvider>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto opacity-50 cursor-not-allowed" disabled>
+                    <Play className="mr-2 h-5 w-5" /> Find Random Match
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Coming Soon!</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto opacity-50 cursor-not-allowed" disabled>
+                    <Users className="mr-2 h-5 w-5" /> Challenge a Friend
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Coming Soon!</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
         </div>
       </div>
 
@@ -65,12 +84,27 @@ export default function BattlesPage() {
       <div className="mt-12 text-center p-6 bg-accent/10 rounded-lg">
         <h3 className="font-headline text-2xl font-semibold text-accent mb-3">Battle Pass</h3>
         <p className="text-foreground/80 mb-4">Get extra battles and exclusive rewards for just ₹9!</p>
-        <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">Unlock Battle Pass</Button>
-        <p className="text-xs text-muted-foreground mt-2">(UPI payments supported)</p>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button className="bg-accent hover:bg-accent/90 text-accent-foreground opacity-50 cursor-not-allowed" disabled>Unlock Battle Pass</Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Payment integration coming soon!</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <p className="text-xs text-muted-foreground mt-2">(UPI payments supported - coming soon)</p>
       </div>
-       <p className="text-center text-sm text-muted-foreground mt-10">
-        (Online battle functionality is under development. This is a UI preview.)
-      </p>
+      
+      <Alert variant="default" className="mt-10 max-w-2xl mx-auto bg-primary/10 border-primary/30">
+        <ShieldAlert className="h-5 w-5 text-primary" />
+        <AlertTitle className="font-headline text-primary">Under Development</AlertTitle>
+        <AlertDescription className="text-foreground/80">
+          The Online Battle functionality is currently under active development and not yet live. 
+          The features described are part of the planned experience. Stay tuned for updates!
+        </AlertDescription>
+      </Alert>
     </div>
   );
 }
