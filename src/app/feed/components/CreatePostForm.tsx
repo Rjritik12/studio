@@ -97,7 +97,7 @@ export function CreatePostForm({ onPostCreate }: CreatePostFormProps) {
           <div>
             <Label htmlFor="post-type" className="text-sm font-medium">Post Type</Label>
             <Select value={type} onValueChange={(value) => handleTypeChange(value as Post['type'])}>
-              <SelectTrigger id="post-type">
+              <SelectTrigger id="post-type" className="focus:border-primary transition-colors">
                 <SelectValue placeholder="Select post type" />
               </SelectTrigger>
               <SelectContent>
