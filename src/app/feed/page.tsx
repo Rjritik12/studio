@@ -6,7 +6,7 @@ import { CreatePostForm } from './components/CreatePostForm';
 import { PostCard } from './components/PostCard';
 import type { Post } from '@/lib/types';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+// import { Button } from '@/components/ui/button'; // Button is not used directly here anymore
 import { SearchIcon, FilterIcon } from 'lucide-react';
 import {
   Select,
@@ -46,7 +46,8 @@ const initialMockPosts: Post[] = [
     id: '3',
     userName: 'BioGeek',
     userAvatar: 'https://placehold.co/40x40.png?text=BG',
-    content: 'Found an amazing PDF on Cell Biology for NEET. Link in bio! (Figuratively, of course, since there is no bio here)',
+    content: 'Found an amazing PDF on Cell Biology for NEET. This is a great resource for revision!', // This is now description
+    linkUrl: 'https://example.com/cell-biology.pdf', // New field
     type: 'link',
     likes: 22,
     commentsCount: 1,

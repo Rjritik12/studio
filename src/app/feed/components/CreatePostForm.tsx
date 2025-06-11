@@ -16,73 +16,73 @@ interface CreatePostFormProps {
 }
 
 export function CreatePostForm({ onPostCreate }: CreatePostFormProps) {
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState(''); // For notes, questions, meme text, link descriptions
   const [type, setType] = useState<Post['type']>('note');
   const [imageUrl, setImageUrl] = useState('');
-  const [linkUrl, setLinkUrl] = useState(''); // Used when type is 'link'
+  const [linkUrl, setLinkUrl] = useState(''); // Dedicated for link URLs
   const [isLoading, setIsLoading] = useState(false);
 
   const handleTypeChange = (newType: Post['type']) => {
     setType(newType);
-    // Reset content if switching away from link type and content was a URL
-    // Or reset if switching to link type to clear out previous note text
-    if (newType === 'link') {
-        if (content && !linkUrl) setLinkUrl(content); // preserve if it looked like a URL
-        setContent(''); // Content becomes description for link type
-    } else {
-        // if switching from 'link' to something else, content might be description or empty
-        // linkUrl will hold the actual URL.
-        // For now, let's clear content if it was a description for a link.
-        // Or if it was the URL itself, it's now in linkUrl.
-        // Let user decide to re-type for note/question if they switch.
-        if (type === 'link') setContent(''); 
+    // Reset specific fields when type changes to avoid confusion
+    if (newType !== 'link') {
+        setLinkUrl(''); // Clear link URL if not a link post
     }
+    if (newType !== 'image' && newType !== 'meme') {
+        setImageUrl(''); // Clear image URL if not an image/meme post
+    }
+    // Content might be preserved or cleared based on user's intent, for now, let them manage it.
   };
-
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
 
-    let postContent = content;
+    const postData: Omit<Post, 'id' | 'likes' | 'commentsCount' | 'createdAt' | 'expiresAt' | 'userAvatar' | 'userName'> & { linkUrl?: string } = {
+      content: content, // This is the description for links, or main content for others
+      type,
+    };
+
     if (type === 'link') {
       if (!linkUrl.trim()) {
         setIsLoading(false);
-        // Basic validation, could be more robust with react-hook-form
         alert("Link URL is required for link posts."); 
         return;
       }
-      postContent = linkUrl; // For link type, the main 'content' is the URL itself.
-                           // The 'content' state here is used for description if needed.
-                           // For now, matching PostCard logic where content is the link URL.
-    } else if (!content.trim()) {
+      postData.linkUrl = linkUrl;
+      // The 'content' state (which is postData.content here) holds the optional description for the link.
+    } else if ((type === 'image' || type === 'meme')) {
+      if (!content.trim() && !imageUrl.trim()) {
         setIsLoading(false);
-        alert("Content cannot be empty.");
+        alert("For Meme/Image posts, please provide either content (description) or an Image URL.");
         return;
+      }
+    } else { // For 'note', 'question'
+       if (!content.trim()) {
+        setIsLoading(false);
+        alert("Content cannot be empty for this post type.");
+        return;
+      }
     }
 
+    if ((type === 'image' || type === 'meme') && imageUrl.trim()) {
+      postData.imageUrl = imageUrl.trim();
+    }
+    
+    onPostCreate(postData as Omit<Post, 'id' | 'likes' | 'commentsCount' | 'createdAt' | 'expiresAt' | 'userAvatar' | 'userName'>);
+    
+    setContent('');
+    setImageUrl('');
+    setLinkUrl('');
+    // setType('note'); // Optionally reset type
+    setIsLoading(false);
+  };
 
-    // Simulate API call
-    setTimeout(() => {
-      const postData: Omit<Post, 'id' | 'likes' | 'commentsCount' | 'createdAt' | 'expiresAt' | 'userAvatar' | 'userName'> = {
-        content: postContent, // This will be the linkUrl if type is link
-        type,
-      };
-      if ((type === 'image' || type === 'meme') && imageUrl) {
-        postData.imageUrl = imageUrl;
-      }
-      // If type is 'link', the `content` field (now `postContent`) already holds the URL.
-      // If we wanted a separate description for links, postData structure would need `linkDescription` field.
-      // For simplicity, the PRD implies links are just the link itself.
-
-      onPostCreate(postData);
-      
-      setContent('');
-      setImageUrl('');
-      setLinkUrl('');
-      // setType('note'); // Optionally reset type
-      setIsLoading(false);
-    }, 500);
+  const isSubmitDisabled = () => {
+    if (isLoading) return true;
+    if (type === 'link') return !linkUrl.trim();
+    if (type === 'image' || type === 'meme') return !content.trim() && !imageUrl.trim();
+    return !content.trim();
   };
 
   return (
@@ -109,28 +109,36 @@ export function CreatePostForm({ onPostCreate }: CreatePostFormProps) {
               </SelectContent>
             </Select>
           </div>
+          
+          {/* Content Textarea: Used for notes, questions, meme text, link descriptions */}
+          <div>
+            <Label htmlFor="post-content" className="text-sm font-medium">
+              {type === 'link' ? 'Link Description (Optional)' : 
+               type === 'meme' ? 'Meme Text / Description' :
+               type === 'image' ? 'Image Caption / Description' :
+               'Content'}
+            </Label>
+            <Textarea
+              id="post-content"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder={
+                type === 'question' ? "What's your question?" :
+                type === 'link' ? "Add a brief description for your link (optional)..." :
+                type === 'meme' ? "Enter meme text or description..." :
+                type === 'image' ? "Enter image caption or description..." :
+                "Share your thoughts or notes..."
+              }
+              rows={type === 'link' ? 2 : 4}
+              required={type !== 'link' && type !== 'image' && type !== 'meme'}
+              className="focus:border-primary transition-colors"
+            />
+          </div>
 
-          {type !== 'link' && (
-            <div>
-              <Label htmlFor="post-content" className="text-sm font-medium">Content</Label>
-              <Textarea
-                id="post-content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder={
-                  type === 'question' ? "What's your question?" :
-                  "Share your thoughts, notes, or a meme description..."
-                }
-                rows={4}
-                required={type !== 'link'} 
-                className="focus:border-primary transition-colors"
-              />
-            </div>
-          )}
-
+          {/* Image URL Input: For 'image' and 'meme' types */}
           {(type === 'image' || type === 'meme') && (
             <div>
-              <Label htmlFor="post-image-url" className="text-sm font-medium">Image URL (Optional for Meme/Image)</Label>
+              <Label htmlFor="post-image-url" className="text-sm font-medium">Image URL {type === 'meme' && content.trim() ? '(Optional if text provided)' : type === 'image' && content.trim() ? '(Optional if caption provided)' : '(Required if no text/caption)'}</Label>
               <div className="flex items-center gap-2">
                  <ImagePlus className="h-5 w-5 text-muted-foreground" />
                 <Input
@@ -145,6 +153,7 @@ export function CreatePostForm({ onPostCreate }: CreatePostFormProps) {
             </div>
           )}
           
+          {/* Link URL Input: For 'link' type */}
           {type === 'link' && (
              <div>
               <Label htmlFor="post-link-url" className="text-sm font-medium">Link URL (Required)</Label>
@@ -160,15 +169,6 @@ export function CreatePostForm({ onPostCreate }: CreatePostFormProps) {
                   className="focus:border-primary transition-colors"
                 />
               </div>
-              <Label htmlFor="post-link-description" className="text-sm font-medium mt-2 block">Optional Description for Link</Label>
-                <Textarea
-                    id="post-link-description"
-                    value={content} // Use content state for the description of the link
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder="Add a brief description for your link (optional)..."
-                    rows={2}
-                    className="focus:border-primary transition-colors mt-1"
-                />
             </div>
           )}
 
@@ -176,7 +176,7 @@ export function CreatePostForm({ onPostCreate }: CreatePostFormProps) {
         <CardFooter className="flex justify-end">
           <Button 
             type="submit" 
-            disabled={isLoading || (type === 'link' ? !linkUrl.trim() : !content.trim())} 
+            disabled={isSubmitDisabled()}
             className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

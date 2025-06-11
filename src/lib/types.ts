@@ -19,13 +19,14 @@ export interface Post {
   id: string;
   userName: string;
   userAvatar: string; // URL for placeholder
-  content: string;
+  content: string; // Main text content, or description for links
   type: 'note' | 'question' | 'meme' | 'link' | 'image';
   likes: number;
   commentsCount: number;
   createdAt: number; // timestamp
   expiresAt: number; // timestamp for ephemeral nature
   imageUrl?: string; // Optional image for post
+  linkUrl?: string; // Optional URL for link type posts
 }
 
 export interface Flashcard {
@@ -44,3 +45,4 @@ export type HintOutput = GetQuizQuestionHintOutput;
 export type FlipQuestionInput = GenerateSingleQuizQuestionInput;
 export type FlipQuestionOutput = SingleQuestionOutput;
 export type FlippedQuizQuestion = NewSingleQuizQuestion;
+

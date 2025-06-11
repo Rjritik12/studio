@@ -5,8 +5,8 @@ import type { Post } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageCircle, Heart, Share2, LinkIcon, Image as ImageIcon, StickyNote, HelpCircle, Smile } from 'lucide-react';
-import Image from 'next/image';
+import { MessageCircle, Heart, Share2, LinkIcon, Image as ImageIconLucide, StickyNote, HelpCircle, Smile } from 'lucide-react'; // Renamed Image to avoid conflict
+import Image from 'next/image'; // Next.js Image component
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -40,13 +40,12 @@ function formatTimeLeft(timestamp: number): string {
   return `~${minutes}m left`;
 }
 
-
 const typeIcons = {
   note: StickyNote,
   question: HelpCircle,
   meme: Smile,
   link: LinkIcon,
-  image: ImageIcon,
+  image: ImageIconLucide,
 };
 
 export function PostCard({ post }: PostCardProps) {
@@ -62,6 +61,9 @@ export function PostCard({ post }: PostCardProps) {
   }, [post.createdAt, post.expiresAt]);
   
   const PostIcon = typeIcons[post.type];
+  const hasContent = post.content && post.content.trim() !== '';
+  const hasImage = post.imageUrl;
+  const hasLink = post.type === 'link' && post.linkUrl;
 
   return (
     <TooltipProvider>
@@ -77,36 +79,43 @@ export function PostCard({ post }: PostCardProps) {
               {timeAgo} &bull; Expires in {timeLeft}
             </CardDescription>
           </div>
-          <PostIcon className="h-5 w-5 text-muted-foreground" title={`Type: ${post.type}`} />
+          <Tooltip>
+            <TooltipTrigger asChild>
+                <PostIcon className="h-5 w-5 text-muted-foreground" />
+            </TooltipTrigger>
+            <TooltipContent>
+                <p>Type: {post.type}</p>
+            </TooltipContent>
+          </Tooltip>
         </CardHeader>
         <CardContent className="pb-4">
-          {post.type === 'link' && !post.imageUrl ? (
-             <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words">
-                {post.content.startsWith('http') ? (
-                    <>
-                        Shared a link: <Link href={post.content} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{post.content}</Link>
-                    </>
-                ) : post.content}
-            </p>
-          ) : (
-            <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words mb-3">{post.content}</p>
+          {/* Display the main text content (or description for links) */}
+          {hasContent && (
+            <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words">{post.content}</p>
           )}
-          {post.imageUrl && (
-            <div className="mt-3 rounded-lg overflow-hidden border">
+
+          {/* Display image if available */}
+          {hasImage && (
+            <div className={`rounded-lg overflow-hidden border ${hasContent ? 'mt-3' : ''}`}>
               <Image 
-                src={post.imageUrl} 
-                alt="Post image" 
+                src={post.imageUrl!} 
+                alt={post.type === 'meme' ? "Meme image" : "Post image"} 
                 width={600} 
                 height={400} 
                 className="object-cover w-full aspect-video"
-                data-ai-hint="social media image"
+                data-ai-hint={post.type === 'meme' ? "funny meme" : "social media image"}
               />
             </div>
           )}
-          {post.type === 'link' && post.imageUrl && ( // if it's a link with an image, display the link below the image
-             <Link href={post.content} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1 text-sm mt-2">
-                <LinkIcon className="h-4 w-4" /> Visit Link
-            </Link>
+
+          {/* Display link if type is link and linkUrl is present */}
+          {hasLink && (
+            <div className={`text-sm mt-2 ${(!hasImage && !hasContent) ? '' : 'pt-1'}`}>
+              <Link href={post.linkUrl!} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1 break-all">
+                <LinkIcon className="h-4 w-4 flex-shrink-0" /> 
+                <span>{post.linkUrl!.length > 60 ? post.linkUrl!.substring(0, 60) + "..." : post.linkUrl}</span>
+              </Link>
+            </div>
           )}
         </CardContent>
         <CardFooter className="flex justify-between items-center pt-3 border-t">

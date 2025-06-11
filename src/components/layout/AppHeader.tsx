@@ -14,6 +14,16 @@ export function AppHeader() {
   const { isMobile } = useSidebar();
   const { user, loading, logout } = useAuth(); // Get auth state and functions
 
+  const getAvatarFallback = () => {
+    if (user?.displayName) {
+      return user.displayName.substring(0, 1).toUpperCase();
+    }
+    if (user?.email) {
+      return user.email.substring(0, 1).toUpperCase();
+    }
+    return <UserCircle className="h-6 w-6" />;
+  };
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-md sm:px-6">
       {isMobile ? (
@@ -40,17 +50,16 @@ export function AppHeader() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
                 <Avatar className="h-8 w-8">
-                  {/* In a real app, user.photoURL would be used if available */}
-                  <AvatarImage src={user.photoURL || "https://placehold.co/40x40.png?text=U"} alt={user.displayName || user.email || "User"} data-ai-hint="user avatar" />
+                  <AvatarImage src={user.photoURL || ""} alt={user.displayName || user.email || "User"} data-ai-hint="user avatar" />
                   <AvatarFallback>
-                    {user.email ? user.email.substring(0,1).toUpperCase() : <UserCircle className="h-6 w-6" />}
+                    {getAvatarFallback()}
                   </AvatarFallback>
                 </Avatar>
                 <span className="sr-only">Toggle user menu</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>{user.email || 'My Account'}</DropdownMenuLabel>
+              <DropdownMenuLabel>{user.displayName || user.email || 'My Account'}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <Link href="/profile" passHref>
                 <DropdownMenuItem>Profile</DropdownMenuItem>
