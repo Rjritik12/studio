@@ -28,7 +28,7 @@ export function NavLinks({ isMobile = false, onLinkClick }: NavLinksProps) {
       {navItems.map((item) => {
         const Icon = item.icon;
         return (
-          <Link href={item.href} key={item.label} passHref legacyBehavior>
+          <Link href={item.href} key={item.label}>
             <SidebarMenuButton
               asChild={false}
               onClick={onLinkClick}
