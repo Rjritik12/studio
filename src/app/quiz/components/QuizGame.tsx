@@ -308,7 +308,7 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
       </Card>
       
       <div>
-        <Label className="text-sm text-muted-foreground">KBC Ladder Progress (out of {TOTAL_QUESTIONS_LADDER} potential questions based on setup)</Label>
+        <Label className="text-sm text-muted-foreground">KBC Ladder Progress (out of {TOTAL_QUESTIONS_LADDER} potential questions)</Label>
         <Progress value={progressPercentage} className="w-full h-3 mt-1" />
         <p className="text-xs text-right text-muted-foreground mt-1">Question {currentQuestionIndex + 1} of {TOTAL_QUESTIONS_LADDER > questions.length ? TOTAL_QUESTIONS_LADDER : questions.length}</p>
       </div>
