@@ -28,7 +28,7 @@ export function QuizFlow() {
     if ('error' in result) {
       setError(result.error);
     } else if (result.questions && result.questions.length > 0) {
-      setQuestions(result.questions);
+      setQuestions(result.questions.map(q => ({...q, topic: result.topic, difficulty: result.difficulty }))); // Store topic and difficulty with questions
       setStage('playing');
     } else {
       setError("No questions were generated. Please try different settings.");
@@ -57,6 +57,15 @@ export function QuizFlow() {
 
   if (stage === 'results') {
     const isWinner = finalScore === questions.length && questions.length > 0;
+    const quizTopic = questions[0]?.topic || 'the quiz';
+    const quizDifficulty = questions[0]?.difficulty || '';
+    
+    let resultDescription = `You scored ${finalScore} out of ${questions.length} on the ${quizDifficulty} ${quizTopic} quiz. Keep practicing!`;
+    if (isWinner) {
+      resultDescription = `You've masterfully answered all questions on the ${quizDifficulty} ${quizTopic} quiz!`;
+    }
+
+
     return (
       <Card className={`w-full max-w-md mx-auto text-center p-6 shadow-xl ${isWinner ? 'border-2 border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-600' : ''}`}>
         <CardHeader>
@@ -67,7 +76,7 @@ export function QuizFlow() {
             {isWinner ? "Congratulations! You Won!" : "Quiz Complete!"}
           </CardTitle>
           <CardDescription className={`text-lg ${isWinner ? 'text-yellow-700/90 dark:text-yellow-300/90' : 'text-foreground/80'}`}>
-            {isWinner ? "You've answered all questions correctly!" : "You've reached the end of the challenge."}
+            {resultDescription}
           </CardDescription>
         </CardHeader>
         <CardContent>

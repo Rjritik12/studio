@@ -29,8 +29,6 @@ function parseFlashcards(flashcardString?: string): Flashcard[] {
       // Fallback for simple two-line Q/A pairs without explicit prefixes
       const lines = pair.split('\n').map(line => line.trim()).filter(line => line);
       if (lines.length >= 2) {
-        // Assume first non-empty line is question, rest is answer.
-        // This is a broad fallback and might need refinement.
         const question = lines[0].replace(/^(?:Q[uestion\s\d]*\.?:?)\s*/i, "").trim();
         const answer = lines.slice(1).join('\n').replace(/^(?:A[nswer\s\d]*\.?:?)\s*/i, "").trim();
         if (question && answer) {
@@ -147,9 +145,9 @@ export function StudyRoomClient() {
                 <h3 className="font-semibold text-xl text-foreground mb-3">Generated Flashcards:</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   {parsedFlashcards.map((flashcard, index) => (
-                    <Card key={index} className="bg-card shadow-md">
+                    <Card key={index} className="bg-card shadow-md hover:shadow-lg transition-shadow">
                       <CardHeader className="pb-2 pt-4">
-                        <CardTitle className="text-md font-medium text-primary">Q: {flashcard.question}</CardTitle>
+                        <CardTitle className="text-base font-semibold text-primary">Q: {flashcard.question}</CardTitle>
                       </CardHeader>
                       <CardContent className="pb-4">
                         <p className="text-sm text-foreground/80">A: {flashcard.answer}</p>

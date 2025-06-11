@@ -81,7 +81,9 @@ export function PostCard({ post }: PostCardProps) {
           </div>
           <Tooltip>
             <TooltipTrigger asChild>
-                <PostIcon className="h-5 w-5 text-muted-foreground" />
+                <div className="bg-primary/10 p-1.5 rounded-full">
+                    <PostIcon className="h-5 w-5 text-primary" />
+                </div>
             </TooltipTrigger>
             <TooltipContent>
                 <p>Type: {post.type}</p>

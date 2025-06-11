@@ -14,7 +14,13 @@ const quizSetupSchema = z.object({
   numQuestions: z.coerce.number().min(1, "Number of questions must be at least 1").max(15, "Max 15 questions"),
 });
 
-export async function handleQuizSetup(formData: FormData): Promise<GenerateQuizQuestionsOutput | { error: string }> {
+export interface HandleQuizSetupResult extends GenerateQuizQuestionsOutput {
+  topic?: string;
+  difficulty?: 'easy' | 'medium' | 'hard';
+}
+
+
+export async function handleQuizSetup(formData: FormData): Promise<HandleQuizSetupResult | { error: string }> {
   const rawFormData = {
     topic: formData.get("topic"),
     difficulty: formData.get("difficulty"),
@@ -28,11 +34,13 @@ export async function handleQuizSetup(formData: FormData): Promise<GenerateQuizQ
   }
   
   try {
-    const quizData = await generateQuizQuestions(validatedFields.data as GenerateQuizQuestionsInput);
+    const quizInput = validatedFields.data as GenerateQuizQuestionsInput;
+    const quizData = await generateQuizQuestions(quizInput);
     if (!quizData.questions || quizData.questions.length === 0) {
       return { error: "No questions were generated. Please try different settings or topic." };
     }
-    return quizData;
+    // Return topic and difficulty along with questions for context in UI
+    return { ...quizData, topic: quizInput.topic, difficulty: quizInput.difficulty };
   } catch (e) {
     console.error("Error generating quiz questions:", e);
     return { error: "Failed to generate quiz questions. Please try again." };
