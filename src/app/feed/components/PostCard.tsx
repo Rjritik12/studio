@@ -5,7 +5,7 @@ import type { Post } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageCircle, Heart, Share2, LinkIcon, Image as ImageIconLucide, StickyNote, HelpCircle, Smile } from 'lucide-react'; // Renamed Image to avoid conflict
+import { MessageCircle, Heart, Share2, LinkIcon as LinkIconLucide, Image as ImageIconLucide, StickyNote, HelpCircle, Smile } from 'lucide-react'; // Renamed Image to avoid conflict
 import Image from 'next/image'; // Next.js Image component
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -44,7 +44,7 @@ const typeIcons = {
   note: StickyNote,
   question: HelpCircle,
   meme: Smile,
-  link: LinkIcon,
+  link: LinkIconLucide,
   image: ImageIconLucide,
 };
 
@@ -74,7 +74,16 @@ export function PostCard({ post }: PostCardProps) {
             <AvatarFallback>{post.userName.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <CardTitle className="text-base font-semibold text-foreground">{post.userName}</CardTitle>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href={`/profile/${post.userName}`} onClick={(e) => e.preventDefault()} className="hover:underline">
+                  <CardTitle className="text-base font-semibold text-foreground">{post.userName}</CardTitle>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Viewing other user profiles - Coming Soon!</p>
+              </TooltipContent>
+            </Tooltip>
             <CardDescription className="text-xs text-muted-foreground">
               {timeAgo} &bull; Expires in {timeLeft}
             </CardDescription>
@@ -114,7 +123,7 @@ export function PostCard({ post }: PostCardProps) {
           {hasLink && (
             <div className={`text-sm mt-2 ${(!hasImage && !hasContent) ? '' : 'pt-1'}`}>
               <Link href={post.linkUrl!} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1 break-all">
-                <LinkIcon className="h-4 w-4 flex-shrink-0" /> 
+                <LinkIconLucide className="h-4 w-4 flex-shrink-0" /> 
                 <span>{post.linkUrl!.length > 60 ? post.linkUrl!.substring(0, 60) + "..." : post.linkUrl}</span>
               </Link>
             </div>
