@@ -1,6 +1,6 @@
 
 import type { GenerateQuizQuestionsOutput } from '@/ai/flows/generate-quiz-questions';
-import type { TutorStudySessionOutput } from '@/ai/flows/tutor-study-session';
+import type { TutorStudySessionOutput } from '@/ai/flows/tutor-study-session'; // Will include practiceQuestions via schema
 import type { GetQuizQuestionHintInput, GetQuizQuestionHintOutput } from '@/ai/flows/get-quiz-question-hint';
 import type { GenerateSingleQuizQuestionInput, GenerateSingleQuizQuestionOutput as SingleQuestionOutput, SingleQuizQuestion as NewSingleQuizQuestion } from '@/ai/flows/generate-single-quiz-question';
 
@@ -9,8 +9,8 @@ export interface QuizQuestion {
   question: string;
   options: string[];
   correctAnswer: string;
-  difficulty?: 'easy' | 'medium' | 'hard'; // Optional: if we want to track per question
-  topic?: string; // Optional: if we want to track per question
+  difficulty?: 'easy' | 'medium' | 'hard';
+  topic?: string;
 }
 
 export type GeneratedQuizData = GenerateQuizQuestionsOutput;
@@ -18,15 +18,15 @@ export type GeneratedQuizData = GenerateQuizQuestionsOutput;
 export interface Post {
   id: string;
   userName: string;
-  userAvatar: string; // URL for placeholder
-  content: string; // Main text content, or description for links
+  userAvatar: string; 
+  content: string; 
   type: 'note' | 'question' | 'meme' | 'link' | 'image';
   likes: number;
   commentsCount: number;
-  createdAt: number; // timestamp
-  expiresAt: number; // timestamp for ephemeral nature
-  imageUrl?: string; // Optional image for post
-  linkUrl?: string; // Optional URL for link type posts
+  createdAt: number; 
+  expiresAt: number; 
+  imageUrl?: string; 
+  linkUrl?: string; 
 }
 
 export interface Flashcard {
@@ -34,12 +34,19 @@ export interface Flashcard {
   answer: string;
 }
 
+export interface PracticeQuestion {
+  question: string;
+  options: string[];
+  correctAnswer: string;
+}
+
+// TutorStudySessionOutput from Genkit will implicitly define the structure of StudyRoomData
 export type StudyRoomData = TutorStudySessionOutput;
 
-// For KBC Game Lifelines
+
 export type Lifeline = "50-50" | "Flip" | "AI_Hint" | "Audience_Poll";
 
-// Types for new AI flows related to lifelines
+
 export type HintInput = GetQuizQuestionHintInput;
 export type HintOutput = GetQuizQuestionHintOutput;
 export type FlipQuestionInput = GenerateSingleQuizQuestionInput;

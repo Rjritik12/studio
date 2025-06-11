@@ -6,27 +6,25 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Sparkles, Wand2, Lightbulb, AlertCircle } from 'lucide-react';
+import { Loader2, Sparkles, Wand2, Lightbulb, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 import { handleStudySession } from '@/lib/actions';
-import type { Flashcard, StudyRoomData } from '@/lib/types';
+import type { Flashcard, StudyRoomData, PracticeQuestion } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { cn } from '@/lib/utils';
 
 function parseFlashcards(flashcardString?: string): Flashcard[] {
   if (!flashcardString || typeof flashcardString !== 'string') return [];
   const cards: Flashcard[] = [];
-  // Regex to split by one or more newlines, trying to catch various AI output styles for card separation.
   const pairs = flashcardString.split(/\n\s*\n+/).filter(pair => pair.trim() !== "");
 
   for (const pair of pairs) {
-    // Regex to find Question: Q: Q. Question. (case insensitive, optional number, optional space after colon/period)
     const qMatch = pair.match(/^(?:Q[uestion\s\d]*\.?:?)\s*(.+)/im);
-    // Regex to find Answer: A: A. Answer. (case insensitive, optional number, optional space after colon/period)
     const aMatch = pair.match(/\n(?:A[nswer\s\d]*\.?:?)\s*(.+)/im);
 
     if (qMatch && qMatch[1] && aMatch && aMatch[1]) {
       cards.push({ question: qMatch[1].trim(), answer: aMatch[1].trim() });
     } else {
-      // Fallback for simple two-line Q/A pairs without explicit prefixes
       const lines = pair.split('\n').map(line => line.trim()).filter(line => line);
       if (lines.length >= 2) {
         const question = lines[0].replace(/^(?:Q[uestion\s\d]*\.?:?)\s*/i, "").trim();
@@ -38,6 +36,56 @@ function parseFlashcards(flashcardString?: string): Flashcard[] {
     }
   }
   return cards;
+}
+
+interface PracticeQuestionCardProps {
+  questionItem: PracticeQuestion;
+  index: number;
+}
+
+function PracticeQuestionCard({ questionItem, index }: PracticeQuestionCardProps) {
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+
+  const handleOptionChange = (value: string) => {
+    setSelectedOption(value);
+    setIsCorrect(value === questionItem.correctAnswer);
+  };
+
+  return (
+    <Card className="bg-card shadow-md hover:shadow-lg transition-shadow">
+      <CardHeader className="pb-3 pt-4">
+        <CardTitle className="text-md font-semibold text-primary">Practice Question {index + 1}:</CardTitle>
+        <p className="text-sm text-foreground/90 pt-1">{questionItem.question}</p>
+      </CardHeader>
+      <CardContent className="pb-4 space-y-3">
+        <RadioGroup onValueChange={handleOptionChange} value={selectedOption || ""}>
+          {questionItem.options.map((option, optIndex) => (
+            <div key={optIndex} className="flex items-center space-x-2">
+              <RadioGroupItem value={option} id={`q${index}-opt${optIndex}`} disabled={selectedOption !== null} />
+              <Label 
+                htmlFor={`q${index}-opt${optIndex}`}
+                className={cn(
+                  "text-sm",
+                  selectedOption === option && isCorrect === true && "text-green-600 font-semibold",
+                  selectedOption === option && isCorrect === false && "text-red-600 font-semibold",
+                  selectedOption !== null && option === questionItem.correctAnswer && "text-green-600 font-semibold"
+                )}
+              >
+                {option}
+                {selectedOption === option && isCorrect === true && <CheckCircle className="inline ml-2 h-4 w-4 text-green-600" />}
+                {selectedOption === option && isCorrect === false && <XCircle className="inline ml-2 h-4 w-4 text-red-600" />}
+                {selectedOption !== null && selectedOption !== option && option === questionItem.correctAnswer && <CheckCircle className="inline ml-2 h-4 w-4 text-green-600" />}
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
+        {selectedOption !== null && isCorrect === false && (
+          <p className="text-xs text-red-700">Correct answer: {questionItem.correctAnswer}</p>
+        )}
+      </CardContent>
+    </Card>
+  );
 }
 
 
@@ -130,10 +178,10 @@ export function StudyRoomClient() {
             </div>
 
             <div>
-                <h3 className="font-semibold text-xl text-foreground mb-2">Flashcard Recommendation:</h3>
+                <h3 className="font-semibold text-xl text-foreground mb-2">Flashcard Status:</h3>
                 <Alert>
                     <Lightbulb className="h-5 w-5" />
-                    <AlertTitle className="font-semibold">Recommendation</AlertTitle>
+                    <AlertTitle className="font-semibold">Recommendation & Outcome</AlertTitle>
                     <AlertDescription className="whitespace-pre-wrap mt-1">
                         {studyData.flashcardRecommendation}
                     </AlertDescription>
@@ -169,6 +217,16 @@ export function StudyRoomClient() {
                     </Alert>
                     <Textarea value={studyData.flashcards} readOnly rows={6} className="bg-muted/50 text-sm mt-3"/>
                  </div>
+            )}
+             {studyData.practiceQuestions && studyData.practiceQuestions.length > 0 && (
+              <div>
+                <h3 className="font-semibold text-xl text-foreground mb-3">Practice Questions:</h3>
+                <div className="space-y-4">
+                  {studyData.practiceQuestions.map((pq, index) => (
+                    <PracticeQuestionCard key={index} questionItem={pq} index={index} />
+                  ))}
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
