@@ -39,7 +39,7 @@ export default function StudyRoomPage() {
                 width={400} 
                 height={250} 
                 className="rounded-md mt-2 object-cover aspect-video"
-                data-ai-hint="team collaboration"
+                data-ai-hint="study group"
               />
                <p className="text-xs text-muted-foreground text-center mt-1">(Co-study features coming soon)</p>
             </CardContent>
@@ -63,7 +63,7 @@ export default function StudyRoomPage() {
                 width={400} 
                 height={250} 
                 className="rounded-md mt-2 object-cover aspect-video"
-                data-ai-hint="robot teaching"
+                data-ai-hint="AI tutor"
               />
             </CardContent>
           </Card>
