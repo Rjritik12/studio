@@ -1,6 +1,6 @@
 
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
-import { getAuth, type Auth } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, type Auth } from 'firebase/auth'; // Added GoogleAuthProvider
 // import { getFirestore } from "firebase/firestore"; // Example for Firestore
 // import { getStorage } from "firebase/storage"; // Example for Storage
 
@@ -25,4 +25,5 @@ const auth: Auth = getAuth(app);
 // const db = getFirestore(app); // Example for Firestore
 // const storage = getStorage(app); // Example for Storage
 
-export { app, auth /*, db, storage */ };
+export { app, auth, GoogleAuthProvider /*, db, storage */ }; // Export GoogleAuthProvider
+

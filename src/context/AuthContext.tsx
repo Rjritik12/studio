@@ -6,11 +6,10 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { 
   onAuthStateChanged, 
   signOut as firebaseSignOut, 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword,
+  signInWithPopup, // Changed from createUserWithEmailAndPassword, signInWithEmailAndPassword
   type User 
 } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, GoogleAuthProvider } from '@/lib/firebase'; // Import GoogleAuthProvider
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
@@ -18,8 +17,7 @@ interface AuthContextType {
   loading: boolean;
   error: string | null;
   setError: Dispatch<SetStateAction<string | null>>;
-  signup: (email: string, pass: string) => Promise<User | null>;
-  login: (email: string, pass: string) => Promise<User | null>;
+  signInWithGoogle: () => Promise<User | null>; // New method
   logout: () => Promise<void>;
 }
 
@@ -39,32 +37,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, []);
 
-  const signup = async (email: string, pass: string): Promise<User | null> => {
+  const signInWithGoogle = async (): Promise<User | null> => {
     setLoading(true);
     setError(null);
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-      setUser(userCredential.user);
-      return userCredential.user;
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      setUser(result.user);
+      return result.user;
     } catch (e: any) {
-      setError(e.message || 'Failed to sign up');
-      console.error("Signup error:", e);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const login = async (email: string, pass: string): Promise<User | null> => {
-    setLoading(true);
-    setError(null);
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-      setUser(userCredential.user);
-      return userCredential.user;
-    } catch (e: any) {
-      setError(e.message || 'Failed to log in');
-      console.error("Login error:", e);
+      // Handle common errors specifically if needed, e.g., popup closed by user
+      if (e.code === 'auth/popup-closed-by-user') {
+        setError('Sign-in process was cancelled.');
+      } else {
+        setError(e.message || 'Failed to sign in with Google.');
+      }
+      console.error("Google Sign-In error:", e);
       return null;
     } finally {
       setLoading(false);
@@ -87,7 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, setError, signup, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, error, setError, signInWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -100,3 +88,4 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
+
