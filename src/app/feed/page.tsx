@@ -6,7 +6,7 @@ import { CreatePostForm } from './components/CreatePostForm';
 import { PostCard } from './components/PostCard';
 import type { Post } from '@/lib/types';
 import { Input } from '@/components/ui/input';
-import { SearchIcon, FilterIcon, MessagesSquare, Image as ImageIconLucide, User } from 'lucide-react';
+import { SearchIcon, FilterIcon, MessagesSquare, Image as ImageIconLucide, User, Plus, StickyNote } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -20,8 +20,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { StoryBubble } from './components/StoryBubble';
 import { Separator } from '@/components/ui/separator';
 import { StoryViewer, type StoryItem } from './components/StoryViewer';
-import { CreateStoryDialog } from './components/CreateStoryDialog'; // Import CreateStoryDialog
-import { useAuth } from '@/context/AuthContext'; // Import useAuth
+import { CreateStoryDialog } from './components/CreateStoryDialog';
+import { useAuth } from '@/context/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface MockStory extends StoryItem {
   hasUnread: boolean;
@@ -53,14 +55,14 @@ export default function FeedPage() {
   const [currentUserStoryGroupIndex, setCurrentUserStoryGroupIndex] = useState(-1);
 
   const [isCreateStoryDialogOpen, setIsCreateStoryDialogOpen] = useState(false);
+  const [isCreatePostDialogOpen, setIsCreatePostDialogOpen] = useState(false);
+
 
   useEffect(() => {
-    // Derive uniqueUserStories whenever mockStoriesData changes
     const usersWithStories = mockStoriesData.reduce((acc, story) => {
       if (!acc.find(s => s.username === story.username)) {
-        // Find if any story for this user is unread
         const hasAnyUnread = mockStoriesData.some(s => s.username === story.username && s.hasUnread);
-        acc.push({...story, hasUnread: hasAnyUnread}); // Use the first story instance but update unread status
+        acc.push({...story, hasUnread: hasAnyUnread});
       }
       return acc;
     }, [] as MockStory[]);
@@ -126,7 +128,6 @@ export default function FeedPage() {
       ? [uniqueUserStories.find(u => u.username === (authUser.displayName || authUser.email?.split('@')[0] || "CurrentUser"))!, ...filteredUniqueUsers]
       : filteredUniqueUsers;
 
-
     if (nextGroupIndex >= displayableUniqueUserStories.length) {
       nextGroupIndex = 0; 
     } else if (nextGroupIndex < 0) {
@@ -154,7 +155,7 @@ export default function FeedPage() {
   };
 
   const handleActualStoryCreate = (imageDataUri: string) => {
-    if (!authUser) return; // Should not happen if add story click is guarded
+    if (!authUser) return;
 
     const currentUserName = authUser.displayName || authUser.email?.split('@')[0] || "CurrentUser";
     const currentUserAvatar = authUser.photoURL || `https://placehold.co/64x64.png?text=${currentUserName.substring(0,1).toUpperCase()}`;
@@ -164,25 +165,19 @@ export default function FeedPage() {
       username: currentUserName,
       avatarUrl: currentUserAvatar,
       storyImageUrl: imageDataUri,
-      hasUnread: true, // New story is always "unread" initially for the user themselves
-      duration: 5000, // Default duration
+      hasUnread: true, 
+      duration: 5000,
     };
-
-    // Add the new story. If user already has stories, add to their existing ones.
-    // Otherwise, add this as their first story.
     setMockStoriesData(prevStories => [newStory, ...prevStories]);
-    // uniqueUserStories will update via useEffect
   };
   
   const currentUserNameOrDefault = authUser?.displayName || authUser?.email?.split('@')[0] || "CurrentUser";
   const currentUserAvatarOrDefault = authUser?.photoURL || `https://placehold.co/64x64.png?text=${currentUserNameOrDefault.substring(0,1).toUpperCase()}`;
-
-  // Determine if "Your Story" bubble should be shown or current user's actual story bubble
   const currentUserHasStories = authUser && mockStoriesData.some(story => story.username === currentUserNameOrDefault);
 
   return (
     <TooltipProvider>
-      <div className="container mx-auto py-8 px-2 md:px-4 lg:px-6">
+      <div className="container mx-auto py-8 px-2 md:px-4 lg:px-6 relative"> {/* Added relative for FAB positioning context */}
         <header className="text-center mb-8">
           <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary mb-3">Community Feed</h1>
           <p className="text-lg text-foreground/80 max-w-xl mx-auto">
@@ -208,22 +203,22 @@ export default function FeedPage() {
               )}
               {uniqueUserStories.map(story => (
                 <StoryBubble 
-                  key={story.username} // Use username as key for unique bubbles
+                  key={story.username}
                   username={story.username}
                   avatarUrl={story.avatarUrl}
-                  hasUnread={mockStoriesData.some(s => s.username === story.username && s.hasUnread)} // Recalculate unread status for the bubble
+                  hasUnread={mockStoriesData.some(s => s.username === story.username && s.hasUnread)}
                   onClick={() => handleStoryBubbleClick(story.username)}
                 />
               ))}
-               {!authUser && !authLoading && ( // Show disabled "Your Story" if not logged in
+               {!authUser && !authLoading && (
                  <Tooltip>
                     <TooltipTrigger asChild>
-                        <div> {/* Wrap in div for tooltip on disabled */}
+                        <div>
                             <StoryBubble 
                             username="Your Story" 
                             avatarUrl={`https://placehold.co/64x64.png?text=Me`}
                             isAddStory 
-                            onClick={handleAddStoryClick} // Will show login toast
+                            onClick={handleAddStoryClick}
                             />
                         </div>
                     </TooltipTrigger>
@@ -234,9 +229,47 @@ export default function FeedPage() {
           </CardContent>
         </Card>
         
-        <div className="max-w-2xl mx-auto mb-10">
-          <CreatePostForm onPostCreate={handlePostCreate} />
-        </div>
+        {/* Create Post FAB */}
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <Button
+                    className="fixed bottom-6 right-6 md:bottom-8 md:right-8 h-14 w-14 md:h-16 md:w-16 rounded-full shadow-lg z-40 bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center"
+                    size="icon"
+                    onClick={() => {
+                        if (authLoading) return;
+                        if (!authUser) {
+                        toast({ title: "Login Required", description: "Please log in to create a post.", variant: "destructive" });
+                        return;
+                        }
+                        setIsCreatePostDialogOpen(true);
+                    }}
+                    aria-label="Create new post"
+                    >
+                    <Plus className="h-7 w-7 md:h-8 md:w-8" />
+                </Button>
+            </TooltipTrigger>
+            <TooltipContent side="left" className="mr-2">
+                 <p>Create new post</p>
+            </TooltipContent>
+        </Tooltip>
+
+
+        <Dialog open={isCreatePostDialogOpen} onOpenChange={setIsCreatePostDialogOpen}>
+            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                <DialogTitle className="font-headline text-xl flex items-center">
+                    <StickyNote className="mr-2 h-6 w-6 text-primary" /> Create New Post
+                </DialogTitle>
+                <DialogDescription>Share your thoughts, notes, or questions with the community.</DialogDescription>
+                </DialogHeader>
+                <CreatePostForm
+                    onPostCreate={(postData) => {
+                        handlePostCreate(postData);
+                        setIsCreatePostDialogOpen(false); 
+                    }}
+                />
+            </DialogContent>
+        </Dialog>
         
         <Separator className="my-8"/>
 
@@ -276,7 +309,7 @@ export default function FeedPage() {
           </div>
         </div>
 
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="max-w-2xl mx-auto space-y-6 pb-20"> {/* Added padding-bottom for FAB visibility */}
           {posts.map(post => (
             <PostCard key={post.id} post={post} />
           ))}
