@@ -1,6 +1,6 @@
 
 import type { GenerateQuizQuestionsOutput } from '@/ai/flows/generate-quiz-questions';
-import type { TutorStudySessionOutput } from '@/ai/flows/tutor-study-session'; // Will include practiceQuestions via schema
+import type { TutorStudySessionOutput } from '@/ai/flows/tutor-study-session'; 
 import type { GetQuizQuestionHintInput, GetQuizQuestionHintOutput } from '@/ai/flows/get-quiz-question-hint';
 import type { GenerateSingleQuizQuestionInput, GenerateSingleQuizQuestionOutput as SingleQuestionOutput, SingleQuizQuestion as NewSingleQuizQuestion } from '@/ai/flows/generate-single-quiz-question';
 
@@ -52,4 +52,3 @@ export type HintOutput = GetQuizQuestionHintOutput;
 export type FlipQuestionInput = GenerateSingleQuizQuestionInput;
 export type FlipQuestionOutput = SingleQuestionOutput;
 export type FlippedQuizQuestion = NewSingleQuizQuestion;
-
