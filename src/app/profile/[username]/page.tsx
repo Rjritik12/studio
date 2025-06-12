@@ -7,17 +7,19 @@ import { Separator } from "@/components/ui/separator";
 import { BadgePercent, Star, ShieldCheck, UserCheck, BarChart3, UserPlus, MessageSquare, Rss, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation'; // Added useRouter
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import Link from "next/link"; // Added Link
 
 export default function UserProfilePage() {
   const params = useParams();
   const username = typeof params.username === 'string' ? decodeURIComponent(params.username) : "User";
   const { toast } = useToast();
   const { user: authUser } = useAuth();
+  const router = useRouter(); // Initialize useRouter
 
   const [isFollowing, setIsFollowing] = useState(false);
   const [mockUserStats, setMockUserStats] = useState({
@@ -27,7 +29,6 @@ export default function UserProfilePage() {
     joinDate: new Date().toLocaleDateString(),
   });
 
-  // Generate mock stats once on component mount or when username changes
   useEffect(() => {
     setMockUserStats({
       xp: Math.floor(Math.random() * 2000) + 500,
@@ -35,7 +36,6 @@ export default function UserProfilePage() {
       badges: ["Quiz Enthusiast", "Active Learner", "Community Helper"].sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 2) + 1),
       joinDate: new Date(Date.now() - Math.floor(Math.random() * 365 * 24 * 60 * 60 * 1000)).toLocaleDateString(),
     });
-    // Reset following state if viewing a new profile
     setIsFollowing(false); 
   }, [username]);
 
@@ -45,14 +45,6 @@ export default function UserProfilePage() {
     toast({
       title: !isFollowing ? `Followed ${username}` : `Unfollowed ${username}`,
       description: !isFollowing ? `You are now following ${username}. (Prototype)` : `You are no longer following ${username}. (Prototype)`,
-    });
-  };
-
-  const handleMessage = () => {
-    toast({
-      title: "Feature Coming Soon",
-      description: `Messaging ${username} will be available in a future update.`,
-      variant: "default",
     });
   };
   
@@ -84,16 +76,23 @@ export default function UserProfilePage() {
           <CardContent className="text-sm text-foreground/80">
             <p>Joined: {mockUserStats.joinDate}</p>
             <Separator className="my-4" />
-            {!isOwnProfilePage && (
+            {!isOwnProfilePage && authUser && ( // Only show if not own profile AND user is logged in
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button onClick={handleFollowToggle} className="flex-1">
                   {isFollowing ? <UserCheck className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
                   {isFollowing ? "Following" : "Follow"}
                 </Button>
-                <Button variant="outline" onClick={handleMessage} className="flex-1">
-                  <MessageSquare className="mr-2 h-4 w-4" /> Message
+                <Button variant="outline" asChild className="flex-1">
+                  <Link href={`/messages/${encodeURIComponent(username)}`}>
+                    <MessageSquare className="mr-2 h-4 w-4" /> Message
+                  </Link>
                 </Button>
               </div>
+            )}
+             {!authUser && (
+                <p className="text-xs text-center text-muted-foreground">
+                    <Link href="/login" className="text-primary hover:underline">Login</Link> to follow or message.
+                </p>
             )}
             {isOwnProfilePage && (
               <p className="text-xs text-center text-muted-foreground mt-2">This is your public profile view.</p>
@@ -163,7 +162,6 @@ export default function UserProfilePage() {
               Displaying {username}'s actual recent posts here requires backend integration for persistent post storage. This feature is planned for future updates!
             </AlertDescription>
           </Alert>
-          {/* Placeholder for where posts might go, e.g., a few static placeholder cards if desired */}
         </CardContent>
       </Card>
       
