@@ -98,7 +98,6 @@ export function PostCard({ post }: PostCardProps) {
     setLocalCommentsCount(prevCount => prevCount + 1);
     toast({
       title: "Comment posted! (prototype)",
-      description: "Full comment viewing is coming soon!",
       variant: "default",
     });
     setCommentText('');
@@ -208,6 +207,12 @@ export function PostCard({ post }: PostCardProps) {
             <DialogTitle className="font-headline text-lg text-primary">Add a comment</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            <div className="max-h-48 overflow-y-auto space-y-2 p-3 border rounded-md bg-muted/50 mb-4">
+              {/* Placeholder for future display of existing comments */}
+              <p className="text-xs text-muted-foreground text-center">
+                Viewing existing comments - coming soon!
+              </p>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="comment-text" className="text-sm font-medium text-card-foreground">
                 Your comment
@@ -217,14 +222,10 @@ export function PostCard({ post }: PostCardProps) {
                 placeholder="Write your comment here..."
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                rows={4}
+                rows={3}
                 className="focus:border-primary transition-colors bg-background"
               />
             </div>
-            {/* Placeholder for future display of existing comments */}
-            {/* <div className="max-h-48 overflow-y-auto space-y-2 p-2 border rounded-md bg-muted/50">
-              <p className="text-xs text-muted-foreground">Viewing comments coming soon...</p>
-            </div> */}
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setIsCommentDialogOpen(false)}>
