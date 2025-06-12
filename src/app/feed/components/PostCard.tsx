@@ -100,6 +100,7 @@ export function PostCard({ post }: PostCardProps) {
     setLocalCommentsCount(prevCount => prevCount + 1);
     toast({
       title: "Comment posted! (prototype)",
+      description: "You can see your new comment in the dialog for this session.",
       variant: "default",
     });
     setCommentText('');
@@ -212,7 +213,7 @@ export function PostCard({ post }: PostCardProps) {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             {/* Section to display comments */}
-            <div className="space-y-3 pr-2 max-h-[200px] overflow-y-auto border rounded-md p-3 bg-muted/30">
+            <div className="space-y-3 pr-2 max-h-[200px] overflow-y-auto border rounded-md p-3 bg-muted/30 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
               {post.commentsCount > 0 && newComments.length === 0 && (
                 <div className="text-xs text-muted-foreground pb-2 mb-2 border-b border-border text-center">
                   {post.commentsCount} existing comment(s) not shown. Add a new one to see it here!
@@ -220,18 +221,19 @@ export function PostCard({ post }: PostCardProps) {
               )}
                {post.commentsCount > 0 && newComments.length > 0 && (
                 <div className="text-xs text-muted-foreground pb-2 mb-2 border-b border-border">
-                  Displaying new comments. ({post.commentsCount} older comment(s) not shown in this prototype).
+                  Displaying new comments. ({post.commentsCount - newComments.length > 0 ? post.commentsCount - newComments.length : 0} older comment(s) not shown in this prototype).
                 </div>
               )}
               {newComments.length > 0 ? (
                 newComments.map((comment, index) => (
                   <div key={index} className="flex items-start gap-2 text-sm">
-                    <Avatar className="h-6 w-6 border text-xs">
+                    <Avatar className="h-8 w-8 border text-xs">
                       <AvatarImage src="https://placehold.co/40x40.png?text=U" alt="User" data-ai-hint="user avatar generic"/>
                       <AvatarFallback>U</AvatarFallback>
                     </Avatar>
-                    <div className="p-2 rounded-md bg-background shadow-sm flex-1">
-                      <p className="whitespace-pre-wrap break-words">{comment}</p>
+                    <div className="p-2.5 rounded-md bg-background shadow-sm flex-1">
+                      <span className="font-semibold text-card-foreground text-xs">You</span>
+                      <p className="whitespace-pre-wrap break-words text-sm text-card-foreground/90 mt-0.5">{comment}</p>
                     </div>
                   </div>
                 ))
@@ -241,7 +243,7 @@ export function PostCard({ post }: PostCardProps) {
             </div>
 
             {/* Section to add a new comment */}
-            <div className="space-y-2 pt-2 border-t">
+            <div className="space-y-2 pt-2 border-t mt-2">
               <Label htmlFor="comment-text" className="text-sm font-medium text-card-foreground">
                 Add your comment
               </Label>
