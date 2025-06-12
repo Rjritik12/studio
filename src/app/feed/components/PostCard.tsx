@@ -64,6 +64,7 @@ export function PostCard({ post }: PostCardProps) {
 
   const [isCommentDialogOpen, setIsCommentDialogOpen] = useState(false);
   const [commentText, setCommentText] = useState('');
+  const [newComments, setNewComments] = useState<string[]>([]); // Store new comments for this post card
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -95,13 +96,14 @@ export function PostCard({ post }: PostCardProps) {
       });
       return;
     }
+    setNewComments(prev => [...prev, commentText]);
     setLocalCommentsCount(prevCount => prevCount + 1);
     toast({
       title: "Comment posted! (prototype)",
       variant: "default",
     });
     setCommentText('');
-    setIsCommentDialogOpen(false);
+    // setIsCommentDialogOpen(false); // Keep dialog open to see the new comment
   };
 
   return (
@@ -204,18 +206,44 @@ export function PostCard({ post }: PostCardProps) {
       <Dialog open={isCommentDialogOpen} onOpenChange={setIsCommentDialogOpen}>
         <DialogContent className="sm:max-w-[480px] bg-card">
           <DialogHeader>
-            <DialogTitle className="font-headline text-lg text-primary">Add a comment</DialogTitle>
+            <DialogTitle className="font-headline text-lg text-primary">
+              Comments ({localCommentsCount})
+            </DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="max-h-48 overflow-y-auto space-y-2 p-3 border rounded-md bg-muted/50 mb-4">
-              {/* Placeholder for future display of existing comments */}
-              <p className="text-xs text-muted-foreground text-center">
-                Viewing existing comments - coming soon!
-              </p>
+            {/* Section to display comments */}
+            <div className="space-y-3 pr-2 max-h-[200px] overflow-y-auto border rounded-md p-3 bg-muted/30">
+              {post.commentsCount > 0 && newComments.length === 0 && (
+                <div className="text-xs text-muted-foreground pb-2 mb-2 border-b border-border text-center">
+                  {post.commentsCount} existing comment(s) not shown. Add a new one to see it here!
+                </div>
+              )}
+               {post.commentsCount > 0 && newComments.length > 0 && (
+                <div className="text-xs text-muted-foreground pb-2 mb-2 border-b border-border">
+                  Displaying new comments. ({post.commentsCount} older comment(s) not shown in this prototype).
+                </div>
+              )}
+              {newComments.length > 0 ? (
+                newComments.map((comment, index) => (
+                  <div key={index} className="flex items-start gap-2 text-sm">
+                    <Avatar className="h-6 w-6 border text-xs">
+                      <AvatarImage src="https://placehold.co/40x40.png?text=U" alt="User" data-ai-hint="user avatar generic"/>
+                      <AvatarFallback>U</AvatarFallback>
+                    </Avatar>
+                    <div className="p-2 rounded-md bg-background shadow-sm flex-1">
+                      <p className="whitespace-pre-wrap break-words">{comment}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                post.commentsCount === 0 && <p className="text-xs text-muted-foreground text-center py-3">No comments yet. Be the first to comment!</p>
+              )}
             </div>
-            <div className="space-y-2">
+
+            {/* Section to add a new comment */}
+            <div className="space-y-2 pt-2 border-t">
               <Label htmlFor="comment-text" className="text-sm font-medium text-card-foreground">
-                Your comment
+                Add your comment
               </Label>
               <Textarea
                 id="comment-text"
