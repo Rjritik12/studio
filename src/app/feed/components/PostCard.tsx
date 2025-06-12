@@ -10,6 +10,8 @@ import Image from 'next/image'; // Next.js Image component
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 interface PostCardProps {
   post: Post;
@@ -51,6 +53,11 @@ const typeIcons = {
 export function PostCard({ post }: PostCardProps) {
   const [timeAgo, setTimeAgo] = useState(formatTimeAgo(post.createdAt));
   const [timeLeft, setTimeLeft] = useState(formatTimeLeft(post.expiresAt));
+  const { toast } = useToast();
+
+  const [isLiked, setIsLiked] = useState(false);
+  const [localLikes, setLocalLikes] = useState(post.likes);
+  const [localCommentsCount, setLocalCommentsCount] = useState(post.commentsCount);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -64,6 +71,20 @@ export function PostCard({ post }: PostCardProps) {
   const hasContent = post.content && post.content.trim() !== '';
   const hasImage = post.imageUrl;
   const hasLink = post.type === 'link' && post.linkUrl;
+
+  const handleLikeClick = () => {
+    setIsLiked(!isLiked);
+    setLocalLikes(prevLikes => isLiked ? prevLikes - 1 : prevLikes + 1);
+  };
+
+  const handleCommentClick = () => {
+    setLocalCommentsCount(prevCount => prevCount + 1);
+    toast({
+      title: "Comment added (prototype)",
+      description: "Viewing full comments is coming soon!",
+      variant: "default",
+    });
+  };
 
   return (
     <TooltipProvider>
@@ -100,12 +121,10 @@ export function PostCard({ post }: PostCardProps) {
           </Tooltip>
         </CardHeader>
         <CardContent className="pb-4">
-          {/* Display the main text content (or description for links) */}
           {hasContent && (
             <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words">{post.content}</p>
           )}
 
-          {/* Display image if available */}
           {hasImage && (
             <div className={`rounded-lg overflow-hidden border ${hasContent ? 'mt-3' : ''}`}>
               <Image 
@@ -119,7 +138,6 @@ export function PostCard({ post }: PostCardProps) {
             </div>
           )}
 
-          {/* Display link if type is link and linkUrl is present */}
           {hasLink && (
             <div className={`text-sm mt-2 ${(!hasImage && !hasContent) ? '' : 'pt-1'}`}>
               <Link href={post.linkUrl!} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1 break-all">
@@ -131,24 +149,27 @@ export function PostCard({ post }: PostCardProps) {
         </CardContent>
         <CardFooter className="flex justify-between items-center pt-3 border-t">
           <div className="flex gap-4 text-muted-foreground">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="flex items-center gap-1.5 hover:text-primary" disabled>
-                  <Heart className="h-4 w-4" />
-                  <span className="text-xs">{post.likes}</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent><p>Liking coming soon!</p></TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="flex items-center gap-1.5 hover:text-primary" disabled>
-                  <MessageCircle className="h-4 w-4" />
-                  <span className="text-xs">{post.commentsCount}</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent><p>Commenting coming soon!</p></TooltipContent>
-            </Tooltip>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className={cn(
+                "flex items-center gap-1.5 hover:text-primary",
+                isLiked && "text-rose-500 hover:text-rose-600"
+              )}
+              onClick={handleLikeClick}
+            >
+              <Heart className={cn("h-4 w-4", isLiked ? "fill-rose-500 text-rose-500" : "text-muted-foreground")} />
+              <span className="text-xs">{localLikes}</span>
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="flex items-center gap-1.5 hover:text-primary" 
+              onClick={handleCommentClick}
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span className="text-xs">{localCommentsCount}</span>
+            </Button>
           </div>
           <Tooltip>
             <TooltipTrigger asChild>
