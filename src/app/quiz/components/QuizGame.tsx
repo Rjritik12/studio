@@ -49,7 +49,6 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
   const currentTopic = questions[0]?.topic || "general knowledge";
   const currentDifficulty = questions[0]?.difficulty || "medium";
 
-
   useEffect(() => {
     if (currentQuestion) {
       setDisplayedOptions(currentQuestion.options);
@@ -57,54 +56,73 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
     }
   }, [currentQuestion]);
   
-  
   const resetForNextQuestion = useCallback(() => {
     setSelectedAnswer(null);
     setAnswerStatus(null);
     setTimeLeft(TIME_PER_QUESTION);
     setHintText(null);
     setAudiencePollResults(null);
-    if (questions[currentQuestionIndex + 1]) {
-       setDisplayedOptions(questions[currentQuestionIndex + 1].options);
+    const nextQuestionIndex = currentQuestionIndex + 1; // Recalculate based on potentially changed currentQuestionIndex
+    if (questions[nextQuestionIndex]) {
+       setDisplayedOptions(questions[nextQuestionIndex].options);
     }
-  }, [currentQuestionIndex, questions]);
+  }, [currentQuestionIndex, questions]); // Ensure `questions` is a dependency
+
+  // Effect to handle game end transition
+  useEffect(() => {
+    if (gameOver) {
+      const timerId = setTimeout(() => {
+        onGameEnd(score); // Pass the final score
+      }, 2000); // Delay to allow user to see feedback on the last question
+      return () => clearTimeout(timerId);
+    }
+  }, [gameOver, score, onGameEnd]);
+
 
   const handleAnswer = useCallback((answer: string | null) => {
-    if (selectedAnswer || gameOver) return;
+    if (selectedAnswer || gameOver) return; // Prevent re-entry
 
-    setSelectedAnswer(answer || "Time's up");
+    setSelectedAnswer(answer || "Time's up"); // Mark "Time's up" if null answer
     const isCorrect = answer === currentQuestion.correctAnswer;
 
     if (isCorrect) {
       setScore((prevScore) => prevScore + 1);
       setAnswerStatus('correct');
-    } else {
-      setAnswerStatus('incorrect');
-      setGameOver(true); 
-    }
 
-    setTimeout(() => {
-      if (isCorrect && currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
-        resetForNextQuestion();
+      // Check if it's the last question
+      if (currentQuestionIndex >= questions.length - 1) {
+        setTimeout(() => setGameOver(true), 0); // Game ends after this correct answer (timeout 0 to ensure state updates batch)
       } else {
-        setGameOver(true);
-        onGameEnd(score + (isCorrect ? 1 : 0));
+        // Not the last question, prepare for next after a delay
+        setTimeout(() => {
+          setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+          resetForNextQuestion();
+        }, 2000);
       }
-    }, 2000); 
-  }, [selectedAnswer, gameOver, currentQuestion, currentQuestionIndex, questions.length, onGameEnd, score, resetForNextQuestion]);
+    } else {
+      // Incorrect answer
+      setAnswerStatus('incorrect');
+      setTimeout(() => setGameOver(true), 0); // Game ends on incorrect answer
+    }
+  }, [selectedAnswer, gameOver, currentQuestion, currentQuestionIndex, questions.length, resetForNextQuestion]);
 
+  // Timer effect
   useEffect(() => {
-    if (gameOver || selectedAnswer) return;
+    if (gameOver || selectedAnswer) return; // Stop timer if game over or answer selected
 
     if (timeLeft === 0) {
-      handleAnswer(null); 
+      setSelectedAnswer("Time's up"); // Visually indicate time's up
+      setAnswerStatus('incorrect'); // Treat as incorrect
+      setGameOver(true); // Trigger game over
+      return; // Stop further timer processing for this cycle
     }
+
     const timer = setInterval(() => {
       setTimeLeft((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
     }, 1000);
+
     return () => clearInterval(timer);
-  }, [timeLeft, gameOver, selectedAnswer, handleAnswer]);
+  }, [timeLeft, gameOver, selectedAnswer]);
 
 
   const handleLifeline = async (type: Lifeline) => {
@@ -152,12 +170,19 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
               toast({ title: "Error", description: flipResult.error || "Failed to flip question", variant: "destructive" });
               setLifelines(prev => ({ ...prev, [type]: { ...prev[type], isLoading: false }})); 
             } else {
-              const newQuestion = { ...flipResult.question, topic: flipInput.topic, difficulty: flipInput.difficulty };
+              const newQuestionData = { ...flipResult.question, topic: flipInput.topic, difficulty: flipInput.difficulty };
               const updatedQuestions = [...questions];
-              updatedQuestions[currentQuestionIndex] = newQuestion;
+              updatedQuestions[currentQuestionIndex] = newQuestionData;
               setQuestions(updatedQuestions);
-              resetForNextQuestion(); // Resets selectedAnswer, answerStatus, timeLeft, hintText, audiencePollResults
-              setDisplayedOptions(newQuestion.options); 
+              
+              // Reset states for the new question at the current index
+              setSelectedAnswer(null);
+              setAnswerStatus(null);
+              setTimeLeft(TIME_PER_QUESTION);
+              setHintText(null);
+              setAudiencePollResults(null);
+              setDisplayedOptions(newQuestionData.options); 
+              
               toast({ title: "Question Flipped!", description: "A new question has been loaded." });
               setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
             }
@@ -202,18 +227,19 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
             if (currentSum !== totalPercentage && numOptions > 0) {
                 const diff = totalPercentage - currentSum;
                 const adjustIdx = correctAnswerIndex !== -1 ? correctAnswerIndex : percentages.indexOf(Math.max(...percentages));
-                percentages[adjustIdx] += diff;
+                 if (adjustIdx >= 0 && adjustIdx < percentages.length) { percentages[adjustIdx] += diff; }
             }
             
-            percentages = percentages.map(p => Math.max(0, p)); // Ensure no negative
+            percentages = percentages.map(p => Math.max(0, p)); 
             currentSum = percentages.reduce((a,b) => a+b, 0);
-            if (currentSum !== totalPercentage && numOptions > 0) { // Final normalization
-                 percentages[correctAnswerIndex !== -1 ? correctAnswerIndex : 0] += (totalPercentage - currentSum);
+            if (currentSum !== totalPercentage && numOptions > 0) { 
+                 const primaryIdx = correctAnswerIndex !== -1 ? correctAnswerIndex : 0;
+                 if (primaryIdx >= 0 && primaryIdx < percentages.length) { percentages[primaryIdx] += (totalPercentage - currentSum); }
             }
 
 
             optionsToPoll.forEach((opt, idx) => {
-                poll[opt] = percentages[idx];
+                poll[opt] = percentages[idx] || 0; // Ensure poll[opt] is a number
             });
 
             setAudiencePollResults(poll);
@@ -230,7 +256,6 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
 
   const renderKBCLadder = () => {
     const ladderSteps = Array.from({ length: questions.length }, (_, i) => i + 1);
-    // Example safe havens - this could be made more dynamic based on KBC rules if needed
     const safeHavens = questions.length >= 10 ? [Math.floor(questions.length * 0.3), Math.floor(questions.length * 0.6)] : 
                        questions.length >= 5 ? [Math.floor(questions.length * 0.4)] : [];
 
@@ -245,10 +270,10 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
               key={step}
               className={cn(
                 "w-7 h-7 md:w-8 md:h-8 flex items-center justify-center rounded-full text-xs font-semibold border-2 transition-all duration-300",
-                currentQuestionIndex + 1 === step ? "bg-primary text-primary-foreground border-primary-foreground scale-110 shadow-lg" : // Current question
-                currentQuestionIndex + 1 > step ? "bg-green-500 text-white border-green-700 opacity-75" : // Answered correctly
-                safeHavens.includes(step) ? "bg-yellow-400 border-yellow-600 text-yellow-900" : // Safe haven
-                "bg-card border-border text-muted-foreground" // Future question
+                currentQuestionIndex + 1 === step ? "bg-primary text-primary-foreground border-primary-foreground scale-110 shadow-lg" : 
+                currentQuestionIndex + 1 > step ? "bg-green-500 text-white border-green-700 opacity-75" : 
+                safeHavens.includes(step) ? "bg-yellow-400 border-yellow-600 text-yellow-900" : 
+                "bg-card border-border text-muted-foreground" 
               )}
               title={`Question ${step}`}
             >
@@ -291,24 +316,24 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
                 key={option}
                 variant="outline"
                 className={cn(
-                  "p-4 h-auto text-base justify-start text-left whitespace-normal break-words relative flex-col items-start", // flex-col for poll bar
+                  "p-4 h-auto text-base justify-start text-left whitespace-normal break-words relative flex-col items-start", 
                   "border-2 rounded-lg transition-all duration-200 ease-in-out", 
                   selectedAnswer === option && answerStatus === 'correct' && 'bg-green-500 border-green-700 text-white hover:bg-green-600',
                   selectedAnswer === option && answerStatus === 'incorrect' && 'bg-red-500 border-red-700 text-white hover:bg-red-600',
                   selectedAnswer && selectedAnswer !== option && option === currentQuestion.correctAnswer && 'bg-green-200 border-green-400 text-green-800 dark:bg-green-700 dark:text-green-100 dark:border-green-600', 
                   !selectedAnswer && 'hover:bg-primary/10 hover:border-primary',
-                  selectedAnswer && 'cursor-not-allowed'
+                  (selectedAnswer || gameOver) && 'cursor-not-allowed' // Disable if answer selected or game over
                 )}
                 onClick={() => handleAnswer(option)}
                 disabled={!!selectedAnswer || gameOver}
               >
-                <div className="w-full flex items-center justify-between"> {/* Wrapper for text and icon */}
+                <div className="w-full flex items-center justify-between"> 
                   <span>{option}</span> 
                   <span className="flex items-center">
                     {selectedAnswer === option && answerStatus === 'correct' && <CheckCircle className="ml-2 h-5 w-5 text-white" />}
                     {selectedAnswer === option && answerStatus === 'incorrect' && <XCircle className="ml-2 h-5 w-5 text-white" />}
                     {selectedAnswer && selectedAnswer !== option && option === currentQuestion.correctAnswer && <CheckCircle className="ml-2 h-5 w-5 text-green-700 dark:text-green-200" />}
-                    {audiencePollResults && audiencePollResults[option] !== undefined && !selectedAnswer && ( // Show text poll only if not answered
+                    {audiencePollResults && audiencePollResults[option] !== undefined && !selectedAnswer && ( 
                       <span className="ml-2 text-xs font-bold bg-accent/80 text-accent-foreground px-2 py-0.5 rounded">
                         {audiencePollResults[option]}%
                       </span>
@@ -327,9 +352,9 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
             ))}
           </div>
         </CardContent>
-        {answerStatus && (
+        {answerStatus && ( // Show feedback only if an answer has been processed
           <CardFooter className="mt-4 border-t pt-4">
-            {answerStatus === 'correct' && <p className="text-green-600 font-semibold flex items-center"><CheckCircle className="mr-2"/>Correct! Moving to next question...</p>}
+            {answerStatus === 'correct' && <p className="text-green-600 font-semibold flex items-center"><CheckCircle className="mr-2"/>Correct! {currentQuestionIndex < questions.length - 1 ? 'Moving to next question...' : 'Quiz completed!'}</p>}
             {answerStatus === 'incorrect' && <p className="text-red-600 font-semibold flex items-center"><XCircle className="mr-2"/>Incorrect! Correct answer was: {currentQuestion.correctAnswer}</p>}
           </CardFooter>
         )}
@@ -364,11 +389,13 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
         <p className="text-xs text-right text-muted-foreground mt-1">Question {currentQuestionIndex + 1} of {questions.length}</p>
       </div>
 
-      {gameOver && answerStatus && ( 
+      {gameOver && answerStatus === 'incorrect' && ( // Only show this specific "Game Over" card on incorrect answer
         <Card className="text-center p-6 mt-6 bg-destructive/10 border-destructive dark:bg-destructive/20 dark:border-destructive/50 shadow-xl">
           <CardTitle className="font-headline text-2xl mb-3 text-destructive flex items-center justify-center"><AlertCircle className="mr-2" />Game Over!</CardTitle>
-          <CardDescription className="text-lg mb-4 text-destructive/80 dark:text-destructive/70">Your final score: {score} / {questions.length}</CardDescription>
-          <Button onClick={() => onGameEnd(score)} className="bg-primary hover:bg-primary/90 text-primary-foreground">View Results</Button>
+          <CardDescription className="text-lg mb-4 text-destructive/80 dark:text-destructive/70">
+            You answered incorrectly. Your final score is {score} / {questions.length}.
+          </CardDescription>
+          {/* Button removed as transition is automatic */}
         </Card>
       )}
 
@@ -388,3 +415,4 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
     </div>
   );
 }
+
