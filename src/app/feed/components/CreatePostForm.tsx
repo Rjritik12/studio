@@ -1,37 +1,70 @@
 
 "use client";
 
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, type ChangeEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ImagePlus, LinkIcon, Loader2, StickyNote } from 'lucide-react';
+import { ImagePlus, LinkIcon, Loader2, StickyNote, UploadCloud, X } from 'lucide-react';
 import type { Post } from '@/lib/types';
+import Image from 'next/image'; // For image preview
 
 interface CreatePostFormProps {
   onPostCreate: (postData: Omit<Post, 'id' | 'likes' | 'commentsCount' | 'createdAt' | 'expiresAt' | 'userAvatar' | 'userName'>) => void;
 }
 
 export function CreatePostForm({ onPostCreate }: CreatePostFormProps) {
-  const [content, setContent] = useState(''); // For notes, questions, meme text, link descriptions
+  const [content, setContent] = useState('');
   const [type, setType] = useState<Post['type']>('note');
-  const [imageUrl, setImageUrl] = useState('');
-  const [linkUrl, setLinkUrl] = useState(''); // Dedicated for link URLs
+  const [imageUrl, setImageUrl] = useState(''); // Will store the data URI of the uploaded image
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [linkUrl, setLinkUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleTypeChange = (newType: Post['type']) => {
     setType(newType);
-    // Reset specific fields when type changes to avoid confusion
     if (newType !== 'link') {
-        setLinkUrl(''); // Clear link URL if not a link post
+        setLinkUrl('');
     }
     if (newType !== 'image' && newType !== 'meme') {
-        setImageUrl(''); // Clear image URL if not an image/meme post
+        setImageUrl('');
+        setImagePreview(null);
     }
-    // Content might be preserved or cleared based on user's intent, for now, let them manage it.
+  };
+
+  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        alert("File is too large. Please select an image under 5MB.");
+        event.target.value = ''; // Reset file input
+        setImageUrl('');
+        setImagePreview(null);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageUrl(reader.result as string);
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setImageUrl('');
+      setImagePreview(null);
+    }
+  };
+
+  const removeImage = () => {
+    setImageUrl('');
+    setImagePreview(null);
+    // Reset the file input value if you have a ref to it
+    const fileInput = document.getElementById('post-image-upload') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -39,7 +72,7 @@ export function CreatePostForm({ onPostCreate }: CreatePostFormProps) {
     setIsLoading(true);
 
     const postData: Omit<Post, 'id' | 'likes' | 'commentsCount' | 'createdAt' | 'expiresAt' | 'userAvatar' | 'userName'> & { linkUrl?: string } = {
-      content: content, // This is the description for links, or main content for others
+      content: content,
       type,
     };
 
@@ -50,14 +83,13 @@ export function CreatePostForm({ onPostCreate }: CreatePostFormProps) {
         return;
       }
       postData.linkUrl = linkUrl;
-      // The 'content' state (which is postData.content here) holds the optional description for the link.
     } else if ((type === 'image' || type === 'meme')) {
-      if (!content.trim() && !imageUrl.trim()) {
+      if (!content.trim() && !imageUrl.trim()) { // imageUrl now holds data URI
         setIsLoading(false);
-        alert("For Meme/Image posts, please provide either content (description) or an Image URL.");
+        alert("For Meme/Image posts, please provide either content (description) or an uploaded image.");
         return;
       }
-    } else { // For 'note', 'question'
+    } else {
        if (!content.trim()) {
         setIsLoading(false);
         alert("Content cannot be empty for this post type.");
@@ -66,21 +98,26 @@ export function CreatePostForm({ onPostCreate }: CreatePostFormProps) {
     }
 
     if ((type === 'image' || type === 'meme') && imageUrl.trim()) {
-      postData.imageUrl = imageUrl.trim();
+      postData.imageUrl = imageUrl; // Assign data URI
     }
     
     onPostCreate(postData as Omit<Post, 'id' | 'likes' | 'commentsCount' | 'createdAt' | 'expiresAt' | 'userAvatar' | 'userName'>);
     
     setContent('');
     setImageUrl('');
+    setImagePreview(null);
     setLinkUrl('');
-    // setType('note'); // Optionally reset type
+    const fileInput = document.getElementById('post-image-upload') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
     setIsLoading(false);
   };
 
   const isSubmitDisabled = () => {
     if (isLoading) return true;
     if (type === 'link') return !linkUrl.trim();
+    // For image/meme, ensure either content or an image (data URI in imageUrl) is present
     if (type === 'image' || type === 'meme') return !content.trim() && !imageUrl.trim();
     return !content.trim();
   };
@@ -110,7 +147,6 @@ export function CreatePostForm({ onPostCreate }: CreatePostFormProps) {
             </Select>
           </div>
           
-          {/* Content Textarea: Used for notes, questions, meme text, link descriptions */}
           <div>
             <Label htmlFor="post-content" className="text-sm font-medium">
               {type === 'link' ? 'Link Description (Optional)' : 
@@ -130,30 +166,45 @@ export function CreatePostForm({ onPostCreate }: CreatePostFormProps) {
                 "Share your thoughts or notes..."
               }
               rows={type === 'link' ? 2 : 4}
-              required={type !== 'link' && type !== 'image' && type !== 'meme'}
+              required={type !== 'link' && !( (type === 'image' || type === 'meme') && imageUrl) }
               className="focus:border-primary transition-colors"
             />
           </div>
 
-          {/* Image URL Input: For 'image' and 'meme' types */}
           {(type === 'image' || type === 'meme') && (
             <div>
-              <Label htmlFor="post-image-url" className="text-sm font-medium">Image URL {type === 'meme' && content.trim() ? '(Optional if text provided)' : type === 'image' && content.trim() ? '(Optional if caption provided)' : '(Required if no text/caption)'}</Label>
-              <div className="flex items-center gap-2">
-                 <ImagePlus className="h-5 w-5 text-muted-foreground" />
+              <Label htmlFor="post-image-upload" className="text-sm font-medium">
+                Upload Image {content.trim() ? '(Optional if text/caption provided)' : '(Required if no text/caption)'}
+              </Label>
+              <div className="flex items-center gap-2 mt-1">
+                <UploadCloud className="h-5 w-5 text-muted-foreground" />
                 <Input
-                  id="post-image-url"
-                  type="url"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="https://example.com/image.png"
-                  className="focus:border-primary transition-colors"
+                  id="post-image-upload"
+                  type="file"
+                  accept="image/png, image/jpeg, image/gif, image/webp"
+                  onChange={handleImageChange}
+                  className="focus:border-primary transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
                 />
               </div>
+              {imagePreview && (
+                <div className="mt-3 relative w-48 h-48 border rounded-md overflow-hidden shadow">
+                  <Image src={imagePreview} alt="Image preview" layout="fill" objectFit="cover" />
+                  <Button 
+                    variant="destructive" 
+                    size="icon" 
+                    className="absolute top-1 right-1 h-6 w-6"
+                    onClick={removeImage}
+                    type="button"
+                  >
+                    <X className="h-4 w-4" />
+                    <span className="sr-only">Remove image</span>
+                  </Button>
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Max file size: 5MB. Accepted: PNG, JPG, GIF, WEBP.</p>
             </div>
           )}
           
-          {/* Link URL Input: For 'link' type */}
           {type === 'link' && (
              <div>
               <Label htmlFor="post-link-url" className="text-sm font-medium">Link URL (Required)</Label>
