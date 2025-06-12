@@ -6,7 +6,7 @@ import { CreatePostForm } from './components/CreatePostForm';
 import { PostCard } from './components/PostCard';
 import type { Post } from '@/lib/types';
 import { Input } from '@/components/ui/input';
-import { SearchIcon, FilterIcon, MessagesSquare, Image as ImageIcon } from 'lucide-react'; // Added ImageIcon for Story
+import { SearchIcon, FilterIcon, MessagesSquare, Image as ImageIconLucide } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -16,31 +16,46 @@ import {
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'; // Added Card and CardContent
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { StoryBubble } from './components/StoryBubble';
 import { Separator } from '@/components/ui/separator';
+import { StoryViewer, type StoryItem } from './components/StoryViewer'; // Import StoryViewer and StoryItem
 
 // Mock data for stories
-interface MockStory {
-  id: string;
-  username: string;
-  avatarUrl: string;
+interface MockStory extends StoryItem {
   hasUnread: boolean;
 }
 
-const mockStories: MockStory[] = [
-  { id: "user1", username: "Alice", avatarUrl: "https://placehold.co/64x64.png?text=A", hasUnread: true },
-  { id: "user2", username: "BobCoder", avatarUrl: "https://placehold.co/64x64.png?text=BC", hasUnread: true },
-  { id: "user3", username: "TechGuru", avatarUrl: "https://placehold.co/64x64.png?text=TG", hasUnread: false },
-  { id: "user4", username: "DesignerDee", avatarUrl: "https://placehold.co/64x64.png?text=DD", hasUnread: true },
-  { id: "user5", username: "SamLearns", avatarUrl: "https://placehold.co/64x64.png?text=SL", hasUnread: false },
-  { id: "user6", username: "EvaReads", avatarUrl: "https://placehold.co/64x64.png?text=ER", hasUnread: true },
+const mockStoriesData: MockStory[] = [
+  { id: "user1", username: "Alice", avatarUrl: "https://placehold.co/64x64.png?text=A", storyImageUrl: "https://placehold.co/360x640.png?text=Alice's+Story+1", hasUnread: true },
+  { id: "user1-2", username: "Alice", avatarUrl: "https://placehold.co/64x64.png?text=A", storyImageUrl: "https://placehold.co/360x640.png?text=Alice's+Story+2", hasUnread: true },
+  { id: "user2", username: "BobCoder", avatarUrl: "https://placehold.co/64x64.png?text=BC", storyImageUrl: "https://placehold.co/360x640.png?text=Bob's+Story", hasUnread: true },
+  { id: "user3", username: "TechGuru", avatarUrl: "https://placehold.co/64x64.png?text=TG", storyImageUrl: "https://placehold.co/360x640.png?text=TechGuru's+Story", hasUnread: false },
+  { id: "user4", username: "DesignerDee", avatarUrl: "https://placehold.co/64x64.png?text=DD", storyImageUrl: "https://placehold.co/360x640.png?text=Dee's+Story", hasUnread: true },
+  { id: "user5", username: "SamLearns", avatarUrl: "https://placehold.co/64x64.png?text=SL", storyImageUrl: "https://placehold.co/360x640.png?text=Sam's+Story", hasUnread: false },
+  { id: "user6", username: "EvaReads", avatarUrl: "https://placehold.co/64x64.png?text=ER", storyImageUrl: "https://placehold.co/360x640.png?text=Eva's+Story+1", hasUnread: true },
+  { id: "user6-2", username: "EvaReads", avatarUrl: "https://placehold.co/64x64.png?text=ER", storyImageUrl: "https://placehold.co/360x640.png?text=Eva's+Story+2", hasUnread: true },
+  { id: "user6-3", username: "EvaReads", avatarUrl: "https://placehold.co/64x64.png?text=ER", storyImageUrl: "https://placehold.co/360x640.png?text=Eva's+Story+3", hasUnread: true },
 ];
+
+// Group stories by username for the bubble display
+const uniqueUserStories = mockStoriesData.reduce((acc, story) => {
+  if (!acc.find(s => s.username === story.username)) {
+    acc.push(story);
+  }
+  return acc;
+}, [] as MockStory[]);
 
 
 export default function FeedPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const { toast } = useToast();
+  
+  const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
+  const [storiesForViewer, setStoriesForViewer] = useState<StoryItem[]>([]);
+  const [storyViewerStartIndex, setStoryViewerStartIndex] = useState(0);
+  const [currentUserStoryGroupIndex, setCurrentUserStoryGroupIndex] = useState(-1);
+
 
   const handlePostCreate = (newPostData: Omit<Post, 'id' | 'likes' | 'commentsCount' | 'createdAt' | 'expiresAt' | 'userAvatar' | 'userName'>) => {
     const newPost: Post = {
@@ -61,11 +76,60 @@ export default function FeedPage() {
     });
   };
 
-  const handleStoryClick = (username?: string) => {
-    toast({
+  const handleAddStoryClick = () => {
+     toast({
       title: "Stories Feature",
-      description: `${username ? username + "'s story" : "Adding/Viewing stories"} coming soon!`,
+      description: "Adding your own story is coming soon!",
     });
+  }
+
+  const handleStoryBubbleClick = (username: string) => {
+    const userStoryItems = mockStoriesData.filter(s => s.username === username);
+    if (userStoryItems.length > 0) {
+      setStoriesForViewer(userStoryItems);
+      setStoryViewerStartIndex(0); // Start from the first story of that user
+      setIsStoryViewerOpen(true);
+      const groupIndex = uniqueUserStories.findIndex(s => s.username === username);
+      setCurrentUserStoryGroupIndex(groupIndex);
+    }
+  };
+
+  const handleStoryViewerClose = () => {
+    setIsStoryViewerOpen(false);
+    setStoriesForViewer([]);
+    setCurrentUserStoryGroupIndex(-1);
+  };
+  
+  const navigateStorySet = (direction: 'next' | 'prev') => {
+    let nextGroupIndex = currentUserStoryGroupIndex + (direction === 'next' ? 1 : -1);
+
+    // Cycle through unique users
+    if (nextGroupIndex >= uniqueUserStories.length) {
+      nextGroupIndex = 0; 
+    } else if (nextGroupIndex < 0) {
+      nextGroupIndex = uniqueUserStories.length - 1;
+    }
+    
+    if (nextGroupIndex === currentUserStoryGroupIndex && uniqueUserStories.length ===1) { // only one user, close
+         handleStoryViewerClose();
+         return;
+    }
+
+
+    if (uniqueUserStories[nextGroupIndex]) {
+      const nextUsername = uniqueUserStories[nextGroupIndex].username;
+      const nextUserStories = mockStoriesData.filter(s => s.username === nextUsername);
+      if (nextUserStories.length > 0) {
+        setStoriesForViewer(nextUserStories);
+        setStoryViewerStartIndex(0);
+        setCurrentUserStoryGroupIndex(nextGroupIndex);
+        // setIsStoryViewerOpen(true); // Viewer is already open
+      } else {
+        handleStoryViewerClose(); // No stories for next/prev user, close
+      }
+    } else {
+      handleStoryViewerClose(); // Should not happen if logic is correct
+    }
   };
 
 
@@ -79,11 +143,10 @@ export default function FeedPage() {
           </p>
         </header>
 
-        {/* Stories Bar */}
         <Card className="mb-8 shadow-sm">
           <CardHeader className="pb-3 pt-4">
             <CardTitle className="text-lg font-semibold flex items-center">
-                <ImageIcon className="h-5 w-5 mr-2 text-primary" /> Stories
+                <ImageIconLucide className="h-5 w-5 mr-2 text-primary" /> Stories
             </CardTitle>
           </CardHeader>
           <CardContent className="pb-4">
@@ -92,15 +155,15 @@ export default function FeedPage() {
                 username="CurrentUser" 
                 avatarUrl="https://placehold.co/64x64.png?text=Me" 
                 isAddStory 
-                onClick={() => handleStoryClick()}
+                onClick={handleAddStoryClick}
               />
-              {mockStories.map(story => (
+              {uniqueUserStories.map(story => (
                 <StoryBubble 
-                  key={story.id}
+                  key={story.id} // Use a unique ID from the first story of the user
                   username={story.username}
                   avatarUrl={story.avatarUrl}
                   hasUnread={story.hasUnread}
-                  onClick={() => handleStoryClick(story.username)}
+                  onClick={() => handleStoryBubbleClick(story.username)}
                 />
               ))}
             </div>
@@ -166,6 +229,17 @@ export default function FeedPage() {
           )}
         </div>
       </div>
+      
+      {isStoryViewerOpen && storiesForViewer.length > 0 && (
+        <StoryViewer
+          isOpen={isStoryViewerOpen}
+          onClose={handleStoryViewerClose}
+          stories={storiesForViewer}
+          startIndex={storyViewerStartIndex}
+          onNextStorySet={() => navigateStorySet('next')}
+          onPrevStorySet={() => navigateStorySet('prev')}
+        />
+      )}
     </TooltipProvider>
   );
 }
