@@ -1,7 +1,7 @@
 
 import { StudyRoomClient } from './components/StudyRoomClient';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Lightbulb, Brain, AlertCircle, Clock } from 'lucide-react';
+import { Users, Lightbulb, Brain, Clock, Archive } from 'lucide-react';
 import Image from 'next/image';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -47,14 +47,15 @@ export default function StudyRoomPage() {
 
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle className="font-headline text-xl flex items-center"><Lightbulb className="mr-2 h-6 w-6 text-accent" /> Gemini Tutor</CardTitle>
+              <CardTitle className="font-headline text-xl flex items-center"><Lightbulb className="mr-2 h-6 w-6 text-accent" /> Gemini Tutor Capabilities</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-foreground/80">Your AI tutor can:</p>
               <ul className="list-disc list-inside space-y-1 text-sm text-foreground/70">
-                <li>Answer your doubts</li>
+                <li>Answer your specific doubts</li>
                 <li>Convert notes to flashcards (if helpful)</li>
-                <li>Provide reasoning for flashcard generation</li>
+                <li>Generate practice questions from notes</li>
+                <li>Provide reasoning for its actions</li>
               </ul>
                <Image 
                 src="https://placehold.co/400x250.png" 
@@ -69,9 +70,10 @@ export default function StudyRoomPage() {
           
           <Alert variant="default" className="bg-blue-50 border-blue-300 dark:bg-blue-900/30 dark:border-blue-700">
             <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-            <AlertTitle className="font-semibold text-blue-700 dark:text-blue-300">Session Information</AlertTitle>
-            <AlertDescription className="text-blue-700/90 dark:text-blue-300/90 mt-1">
-              Study sessions are ephemeral and auto-delete after 2 hours. Use a "Time Capsule" to save important content (3 per month free - feature coming soon).
+            <AlertTitle className="font-semibold text-blue-700 dark:text-blue-300">Session & Content Information</AlertTitle>
+            <AlertDescription className="text-blue-700/90 dark:text-blue-300/90 mt-1 space-y-1">
+                <p>Study sessions are ephemeral and auto-delete after 2 hours of inactivity.</p>
+                <p className="flex items-center"><Archive className="h-4 w-4 mr-1.5 text-blue-500 dark:text-blue-300" /> Use a "Time Capsule" to save important AI generations (3 per month free - feature coming soon).</p>
             </AlertDescription>
           </Alert>
         </aside>

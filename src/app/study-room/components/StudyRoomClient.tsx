@@ -172,7 +172,7 @@ export function StudyRoomClient() {
           <CardContent className="space-y-6">
             <div>
               <h3 className="font-semibold text-xl text-foreground mb-2">Answer to Your Doubt:</h3>
-              <div className="prose prose-sm sm:prose lg:prose-lg dark:prose-invert max-w-none p-4 bg-foreground/5 rounded-md">
+              <div className="prose prose-sm sm:prose lg:prose-lg dark:prose-invert max-w-none p-4 bg-foreground/5 rounded-md shadow">
                 <p className="text-foreground/90 whitespace-pre-wrap">{studyData.answer}</p>
               </div>
             </div>
@@ -207,6 +207,7 @@ export function StudyRoomClient() {
             )}
             {studyData.flashcards && parsedFlashcards.length === 0 && (
                  <div>
+                    <h3 className="font-semibold text-xl text-foreground mb-3">Generated Flashcards (Raw Data):</h3>
                     <Alert variant="default" className="bg-amber-50 border-amber-300 dark:bg-amber-900/30 dark:border-amber-700">
                         <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                         <AlertTitle className="font-semibold text-amber-700 dark:text-amber-300">Flashcard Parsing Issue</AlertTitle>
@@ -215,7 +216,7 @@ export function StudyRoomClient() {
                             You can see the raw data below to copy or format it manually.
                         </AlertDescription>
                     </Alert>
-                    <Textarea value={studyData.flashcards} readOnly rows={6} className="bg-muted/50 text-sm mt-3"/>
+                    <Textarea value={studyData.flashcards} readOnly rows={8} className="bg-muted/50 text-sm mt-3 focus-visible:ring-0 focus-visible:ring-offset-0" />
                  </div>
             )}
              {studyData.practiceQuestions && studyData.practiceQuestions.length > 0 && (
