@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { FormEvent } from 'react';
@@ -13,6 +14,35 @@ interface QuizSetupProps {
   isLoading: boolean;
   error?: string | null;
 }
+
+const suggestedTopics = [
+  "General Knowledge",
+  "Science",
+  "Mathematics",
+  "History",
+  "Geography",
+  "Literature",
+  "Art",
+  "Music",
+  "Movies",
+  "Sports",
+  "Technology",
+  "Physics",
+  "Chemistry",
+  "Biology",
+  "Computer Science",
+  "Indian History",
+  "World History",
+  "Current Events",
+  "Politics",
+  "Economics",
+  "Mythology",
+  "Space Exploration",
+  "Nature & Environment",
+  "World Capitals",
+  "Inventions & Discoveries",
+  "Famous Personalities"
+];
 
 export function QuizSetup({ onQuizSetup, isLoading, error }: QuizSetupProps) {
   
@@ -32,7 +62,18 @@ export function QuizSetup({ onQuizSetup, isLoading, error }: QuizSetupProps) {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="topic" className="text-foreground/90">Topic</Label>
-            <Input id="topic" name="topic" placeholder="e.g., Indian History, Physics" required />
+            <Input 
+              id="topic" 
+              name="topic" 
+              placeholder="e.g., Indian History, Physics" 
+              required 
+              list="topic-suggestions"
+            />
+            <datalist id="topic-suggestions">
+              {suggestedTopics.map(topic => (
+                <option key={topic} value={topic} />
+              ))}
+            </datalist>
           </div>
           
           <div className="space-y-2">
