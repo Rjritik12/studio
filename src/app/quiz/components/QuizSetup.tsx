@@ -16,32 +16,22 @@ interface QuizSetupProps {
 }
 
 const suggestedTopics = [
-  "General Knowledge",
-  "Science",
-  "Mathematics",
-  "History",
-  "Geography",
-  "Literature",
-  "Art",
-  "Music",
-  "Movies",
-  "Sports",
-  "Technology",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "Computer Science",
-  "Indian History",
-  "World History",
-  "Current Events",
-  "Politics",
-  "Economics",
-  "Mythology",
-  "Space Exploration",
-  "Nature & Environment",
-  "World Capitals",
-  "Inventions & Discoveries",
-  "Famous Personalities"
+  "General Knowledge", "Current Events", "World History", "Indian History", "Geography", "World Capitals",
+  "Science", "Physics", "Chemistry", "Biology", "Human Body", "Space Exploration", "Technology", "Computer Science", "Artificial Intelligence",
+  "Mathematics", "Algebra", "Geometry",
+  "Literature", "Famous Books", "Authors", "Poetry",
+  "Art", "Famous Paintings", "Artists", "Sculpture",
+  "Music", "Classical Music", "Pop Music", "Musicians", "Instruments",
+  "Movies", "Hollywood", "Bollywood", "Famous Actors", "Film Directors",
+  "Sports", "Cricket", "Football (Soccer)", "Basketball", "Tennis", "Olympics",
+  "Politics", "World Leaders", "Indian Politics", "International Relations",
+  "Economics", "Global Economy", "Stock Market",
+  "Mythology", "Greek Mythology", "Norse Mythology", "Indian Mythology",
+  "Nature & Environment", "Animals", "Plants", "Climate Change", "National Parks",
+  "Inventions & Discoveries", "Inventors", "Scientific Discoveries",
+  "Famous Personalities", "Entrepreneurs", "Scientists", "Nobel Prize Winners",
+  "Food & Drink", "World Cuisine", "Cooking Techniques",
+  "Programming Languages", "Web Development", "Data Structures", "Algorithms"
 ];
 
 export function QuizSetup({ onQuizSetup, isLoading, error }: QuizSetupProps) {

@@ -33,10 +33,10 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
   const { toast } = useToast();
   
   const initialLifelines = {
-    "50-50": { used: false, available: true, isLoading: false },
-    "Flip": { used: false, available: true, isLoading: false },
-    "AI_Hint": { used: false, available: true, isLoading: false },
-    "Audience_Poll": { used: false, available: true, isLoading: false },
+    "50-50": { used: false, isLoading: false },
+    "Flip": { used: false, isLoading: false },
+    "AI_Hint": { used: false, isLoading: false },
+    "Audience_Poll": { used: false, isLoading: false },
   };
   const [lifelines, setLifelines] = useState(initialLifelines);
   const [displayedOptions, setDisplayedOptions] = useState<string[]>([]);
@@ -62,59 +62,54 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
     setTimeLeft(TIME_PER_QUESTION);
     setHintText(null);
     setAudiencePollResults(null);
-    const nextQuestionIndex = currentQuestionIndex + 1; // Recalculate based on potentially changed currentQuestionIndex
+    // Ensure displayedOptions are reset for the next question, if it exists
+    const nextQuestionIndex = currentQuestionIndex + 1;
     if (questions[nextQuestionIndex]) {
        setDisplayedOptions(questions[nextQuestionIndex].options);
     }
-  }, [currentQuestionIndex, questions]); // Ensure `questions` is a dependency
+  }, [currentQuestionIndex, questions]);
 
   // Effect to handle game end transition
   useEffect(() => {
     if (gameOver) {
       const timerId = setTimeout(() => {
-        onGameEnd(score); // Pass the final score
-      }, 2000); // Delay to allow user to see feedback on the last question
+        onGameEnd(score); 
+      }, 2000); 
       return () => clearTimeout(timerId);
     }
   }, [gameOver, score, onGameEnd]);
 
 
   const handleAnswer = useCallback((answer: string | null) => {
-    if (selectedAnswer || gameOver) return; // Prevent re-entry
+    if (selectedAnswer || gameOver) return; 
 
-    setSelectedAnswer(answer || "Time's up"); // Mark "Time's up" if null answer
+    setSelectedAnswer(answer || "Time's up"); 
     const isCorrect = answer === currentQuestion.correctAnswer;
 
     if (isCorrect) {
       setScore((prevScore) => prevScore + 1);
       setAnswerStatus('correct');
-
-      // Check if it's the last question
       if (currentQuestionIndex >= questions.length - 1) {
-        setTimeout(() => setGameOver(true), 0); // Game ends after this correct answer (timeout 0 to ensure state updates batch)
+        setTimeout(() => setGameOver(true), 0); 
       } else {
-        // Not the last question, prepare for next after a delay
         setTimeout(() => {
           setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
           resetForNextQuestion();
         }, 2000);
       }
     } else {
-      // Incorrect answer
       setAnswerStatus('incorrect');
-      setTimeout(() => setGameOver(true), 0); // Game ends on incorrect answer
+      setTimeout(() => setGameOver(true), 0); 
     }
   }, [selectedAnswer, gameOver, currentQuestion, currentQuestionIndex, questions.length, resetForNextQuestion]);
 
   // Timer effect
   useEffect(() => {
-    if (gameOver || selectedAnswer) return; // Stop timer if game over or answer selected
+    if (gameOver || selectedAnswer) return; 
 
     if (timeLeft === 0) {
-      setSelectedAnswer("Time's up"); // Visually indicate time's up
-      setAnswerStatus('incorrect'); // Treat as incorrect
-      setGameOver(true); // Trigger game over
-      return; // Stop further timer processing for this cycle
+      handleAnswer(null); // Pass null to indicate time's up
+      return; 
     }
 
     const timer = setInterval(() => {
@@ -122,7 +117,7 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft, gameOver, selectedAnswer]);
+  }, [timeLeft, gameOver, selectedAnswer, handleAnswer]);
 
 
   const handleLifeline = async (type: Lifeline) => {
@@ -136,12 +131,16 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
           {
             const correctAnswer = currentQuestion.correctAnswer;
             let wrongOptions = currentQuestion.options.filter(opt => opt !== correctAnswer);
-            wrongOptions.sort(() => Math.random() - 0.5);
-            const optionToKeep = wrongOptions.length > 0 ? wrongOptions[0] : undefined;
+            wrongOptions.sort(() => Math.random() - 0.5); // Shuffle wrong options
+            const optionToKeep = wrongOptions.length > 0 ? wrongOptions[0] : undefined; // Pick one random wrong option
+            
             const newDisplayedOptions = [correctAnswer];
-            if (optionToKeep) newDisplayedOptions.push(optionToKeep);
-            setDisplayedOptions([...new Set(newDisplayedOptions)].sort(() => Math.random() - 0.5));
-            setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
+            if (optionToKeep) {
+                newDisplayedOptions.push(optionToKeep);
+            }
+            // Shuffle the final two options
+            setDisplayedOptions(newDisplayedOptions.sort(() => Math.random() - 0.5));
+            setLifelines(prev => ({ ...prev, [type]: { used: true, isLoading: false }}));
             break;
           }
         case 'AI_Hint':
@@ -149,13 +148,12 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
             const hintInput: HintInput = { question: currentQuestion.question, options: currentQuestion.options, correctAnswer: currentQuestion.correctAnswer };
             const hintResult = await handleGetQuizHint(hintInput);
             if ('error' in hintResult) {
-              toast({ title: "Error", description: hintResult.error, variant: "destructive" });
-              setLifelines(prev => ({ ...prev, [type]: { ...prev[type], isLoading: false }}));
+              toast({ title: "Error Getting Hint", description: hintResult.error, variant: "destructive" });
             } else {
               setHintText(hintResult.hint);
               setShowHintDialog(true);
-              setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
             }
+            setLifelines(prev => ({ ...prev, [type]: { used: true, isLoading: false }}));
             break;
           }
         case 'Flip':
@@ -167,24 +165,24 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
             };
             const flipResult = await handleFlipQuestion(flipInput);
             if ('error' in flipResult || !flipResult.question) {
-              toast({ title: "Error", description: flipResult.error || "Failed to flip question", variant: "destructive" });
+              toast({ title: "Error Flipping Question", description: flipResult.error || "Failed to flip question.", variant: "destructive" });
               setLifelines(prev => ({ ...prev, [type]: { ...prev[type], isLoading: false }})); 
             } else {
               const newQuestionData = { ...flipResult.question, topic: flipInput.topic, difficulty: flipInput.difficulty };
               const updatedQuestions = [...questions];
               updatedQuestions[currentQuestionIndex] = newQuestionData;
-              setQuestions(updatedQuestions);
+              setQuestions(updatedQuestions); // This will trigger useEffect for currentQuestion
               
-              // Reset states for the new question at the current index
+              // Reset states for the new question
               setSelectedAnswer(null);
               setAnswerStatus(null);
               setTimeLeft(TIME_PER_QUESTION);
               setHintText(null);
               setAudiencePollResults(null);
-              setDisplayedOptions(newQuestionData.options); 
+              // setDisplayedOptions will be updated by the useEffect watching currentQuestion
               
               toast({ title: "Question Flipped!", description: "A new question has been loaded." });
-              setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
+              setLifelines(prev => ({ ...prev, [type]: { used: true, isLoading: false }}));
             }
             break;
           }
@@ -195,62 +193,77 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
             const numOptions = optionsToPoll.length;
 
             if (numOptions === 0) {
-                setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
+                setLifelines(prev => ({ ...prev, [type]: { used: true, isLoading: false }}));
                 break;
             }
             
             let percentages = new Array(numOptions).fill(0);
             let totalPercentage = 100;
             
+            // Give correct answer a higher base
             const correctAnswerIndex = optionsToPoll.indexOf(currentQuestion.correctAnswer);
             if (correctAnswerIndex !== -1) {
-                percentages[correctAnswerIndex] = Math.floor(Math.random() * 21) + 30; // 30 to 50
+                percentages[correctAnswerIndex] = Math.floor(Math.random() * 31) + 40; // 40% to 70% for correct answer
             } else {
+                // If correct answer not in options (e.g. after 50-50, though poll should ideally be before)
+                // distribute somewhat evenly or pick a random high one
                 const randomIndex = Math.floor(Math.random() * numOptions);
-                percentages[randomIndex] = Math.floor(Math.random() * 21) + 30;
+                percentages[randomIndex] = Math.floor(Math.random() * 21) + 30; // 30 to 50
             }
 
             let remainingPercentage = totalPercentage - percentages.reduce((a, b) => a + b, 0);
             
             const otherIndices = optionsToPoll.map((_,i) => i).filter(i => percentages[i] === 0);
             otherIndices.forEach((idx, arrIdx) => {
-                if (arrIdx === otherIndices.length - 1) {
-                    percentages[idx] = remainingPercentage;
+                if (arrIdx === otherIndices.length - 1) { // Last one gets the remainder
+                    percentages[idx] = Math.max(0, remainingPercentage); // Ensure not negative
                 } else {
-                    const randomShare = Math.floor(Math.random() * (remainingPercentage / (otherIndices.length - arrIdx)));
+                    // Distribute remaining percentage among other options
+                    const randomShare = Math.max(0, Math.floor(Math.random() * (remainingPercentage / (otherIndices.length - arrIdx) + 1)));
                     percentages[idx] = randomShare;
                     remainingPercentage -= randomShare;
                 }
             });
-            
-            let currentSum = percentages.reduce((a, b) => a + b, 0);
+             // Normalize if sum is not 100
+            let currentSum = percentages.reduce((a,b) => a+b,0);
             if (currentSum !== totalPercentage && numOptions > 0) {
                 const diff = totalPercentage - currentSum;
+                // Add/remove difference to/from the correct answer or highest polled option
                 const adjustIdx = correctAnswerIndex !== -1 ? correctAnswerIndex : percentages.indexOf(Math.max(...percentages));
-                 if (adjustIdx >= 0 && adjustIdx < percentages.length) { percentages[adjustIdx] += diff; }
+                if(adjustIdx >= 0 && adjustIdx < percentages.length) {
+                  percentages[adjustIdx] += diff;
+                  percentages[adjustIdx] = Math.max(0, percentages[adjustIdx]); // ensure not negative
+                }
             }
-            
-            percentages = percentages.map(p => Math.max(0, p)); 
-            currentSum = percentages.reduce((a,b) => a+b, 0);
-            if (currentSum !== totalPercentage && numOptions > 0) { 
+            // Final check to ensure sum is 100 and no negative values
+             percentages = percentages.map(p => Math.max(0, Math.round(p)));
+             currentSum = percentages.reduce((a,b) => a+b,0);
+             if (currentSum !== totalPercentage && numOptions > 0) {
                  const primaryIdx = correctAnswerIndex !== -1 ? correctAnswerIndex : 0;
-                 if (primaryIdx >= 0 && primaryIdx < percentages.length) { percentages[primaryIdx] += (totalPercentage - currentSum); }
-            }
+                 if (primaryIdx >= 0 && primaryIdx < percentages.length) {
+                     percentages[primaryIdx] += (totalPercentage - currentSum);
+                     percentages[primaryIdx] = Math.max(0, percentages[primaryIdx]);
+                 }
+             }
 
 
             optionsToPoll.forEach((opt, idx) => {
-                poll[opt] = percentages[idx] || 0; // Ensure poll[opt] is a number
+                poll[opt] = percentages[idx] || 0; 
             });
 
             setAudiencePollResults(poll);
-            setLifelines(prev => ({ ...prev, [type]: { ...prev[type], used: true, isLoading: false }}));
+            setLifelines(prev => ({ ...prev, [type]: { used: true, isLoading: false }}));
             break;
           }
       }
     } catch (error) {
         console.error("Lifeline error:", error);
         toast({ title: "Error", description: `Could not use ${type} lifeline.`, variant: "destructive" });
-        setLifelines(prev => ({ ...prev, [type]: { ...prev[type], isLoading: false }})); 
+    } finally {
+        // Ensure isLoading is set to false even if not explicitly set in every case
+        if (lifelines[type]?.isLoading) {
+             setLifelines(prev => ({ ...prev, [type]: { ...prev[type], isLoading: false }}));
+        }
     }
   };
 
@@ -322,10 +335,10 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
                   selectedAnswer === option && answerStatus === 'incorrect' && 'bg-red-500 border-red-700 text-white hover:bg-red-600',
                   selectedAnswer && selectedAnswer !== option && option === currentQuestion.correctAnswer && 'bg-green-200 border-green-400 text-green-800 dark:bg-green-700 dark:text-green-100 dark:border-green-600', 
                   !selectedAnswer && 'hover:bg-primary/10 hover:border-primary',
-                  (selectedAnswer || gameOver) && 'cursor-not-allowed' // Disable if answer selected or game over
+                  (selectedAnswer || gameOver) && 'cursor-not-allowed' 
                 )}
                 onClick={() => handleAnswer(option)}
-                disabled={!!selectedAnswer || gameOver}
+                disabled={!!selectedAnswer || gameOver || lifelines['50-50'].isLoading || lifelines['Flip'].isLoading || lifelines['AI_Hint'].isLoading || lifelines['Audience_Poll'].isLoading}
               >
                 <div className="w-full flex items-center justify-between"> 
                   <span>{option}</span> 
@@ -352,7 +365,7 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
             ))}
           </div>
         </CardContent>
-        {answerStatus && ( // Show feedback only if an answer has been processed
+        {answerStatus && ( 
           <CardFooter className="mt-4 border-t pt-4">
             {answerStatus === 'correct' && <p className="text-green-600 font-semibold flex items-center"><CheckCircle className="mr-2"/>Correct! {currentQuestionIndex < questions.length - 1 ? 'Moving to next question...' : 'Quiz completed!'}</p>}
             {answerStatus === 'incorrect' && <p className="text-red-600 font-semibold flex items-center"><XCircle className="mr-2"/>Incorrect! Correct answer was: {currentQuestion.correctAnswer}</p>}
@@ -389,13 +402,12 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
         <p className="text-xs text-right text-muted-foreground mt-1">Question {currentQuestionIndex + 1} of {questions.length}</p>
       </div>
 
-      {gameOver && answerStatus === 'incorrect' && ( // Only show this specific "Game Over" card on incorrect answer
+      {gameOver && answerStatus === 'incorrect' && ( 
         <Card className="text-center p-6 mt-6 bg-destructive/10 border-destructive dark:bg-destructive/20 dark:border-destructive/50 shadow-xl">
           <CardTitle className="font-headline text-2xl mb-3 text-destructive flex items-center justify-center"><AlertCircle className="mr-2" />Game Over!</CardTitle>
           <CardDescription className="text-lg mb-4 text-destructive/80 dark:text-destructive/70">
             You answered incorrectly. Your final score is {score} / {questions.length}.
           </CardDescription>
-          {/* Button removed as transition is automatic */}
         </Card>
       )}
 
@@ -415,4 +427,3 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
     </div>
   );
 }
-
