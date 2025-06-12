@@ -5,14 +5,13 @@ import type { Post } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageCircle, Heart, Share2, LinkIcon as LinkIconLucide, Image as ImageIconLucide, StickyNote, HelpCircle, Smile } from 'lucide-react';
+import { MessageCircle, Heart, Share2, LinkIcon as LinkIconLucide, Image as ImageIconLucide, StickyNote, HelpCircle, Smile, Send } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 
@@ -60,17 +59,18 @@ export function PostCard({ post }: PostCardProps) {
 
   const [isLiked, setIsLiked] = useState(false);
   const [localLikes, setLocalLikes] = useState(post.likes);
-  const [localCommentsCount, setLocalCommentsCount] = useState(post.commentsCount);
-
-  const [isCommentDialogOpen, setIsCommentDialogOpen] = useState(false);
+  
   const [commentText, setCommentText] = useState('');
-  const [newComments, setNewComments] = useState<string[]>([]); // Store new comments for this post card
+  const [newComments, setNewComments] = useState<string[]>([]); 
+  // localCommentsCount will now be derived from post.commentsCount + newComments.length
+  const localCommentsCount = post.commentsCount + newComments.length;
+
 
   useEffect(() => {
     const interval = setInterval(() => {
       setTimeAgo(formatTimeAgo(post.createdAt));
       setTimeLeft(formatTimeLeft(post.expiresAt));
-    }, 60000); // Update every minute
+    }, 60000); 
     return () => clearInterval(interval);
   }, [post.createdAt, post.expiresAt]);
   
@@ -84,10 +84,6 @@ export function PostCard({ post }: PostCardProps) {
     setLocalLikes(prevLikes => isLiked ? prevLikes - 1 : prevLikes + 1);
   };
 
-  const openCommentDialog = () => {
-    setIsCommentDialogOpen(true);
-  };
-
   const handlePostComment = () => {
     if (commentText.trim() === '') {
       toast({
@@ -97,14 +93,13 @@ export function PostCard({ post }: PostCardProps) {
       return;
     }
     setNewComments(prev => [...prev, commentText]);
-    setLocalCommentsCount(prevCount => prevCount + 1);
+    // localCommentsCount is now derived, so no need to set it directly
     toast({
       title: "Comment posted! (prototype)",
-      description: "You can see your new comment in the dialog for this session.",
+      description: "Your new comment is visible below for this session.",
       variant: "default",
     });
     setCommentText('');
-    // setIsCommentDialogOpen(false); // Keep dialog open to see the new comment
   };
 
   return (
@@ -185,8 +180,8 @@ export function PostCard({ post }: PostCardProps) {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="flex items-center gap-1.5 hover:text-primary" 
-              onClick={openCommentDialog}
+              className="flex items-center gap-1.5 hover:text-primary"
+              // onClick could focus the input field or scroll to comments
             >
               <MessageCircle className="h-4 w-4" />
               <span className="text-xs">{localCommentsCount}</span>
@@ -202,71 +197,63 @@ export function PostCard({ post }: PostCardProps) {
             <TooltipContent><p>Sharing coming soon!</p></TooltipContent>
           </Tooltip>
         </CardFooter>
-      </Card>
 
-      <Dialog open={isCommentDialogOpen} onOpenChange={setIsCommentDialogOpen}>
-        <DialogContent className="sm:max-w-[480px] bg-card">
-          <DialogHeader>
-            <DialogTitle className="font-headline text-lg text-primary">
+        {/* Inline Comment Section */}
+        <div className="px-6 pt-4 pb-4 border-t bg-muted/20">
+          {(newComments.length > 0 || post.commentsCount > 0) && (
+            <h4 className="text-xs font-medium mb-3 text-muted-foreground uppercase tracking-wider">
               Comments ({localCommentsCount})
-            </DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            {/* Section to display comments */}
-            <div className="space-y-3 pr-2 max-h-[200px] overflow-y-auto border rounded-md p-3 bg-muted/30 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
-              {post.commentsCount > 0 && newComments.length === 0 && (
-                <div className="text-xs text-muted-foreground pb-2 mb-2 border-b border-border text-center">
-                  {post.commentsCount} existing comment(s) not shown. Add a new one to see it here!
-                </div>
-              )}
-               {post.commentsCount > 0 && newComments.length > 0 && (
-                <div className="text-xs text-muted-foreground pb-2 mb-2 border-b border-border">
-                  Displaying new comments. ({post.commentsCount - newComments.length > 0 ? post.commentsCount - newComments.length : 0} older comment(s) not shown in this prototype).
-                </div>
-              )}
-              {newComments.length > 0 ? (
-                newComments.map((comment, index) => (
-                  <div key={index} className="flex items-start gap-2 text-sm">
-                    <Avatar className="h-8 w-8 border text-xs">
-                      <AvatarImage src="https://placehold.co/40x40.png?text=U" alt="User" data-ai-hint="user avatar generic"/>
-                      <AvatarFallback>U</AvatarFallback>
-                    </Avatar>
-                    <div className="p-2.5 rounded-md bg-background shadow-sm flex-1">
-                      <span className="font-semibold text-card-foreground text-xs">You</span>
-                      <p className="whitespace-pre-wrap break-words text-sm text-card-foreground/90 mt-0.5">{comment}</p>
-                    </div>
+            </h4>
+          )}
+          
+          <div className="max-h-48 overflow-y-auto space-y-3.5 pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent mb-3">
+            {post.commentsCount > 0 && (
+              <div className="text-xs text-muted-foreground pb-2 mb-2 border-b border-border/50 text-center">
+                {post.commentsCount} older comment(s) not shown in this prototype.
+              </div>
+            )}
+            {newComments.length > 0 ? (
+              newComments.map((comment, index) => (
+                <div key={index} className="flex items-start gap-2.5 text-sm">
+                  <Avatar className="h-8 w-8 border text-xs shrink-0">
+                    <AvatarImage src="https://placehold.co/40x40.png?text=U" alt="User" data-ai-hint="user avatar generic"/>
+                    <AvatarFallback>U</AvatarFallback>
+                  </Avatar>
+                  <div className="p-2.5 rounded-md bg-background shadow-sm flex-1">
+                    <span className="font-semibold text-card-foreground text-xs">You</span>
+                    <p className="whitespace-pre-wrap break-words text-sm text-card-foreground/90 mt-0.5">{comment}</p>
                   </div>
-                ))
-              ) : (
-                post.commentsCount === 0 && <p className="text-xs text-muted-foreground text-center py-3">No comments yet. Be the first to comment!</p>
-              )}
-            </div>
-
-            {/* Section to add a new comment */}
-            <div className="space-y-2 pt-2 border-t mt-2">
-              <Label htmlFor="comment-text" className="text-sm font-medium text-card-foreground">
-                Add your comment
-              </Label>
-              <Textarea
-                id="comment-text"
-                placeholder="Write your comment here..."
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                rows={3}
-                className="focus:border-primary transition-colors bg-background"
-              />
-            </div>
+                </div>
+              ))
+            ) : (
+              post.commentsCount === 0 && <p className="text-xs text-muted-foreground text-center py-3">No comments yet. Be the first to comment!</p>
+            )}
           </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setIsCommentDialogOpen(false)}>
-              Cancel
+
+          <div className="flex items-start gap-2 pt-3 border-t border-border/50">
+            <Avatar className="h-8 w-8 border shrink-0 mt-0.5">
+              <AvatarImage src="https://placehold.co/40x40.png?text=Me" alt="Current User" data-ai-hint="user avatar current"/>
+              <AvatarFallback>Me</AvatarFallback>
+            </Avatar>
+            <Textarea
+              placeholder="Add a comment..."
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              rows={1}
+              className="flex-1 resize-none bg-background focus:border-primary transition-colors text-sm min-h-[40px] h-10 leading-tight"
+            />
+            <Button 
+              onClick={handlePostComment} 
+              disabled={!commentText.trim()} 
+              size="sm" 
+              className="self-start bg-primary hover:bg-primary/90 text-primary-foreground"
+              aria-label="Post comment"
+            >
+              <Send className="h-4 w-4" />
             </Button>
-            <Button type="button" onClick={handlePostComment} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              Post Comment
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+        </div>
+      </Card>
     </TooltipProvider>
   );
 }
