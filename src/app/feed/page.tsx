@@ -1,12 +1,12 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CreatePostForm } from './components/CreatePostForm';
 import { PostCard } from './components/PostCard';
 import type { Post } from '@/lib/types';
 import { Input } from '@/components/ui/input';
-import { SearchIcon, FilterIcon, MessagesSquare, Image as ImageIconLucide } from 'lucide-react';
+import { SearchIcon, FilterIcon, MessagesSquare, Image as ImageIconLucide, User } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -19,50 +19,63 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { StoryBubble } from './components/StoryBubble';
 import { Separator } from '@/components/ui/separator';
-import { StoryViewer, type StoryItem } from './components/StoryViewer'; // Import StoryViewer and StoryItem
+import { StoryViewer, type StoryItem } from './components/StoryViewer';
+import { CreateStoryDialog } from './components/CreateStoryDialog'; // Import CreateStoryDialog
+import { useAuth } from '@/context/AuthContext'; // Import useAuth
 
-// Mock data for stories
 interface MockStory extends StoryItem {
   hasUnread: boolean;
 }
 
-const mockStoriesData: MockStory[] = [
-  { id: "user1", username: "Alice", avatarUrl: "https://placehold.co/64x64.png?text=A", storyImageUrl: "https://placehold.co/360x640.png?text=Alice's+Story+1", hasUnread: true },
-  { id: "user1-2", username: "Alice", avatarUrl: "https://placehold.co/64x64.png?text=A", storyImageUrl: "https://placehold.co/360x640.png?text=Alice's+Story+2", hasUnread: true },
-  { id: "user2", username: "BobCoder", avatarUrl: "https://placehold.co/64x64.png?text=BC", storyImageUrl: "https://placehold.co/360x640.png?text=Bob's+Story", hasUnread: true },
-  { id: "user3", username: "TechGuru", avatarUrl: "https://placehold.co/64x64.png?text=TG", storyImageUrl: "https://placehold.co/360x640.png?text=TechGuru's+Story", hasUnread: false },
-  { id: "user4", username: "DesignerDee", avatarUrl: "https://placehold.co/64x64.png?text=DD", storyImageUrl: "https://placehold.co/360x640.png?text=Dee's+Story", hasUnread: true },
-  { id: "user5", username: "SamLearns", avatarUrl: "https://placehold.co/64x64.png?text=SL", storyImageUrl: "https://placehold.co/360x640.png?text=Sam's+Story", hasUnread: false },
-  { id: "user6", username: "EvaReads", avatarUrl: "https://placehold.co/64x64.png?text=ER", storyImageUrl: "https://placehold.co/360x640.png?text=Eva's+Story+1", hasUnread: true },
-  { id: "user6-2", username: "EvaReads", avatarUrl: "https://placehold.co/64x64.png?text=ER", storyImageUrl: "https://placehold.co/360x640.png?text=Eva's+Story+2", hasUnread: true },
-  { id: "user6-3", username: "EvaReads", avatarUrl: "https://placehold.co/64x64.png?text=ER", storyImageUrl: "https://placehold.co/360x640.png?text=Eva's+Story+3", hasUnread: true },
+const initialMockStoriesData: MockStory[] = [
+  { id: "user1_story1", username: "Alice", avatarUrl: "https://placehold.co/64x64.png?text=A", storyImageUrl: "https://placehold.co/360x640.png?text=Alice's+Story+1", hasUnread: true, duration: 7000 },
+  { id: "user1_story2", username: "Alice", avatarUrl: "https://placehold.co/64x64.png?text=A", storyImageUrl: "https://placehold.co/360x640.png?text=Alice's+Story+2", hasUnread: true },
+  { id: "user2_story1", username: "BobCoder", avatarUrl: "https://placehold.co/64x64.png?text=BC", storyImageUrl: "https://placehold.co/360x640.png?text=Bob's+Story", hasUnread: true },
+  { id: "user3_story1", username: "TechGuru", avatarUrl: "https://placehold.co/64x64.png?text=TG", storyImageUrl: "https://placehold.co/360x640.png?text=TechGuru's+Story", hasUnread: false },
+  { id: "user4_story1", username: "DesignerDee", avatarUrl: "https://placehold.co/64x64.png?text=DD", storyImageUrl: "https://placehold.co/360x640.png?text=Dee's+Story", hasUnread: true },
+  { id: "user5_story1", username: "SamLearns", avatarUrl: "https://placehold.co/64x64.png?text=SL", storyImageUrl: "https://placehold.co/360x640.png?text=Sam's+Story", hasUnread: false },
+  { id: "user6_story1", username: "EvaReads", avatarUrl: "https://placehold.co/64x64.png?text=ER", storyImageUrl: "https://placehold.co/360x640.png?text=Eva's+Story+1", hasUnread: true },
+  { id: "user6_story2", username: "EvaReads", avatarUrl: "https://placehold.co/64x64.png?text=ER", storyImageUrl: "https://placehold.co/360x640.png?text=Eva's+Story+2", hasUnread: true },
+  { id: "user6_story3", username: "EvaReads", avatarUrl: "https://placehold.co/64x64.png?text=ER", storyImageUrl: "https://placehold.co/360x640.png?text=Eva's+Story+3", hasUnread: true },
 ];
-
-// Group stories by username for the bubble display
-const uniqueUserStories = mockStoriesData.reduce((acc, story) => {
-  if (!acc.find(s => s.username === story.username)) {
-    acc.push(story);
-  }
-  return acc;
-}, [] as MockStory[]);
-
 
 export default function FeedPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const { toast } = useToast();
+  const { user: authUser, loading: authLoading } = useAuth();
+
+  const [mockStoriesData, setMockStoriesData] = useState<MockStory[]>(initialMockStoriesData);
+  const [uniqueUserStories, setUniqueUserStories] = useState<MockStory[]>([]);
   
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
   const [storiesForViewer, setStoriesForViewer] = useState<StoryItem[]>([]);
   const [storyViewerStartIndex, setStoryViewerStartIndex] = useState(0);
   const [currentUserStoryGroupIndex, setCurrentUserStoryGroupIndex] = useState(-1);
 
+  const [isCreateStoryDialogOpen, setIsCreateStoryDialogOpen] = useState(false);
+
+  useEffect(() => {
+    // Derive uniqueUserStories whenever mockStoriesData changes
+    const usersWithStories = mockStoriesData.reduce((acc, story) => {
+      if (!acc.find(s => s.username === story.username)) {
+        // Find if any story for this user is unread
+        const hasAnyUnread = mockStoriesData.some(s => s.username === story.username && s.hasUnread);
+        acc.push({...story, hasUnread: hasAnyUnread}); // Use the first story instance but update unread status
+      }
+      return acc;
+    }, [] as MockStory[]);
+    setUniqueUserStories(usersWithStories);
+  }, [mockStoriesData]);
 
   const handlePostCreate = (newPostData: Omit<Post, 'id' | 'likes' | 'commentsCount' | 'createdAt' | 'expiresAt' | 'userAvatar' | 'userName'>) => {
+    const currentUserName = authUser?.displayName || authUser?.email?.split('@')[0] || "Anonymous";
+    const currentUserAvatar = authUser?.photoURL || `https://placehold.co/40x40.png?text=${currentUserName.substring(0,1).toUpperCase()}`;
+
     const newPost: Post = {
       ...newPostData,
       id: String(Date.now()),
-      userName: 'CurrentUser', 
-      userAvatar: 'https://placehold.co/40x40.png?text=CU', 
+      userName: currentUserName, 
+      userAvatar: currentUserAvatar, 
       likes: 0,
       commentsCount: 0,
       createdAt: Date.now(),
@@ -77,17 +90,23 @@ export default function FeedPage() {
   };
 
   const handleAddStoryClick = () => {
-     toast({
-      title: "Stories Feature",
-      description: "Adding your own story is coming soon!",
-    });
+    if (authLoading) return;
+    if (!authUser) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to add your story.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsCreateStoryDialogOpen(true);
   }
 
   const handleStoryBubbleClick = (username: string) => {
     const userStoryItems = mockStoriesData.filter(s => s.username === username);
     if (userStoryItems.length > 0) {
       setStoriesForViewer(userStoryItems);
-      setStoryViewerStartIndex(0); // Start from the first story of that user
+      setStoryViewerStartIndex(0);
       setIsStoryViewerOpen(true);
       const groupIndex = uniqueUserStories.findIndex(s => s.username === username);
       setCurrentUserStoryGroupIndex(groupIndex);
@@ -102,36 +121,64 @@ export default function FeedPage() {
   
   const navigateStorySet = (direction: 'next' | 'prev') => {
     let nextGroupIndex = currentUserStoryGroupIndex + (direction === 'next' ? 1 : -1);
+    const filteredUniqueUsers = uniqueUserStories.filter(u => u.username !== (authUser?.displayName || authUser?.email?.split('@')[0] || "CurrentUser"));
+    const displayableUniqueUserStories = authUser && uniqueUserStories.find(u => u.username === (authUser.displayName || authUser.email?.split('@')[0] || "CurrentUser")) 
+      ? [uniqueUserStories.find(u => u.username === (authUser.displayName || authUser.email?.split('@')[0] || "CurrentUser"))!, ...filteredUniqueUsers]
+      : filteredUniqueUsers;
 
-    // Cycle through unique users
-    if (nextGroupIndex >= uniqueUserStories.length) {
+
+    if (nextGroupIndex >= displayableUniqueUserStories.length) {
       nextGroupIndex = 0; 
     } else if (nextGroupIndex < 0) {
-      nextGroupIndex = uniqueUserStories.length - 1;
+      nextGroupIndex = displayableUniqueUserStories.length - 1;
     }
     
-    if (nextGroupIndex === currentUserStoryGroupIndex && uniqueUserStories.length ===1) { // only one user, close
+    if (nextGroupIndex === currentUserStoryGroupIndex && displayableUniqueUserStories.length === 1) {
          handleStoryViewerClose();
          return;
     }
 
-
-    if (uniqueUserStories[nextGroupIndex]) {
-      const nextUsername = uniqueUserStories[nextGroupIndex].username;
+    if (displayableUniqueUserStories[nextGroupIndex]) {
+      const nextUsername = displayableUniqueUserStories[nextGroupIndex].username;
       const nextUserStories = mockStoriesData.filter(s => s.username === nextUsername);
       if (nextUserStories.length > 0) {
         setStoriesForViewer(nextUserStories);
         setStoryViewerStartIndex(0);
         setCurrentUserStoryGroupIndex(nextGroupIndex);
-        // setIsStoryViewerOpen(true); // Viewer is already open
       } else {
-        handleStoryViewerClose(); // No stories for next/prev user, close
+        handleStoryViewerClose();
       }
     } else {
-      handleStoryViewerClose(); // Should not happen if logic is correct
+      handleStoryViewerClose();
     }
   };
 
+  const handleActualStoryCreate = (imageDataUri: string) => {
+    if (!authUser) return; // Should not happen if add story click is guarded
+
+    const currentUserName = authUser.displayName || authUser.email?.split('@')[0] || "CurrentUser";
+    const currentUserAvatar = authUser.photoURL || `https://placehold.co/64x64.png?text=${currentUserName.substring(0,1).toUpperCase()}`;
+
+    const newStory: MockStory = {
+      id: `currentUserStory-${Date.now()}`,
+      username: currentUserName,
+      avatarUrl: currentUserAvatar,
+      storyImageUrl: imageDataUri,
+      hasUnread: true, // New story is always "unread" initially for the user themselves
+      duration: 5000, // Default duration
+    };
+
+    // Add the new story. If user already has stories, add to their existing ones.
+    // Otherwise, add this as their first story.
+    setMockStoriesData(prevStories => [newStory, ...prevStories]);
+    // uniqueUserStories will update via useEffect
+  };
+  
+  const currentUserNameOrDefault = authUser?.displayName || authUser?.email?.split('@')[0] || "CurrentUser";
+  const currentUserAvatarOrDefault = authUser?.photoURL || `https://placehold.co/64x64.png?text=${currentUserNameOrDefault.substring(0,1).toUpperCase()}`;
+
+  // Determine if "Your Story" bubble should be shown or current user's actual story bubble
+  const currentUserHasStories = authUser && mockStoriesData.some(story => story.username === currentUserNameOrDefault);
 
   return (
     <TooltipProvider>
@@ -151,21 +198,38 @@ export default function FeedPage() {
           </CardHeader>
           <CardContent className="pb-4">
             <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
-              <StoryBubble 
-                username="CurrentUser" 
-                avatarUrl="https://placehold.co/64x64.png?text=Me" 
-                isAddStory 
-                onClick={handleAddStoryClick}
-              />
+              {!authLoading && authUser && !currentUserHasStories && (
+                <StoryBubble 
+                  username={currentUserNameOrDefault} 
+                  avatarUrl={currentUserAvatarOrDefault}
+                  isAddStory 
+                  onClick={handleAddStoryClick}
+                />
+              )}
               {uniqueUserStories.map(story => (
                 <StoryBubble 
-                  key={story.id} // Use a unique ID from the first story of the user
+                  key={story.username} // Use username as key for unique bubbles
                   username={story.username}
                   avatarUrl={story.avatarUrl}
-                  hasUnread={story.hasUnread}
+                  hasUnread={mockStoriesData.some(s => s.username === story.username && s.hasUnread)} // Recalculate unread status for the bubble
                   onClick={() => handleStoryBubbleClick(story.username)}
                 />
               ))}
+               {!authUser && !authLoading && ( // Show disabled "Your Story" if not logged in
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div> {/* Wrap in div for tooltip on disabled */}
+                            <StoryBubble 
+                            username="Your Story" 
+                            avatarUrl={`https://placehold.co/64x64.png?text=Me`}
+                            isAddStory 
+                            onClick={handleAddStoryClick} // Will show login toast
+                            />
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent><p>Login to add your story.</p></TooltipContent>
+                 </Tooltip>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -238,6 +302,14 @@ export default function FeedPage() {
           startIndex={storyViewerStartIndex}
           onNextStorySet={() => navigateStorySet('next')}
           onPrevStorySet={() => navigateStorySet('prev')}
+        />
+      )}
+      {isCreateStoryDialogOpen && authUser && (
+        <CreateStoryDialog
+            isOpen={isCreateStoryDialogOpen}
+            onClose={() => setIsCreateStoryDialogOpen(false)}
+            onStoryCreate={handleActualStoryCreate}
+            currentUserName={authUser.displayName || authUser.email?.split('@')[0] || "Your"}
         />
       )}
     </TooltipProvider>
