@@ -5,13 +5,16 @@ import type { Post } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageCircle, Heart, Share2, LinkIcon as LinkIconLucide, Image as ImageIconLucide, StickyNote, HelpCircle, Smile } from 'lucide-react'; // Renamed Image to avoid conflict
-import Image from 'next/image'; // Next.js Image component
+import { MessageCircle, Heart, Share2, LinkIcon as LinkIconLucide, Image as ImageIconLucide, StickyNote, HelpCircle, Smile } from 'lucide-react';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 interface PostCardProps {
   post: Post;
@@ -59,6 +62,9 @@ export function PostCard({ post }: PostCardProps) {
   const [localLikes, setLocalLikes] = useState(post.likes);
   const [localCommentsCount, setLocalCommentsCount] = useState(post.commentsCount);
 
+  const [isCommentDialogOpen, setIsCommentDialogOpen] = useState(false);
+  const [commentText, setCommentText] = useState('');
+
   useEffect(() => {
     const interval = setInterval(() => {
       setTimeAgo(formatTimeAgo(post.createdAt));
@@ -77,13 +83,26 @@ export function PostCard({ post }: PostCardProps) {
     setLocalLikes(prevLikes => isLiked ? prevLikes - 1 : prevLikes + 1);
   };
 
-  const handleCommentClick = () => {
+  const openCommentDialog = () => {
+    setIsCommentDialogOpen(true);
+  };
+
+  const handlePostComment = () => {
+    if (commentText.trim() === '') {
+      toast({
+        title: "Cannot post empty comment",
+        variant: "destructive",
+      });
+      return;
+    }
     setLocalCommentsCount(prevCount => prevCount + 1);
     toast({
-      title: "Comment added (prototype)",
-      description: "Viewing full comments is coming soon!",
+      title: "Comment posted! (prototype)",
+      description: "Full comment viewing is coming soon!",
       variant: "default",
     });
+    setCommentText('');
+    setIsCommentDialogOpen(false);
   };
 
   return (
@@ -165,7 +184,7 @@ export function PostCard({ post }: PostCardProps) {
               variant="ghost" 
               size="sm" 
               className="flex items-center gap-1.5 hover:text-primary" 
-              onClick={handleCommentClick}
+              onClick={openCommentDialog}
             >
               <MessageCircle className="h-4 w-4" />
               <span className="text-xs">{localCommentsCount}</span>
@@ -182,6 +201,41 @@ export function PostCard({ post }: PostCardProps) {
           </Tooltip>
         </CardFooter>
       </Card>
+
+      <Dialog open={isCommentDialogOpen} onOpenChange={setIsCommentDialogOpen}>
+        <DialogContent className="sm:max-w-[480px] bg-card">
+          <DialogHeader>
+            <DialogTitle className="font-headline text-lg text-primary">Add a comment</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="comment-text" className="text-sm font-medium text-card-foreground">
+                Your comment
+              </Label>
+              <Textarea
+                id="comment-text"
+                placeholder="Write your comment here..."
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                rows={4}
+                className="focus:border-primary transition-colors bg-background"
+              />
+            </div>
+            {/* Placeholder for future display of existing comments */}
+            {/* <div className="max-h-48 overflow-y-auto space-y-2 p-2 border rounded-md bg-muted/50">
+              <p className="text-xs text-muted-foreground">Viewing comments coming soon...</p>
+            </div> */}
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsCommentDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={handlePostComment} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              Post Comment
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </TooltipProvider>
   );
 }
