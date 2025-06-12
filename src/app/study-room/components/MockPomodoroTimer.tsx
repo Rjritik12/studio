@@ -97,21 +97,21 @@ export function MockPomodoroTimer() {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center space-y-4">
-        <div className="flex space-x-2 mb-2">
-          <Button size="sm" variant={mode === 'pomodoro' ? 'default' : 'outline'} onClick={() => handleModeChange('pomodoro')}>Focus</Button>
-          <Button size="sm" variant={mode === 'shortBreak' ? 'default' : 'outline'} onClick={() => handleModeChange('shortBreak')}>Short Break</Button>
-          <Button size="sm" variant={mode === 'longBreak' ? 'default' : 'outline'} onClick={() => handleModeChange('longBreak')}>Long Break</Button>
+        <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0 mb-2 w-full sm:w-auto">
+          <Button size="sm" variant={mode === 'pomodoro' ? 'default' : 'outline'} onClick={() => handleModeChange('pomodoro')} className="w-full sm:w-auto">Focus</Button>
+          <Button size="sm" variant={mode === 'shortBreak' ? 'default' : 'outline'} onClick={() => handleModeChange('shortBreak')} className="w-full sm:w-auto">Short Break</Button>
+          <Button size="sm" variant={mode === 'longBreak' ? 'default' : 'outline'} onClick={() => handleModeChange('longBreak')} className="w-full sm:w-auto">Long Break</Button>
         </div>
          <p className="text-sm text-muted-foreground -mt-1 mb-1">{modeTitles[mode]}</p>
         <div className="text-5xl font-mono font-bold text-primary tabular-nums">
           {formatTime(timeLeft)}
         </div>
-        <div className="flex space-x-3">
-          <Button onClick={handleStartPause} className={cn("w-24", isRunning ? "bg-orange-500 hover:bg-orange-600" : "bg-green-500 hover:bg-green-600")}>
+        <div className="flex flex-col sm:flex-row sm:space-x-3 space-y-2 sm:space-y-0 w-full sm:w-auto">
+          <Button onClick={handleStartPause} className={cn("w-full sm:w-24", isRunning ? "bg-orange-500 hover:bg-orange-600" : "bg-green-500 hover:bg-green-600")}>
             {isRunning ? <Pause className="mr-2 h-4 w-4" /> : <Play className="mr-2 h-4 w-4" />}
             {isRunning ? 'Pause' : 'Start'}
           </Button>
-          <Button onClick={handleReset} variant="outline" className="w-24">
+          <Button onClick={handleReset} variant="outline" className="w-full sm:w-24">
             <RotateCcw className="mr-2 h-4 w-4" /> Reset
           </Button>
         </div>
