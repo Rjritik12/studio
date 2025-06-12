@@ -18,20 +18,30 @@ interface QuizSetupProps {
 const suggestedTopics = [
   "General Knowledge", "Current Events", "World History", "Indian History", "Geography", "World Capitals",
   "Science", "Physics", "Chemistry", "Biology", "Human Body", "Space Exploration", "Technology", "Computer Science", "Artificial Intelligence",
-  "Mathematics", "Algebra", "Geometry",
-  "Literature", "Famous Books", "Authors", "Poetry",
-  "Art", "Famous Paintings", "Artists", "Sculpture",
-  "Music", "Classical Music", "Pop Music", "Musicians", "Instruments",
-  "Movies", "Hollywood", "Bollywood", "Famous Actors", "Film Directors",
-  "Sports", "Cricket", "Football (Soccer)", "Basketball", "Tennis", "Olympics",
-  "Politics", "World Leaders", "Indian Politics", "International Relations",
-  "Economics", "Global Economy", "Stock Market",
-  "Mythology", "Greek Mythology", "Norse Mythology", "Indian Mythology",
-  "Nature & Environment", "Animals", "Plants", "Climate Change", "National Parks",
-  "Inventions & Discoveries", "Inventors", "Scientific Discoveries",
-  "Famous Personalities", "Entrepreneurs", "Scientists", "Nobel Prize Winners",
-  "Food & Drink", "World Cuisine", "Cooking Techniques",
-  "Programming Languages", "Web Development", "Data Structures", "Algorithms"
+  "Mathematics", "Algebra", "Geometry", "Trigonometry", "Calculus",
+  "Literature", "Famous Books", "Authors", "Poetry", "Indian Literature", "English Literature",
+  "Art", "Famous Paintings", "Artists", "Sculpture", "Indian Art Forms",
+  "Music", "Classical Music", "Pop Music", "Musicians", "Instruments", "Indian Music",
+  "Movies", "Hollywood", "Bollywood", "Famous Actors", "Film Directors", "World Cinema",
+  "Sports", "Cricket", "Football (Soccer)", "Basketball", "Tennis", "Olympics", "Badminton", "Hockey",
+  "Politics", "World Leaders", "Indian Politics", "International Relations", "Indian Constitution",
+  "Economics", "Global Economy", "Stock Market", "Indian Economy", "Banking",
+  "Mythology", "Greek Mythology", "Norse Mythology", "Indian Mythology", "Egyptian Mythology",
+  "Nature & Environment", "Animals", "Plants", "Climate Change", "National Parks", "Ecology",
+  "Inventions & Discoveries", "Inventors", "Scientific Discoveries", "Technological Advancements",
+  "Famous Personalities", "Entrepreneurs", "Scientists", "Nobel Prize Winners", "Historical Figures",
+  "Food & Drink", "World Cuisine", "Cooking Techniques", "Indian Cuisine",
+  "Programming Languages", "Web Development", "Data Structures", "Algorithms", "Cybersecurity",
+  "Class 6th Science", "Class 6th Maths", "Class 6th Social Studies", "Class 6th English",
+  "Class 7th Science", "Class 7th Maths", "Class 7th Social Studies", "Class 7th English",
+  "Class 8th Science", "Class 8th Maths", "Class 8th Social Studies", "Class 8th English",
+  "Class 9th Physics", "Class 9th Chemistry", "Class 9th Biology", "Class 9th Maths", "Class 9th History", "Class 9th Geography", "Class 9th Civics", "Class 9th Economics",
+  "Class 10th Physics", "Class 10th Chemistry", "Class 10th Biology", "Class 10th Maths", "Class 10th History", "Class 10th Geography", "Class 10th Civics", "Class 10th Economics",
+  "Class 11th Physics", "Class 11th Chemistry", "Class 11th Biology", "Class 11th Maths", "Class 11th Accountancy", "Class 11th Business Studies", "Class 11th Economics", "Class 11th History", "Class 11th Political Science",
+  "Class 12th Physics", "Class 12th Chemistry", "Class 12th Biology", "Class 12th Maths", "Class 12th Accountancy", "Class 12th Business Studies", "Class 12th Economics", "Class 12th History", "Class 12th Political Science",
+  "JEE Main Physics", "JEE Main Chemistry", "JEE Main Maths", "JEE Advanced Physics", "JEE Advanced Chemistry", "JEE Advanced Maths",
+  "NEET Physics", "NEET Chemistry", "NEET Biology (Botany & Zoology)",
+  "Logical Reasoning", "Verbal Ability", "Quantitative Aptitude"
 ];
 
 export function QuizSetup({ onQuizSetup, isLoading, error }: QuizSetupProps) {
@@ -55,7 +65,7 @@ export function QuizSetup({ onQuizSetup, isLoading, error }: QuizSetupProps) {
             <Input 
               id="topic" 
               name="topic" 
-              placeholder="e.g., Indian History, Physics" 
+              placeholder="e.g., Indian History, Class 10th Physics, NEET Biology" 
               required 
               list="topic-suggestions"
             />
@@ -96,3 +106,4 @@ export function QuizSetup({ onQuizSetup, isLoading, error }: QuizSetupProps) {
     </Card>
   );
 }
+
