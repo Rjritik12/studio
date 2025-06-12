@@ -6,7 +6,7 @@ import { CreatePostForm } from './components/CreatePostForm';
 import { PostCard } from './components/PostCard';
 import type { Post } from '@/lib/types';
 import { Input } from '@/components/ui/input';
-import { SearchIcon, FilterIcon } from 'lucide-react';
+import { SearchIcon, FilterIcon, MessagesSquare } from 'lucide-react'; // Added MessagesSquare
 import {
   Select,
   SelectContent,
@@ -16,21 +16,22 @@ import {
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent } from '@/components/ui/card'; // Added Card and CardContent
 
 export default function FeedPage() {
-  const [posts, setPosts] = useState<Post[]>([]); // Initialize with an empty array
+  const [posts, setPosts] = useState<Post[]>([]);
   const { toast } = useToast();
 
   const handlePostCreate = (newPostData: Omit<Post, 'id' | 'likes' | 'commentsCount' | 'createdAt' | 'expiresAt' | 'userAvatar' | 'userName'>) => {
     const newPost: Post = {
       ...newPostData,
       id: String(Date.now()),
-      userName: 'CurrentUser', // Replace with actual user
-      userAvatar: 'https://placehold.co/40x40.png?text=CU', // Placeholder for current user
+      userName: 'CurrentUser', 
+      userAvatar: 'https://placehold.co/40x40.png?text=CU', 
       likes: 0,
       commentsCount: 0,
       createdAt: Date.now(),
-      expiresAt: Date.now() + 3600000 * 48, // Expires in 48 hours
+      expiresAt: Date.now() + 3600000 * 48, 
     };
     setPosts(prevPosts => [newPost, ...prevPosts]);
     toast({
@@ -70,7 +71,7 @@ export default function FeedPage() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild className="w-full sm:w-[180px]">
-                <div> {/* Wrap Select in a div for TooltipTrigger if Select itself is not a valid direct child */}
+                <div> 
                   <Select defaultValue="latest" disabled>
                     <SelectTrigger className="w-full">
                       <FilterIcon className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -96,9 +97,15 @@ export default function FeedPage() {
             <PostCard key={post.id} post={post} />
           ))}
           {posts.length === 0 && (
-            <div className="text-center py-10">
-              <p className="text-xl text-muted-foreground">No posts yet. Be the first to share!</p>
-            </div>
+            <Card className="text-center py-10 shadow-sm bg-card">
+              <CardContent className="flex flex-col items-center gap-4">
+                <MessagesSquare className="h-16 w-16 text-muted-foreground/50" />
+                <p className="text-xl font-medium text-card-foreground">It's quiet in here...</p>
+                <p className="text-sm text-muted-foreground">
+                  No posts yet. Why not be the first to share something?
+                </p>
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>
