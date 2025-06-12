@@ -5,19 +5,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { BadgePercent, Edit3, ShieldCheck, Star, Clock, AlertCircle, LogIn, Loader2, LogOut } from "lucide-react";
+import { BadgePercent, Edit3, ShieldCheck, Star, Clock, AlertCircle, LogIn, Loader2, LogOut, CreditCard, IndianRupee } from "lucide-react";
 import Image from "next/image";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/context/AuthContext"; // Import useAuth
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 
 export default function ProfilePage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  const [mockSubscriptionEndDate, setMockSubscriptionEndDate] = useState('');
 
   // Mock data (will be overridden by auth user if available)
   const mockUserStats = {
@@ -27,12 +28,17 @@ export default function ProfilePage() {
     timeCapsulesUsed: 1,
     timeCapsulesLimit: 3,
     joinDate: "January 1, 2024", // This might be fetched from Firestore in a real app
+    messagingStatus: "Free Trial Active", // or "Premium Active" or "Inactive"
   };
 
   useEffect(() => {
     if (!loading && !user) {
       // router.push('/login?redirect=/profile'); // Redirect to login if not authenticated
     }
+    // Mock an end date for the free trial for display purposes
+    const today = new Date();
+    const trialEndDate = new Date(today.setDate(today.getDate() + (30 - (Math.floor(Math.random() * 15))))); // Random end date within next 15-30 days
+    setMockSubscriptionEndDate(trialEndDate.toLocaleDateString());
   }, [user, loading, router]);
 
 
@@ -100,9 +106,26 @@ export default function ProfilePage() {
                 </TooltipContent>
               </Tooltip>
             </CardHeader>
-            <CardContent className="text-sm text-foreground/80">
+            <CardContent className="text-sm text-foreground/80 space-y-3">
               <p>Joined: {user.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : mockUserStats.joinDate}</p>
-              <Separator className="my-3" />
+              
+              <Separator />
+              <div>
+                <p className="font-medium flex items-center"><CreditCard className="mr-2 h-4 w-4 text-muted-foreground"/>Messaging Subscription:</p>
+                <p className="text-primary">{mockUserStats.messagingStatus}</p>
+                {mockUserStats.messagingStatus === "Free Trial Active" && <p className="text-xs text-muted-foreground">(Ends {mockSubscriptionEndDate})</p>}
+                {mockUserStats.messagingStatus === "Premium Active" && <p className="text-xs text-muted-foreground">(Renews {mockSubscriptionEndDate})</p>}
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="link" className="p-0 h-auto text-primary text-xs mt-1" disabled>
+                            Manage Subscription
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>Subscription management coming soon!</p></TooltipContent>
+                </Tooltip>
+              </div>
+
+              <Separator />
               <div className="flex items-center justify-between">
                   <span className="font-medium">Time Capsules:</span>
                   <span>{mockUserStats.timeCapsulesUsed} / {mockUserStats.timeCapsulesLimit} used this month</span>
@@ -115,7 +138,7 @@ export default function ProfilePage() {
                   <p>Feature coming soon!</p>
                 </TooltipContent>
               </Tooltip>
-               <Separator className="my-3" />
+               <Separator />
                <Button onClick={logout} variant="outline" className="w-full mt-2">
                   <LogOut className="mr-2 h-4 w-4" /> Logout
                 </Button>

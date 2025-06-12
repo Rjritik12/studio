@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Send, Paperclip, Smile, AlertCircle } from "lucide-react";
+import { ArrowLeft, Send, Paperclip, Smile, AlertCircle, IndianRupee } from "lucide-react";
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -107,7 +107,7 @@ export default function ChatPage() {
         <AlertCircle className="h-5 w-5 text-primary" />
         <AlertTitle className="font-headline text-primary">Feature Under Development</AlertTitle>
         <AlertDescription className="text-foreground/80">
-          This is a placeholder chat interface. Full real-time messaging capabilities, including sending and receiving messages, are planned for future updates.
+          This is a placeholder chat interface. Full real-time messaging capabilities, including a subscription model (free first month, then <IndianRupee className="inline h-3 w-3" />19/month via UPI), are planned for future updates.
         </AlertDescription>
       </Alert>
     </div>
