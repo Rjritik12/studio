@@ -71,7 +71,7 @@ export default function UserProfilePage() {
         </p>
       </header>
 
-      <div className="grid lg:grid-cols-3 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <Card className="lg:col-span-1 shadow-xl">
           <CardHeader className="items-center text-center">
             <Avatar className="w-32 h-32 mb-4 border-4 border-primary shadow-md">
@@ -108,7 +108,7 @@ export default function UserProfilePage() {
             <CardTitle className="font-headline text-xl">Stats & Achievements</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-2 gap-6 text-center">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-center">
               <div className="p-4 bg-foreground/5 rounded-lg">
                 <Star className="h-10 w-10 text-accent mx-auto mb-2" />
                 <p className="text-2xl font-bold text-foreground">{mockUserStats.xp} XP</p>
@@ -140,7 +140,7 @@ export default function UserProfilePage() {
                 alt="Generic activity graph"
                 width={600}
                 height={300}
-                className="rounded-lg object-cover aspect-[2/1]"
+                className="rounded-lg object-cover aspect-[2/1] w-full"
                 data-ai-hint="user activity chart" 
               />
               <p className="text-xs text-muted-foreground text-center mt-2">Detailed activity tracking is illustrative.</p>
@@ -177,4 +177,3 @@ export default function UserProfilePage() {
     </div>
   );
 }
-
