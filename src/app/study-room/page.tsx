@@ -1,9 +1,14 @@
 
 import { StudyRoomClient } from './components/StudyRoomClient';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Lightbulb, Brain, Clock, Archive } from 'lucide-react';
+import { Users, Lightbulb, Brain, Clock, Archive, UserCircle } from 'lucide-react';
 import Image from 'next/image';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { MockPomodoroTimer } from './components/MockPomodoroTimer';
+import { MockSharedNotepad } from './components/MockSharedNotepad';
+import { MockGroupChat } from './components/MockGroupChat';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 
 export default function StudyRoomPage() {
   return (
@@ -23,25 +28,27 @@ export default function StudyRoomPage() {
         
         <aside className="lg:col-span-1 space-y-6">
           <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="font-headline text-xl flex items-center"><Users className="mr-2 h-6 w-6 text-accent" /> Co-Study Features</CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="font-headline text-xl flex items-center"><Users className="mr-2 h-6 w-6 text-accent" /> Co-Study Features (Mock)</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-foreground/80">Join up to 2 other users for a collaborative session.</p>
-              <ul className="list-disc list-inside space-y-1 text-sm text-foreground/70">
-                <li>Pomodoro Timers</li>
-                <li>Shared Notepad</li>
-                <li>Group Chat</li>
-              </ul>
-              <Image 
-                src="https://placehold.co/400x250.png" 
-                alt="Collaboration" 
-                width={400} 
-                height={250} 
-                className="rounded-md mt-2 object-cover aspect-video"
-                data-ai-hint="study group"
-              />
-               <p className="text-xs text-muted-foreground text-center mt-1">(Co-study features coming soon)</p>
+            <CardContent className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <p className="text-sm text-foreground/80">Study with:</p>
+                <Avatar className="h-8 w-8 border">
+                  <AvatarImage src="https://placehold.co/40x40.png?text=U1" alt="User 1" data-ai-hint="user avatar"/>
+                  <AvatarFallback>U1</AvatarFallback>
+                </Avatar>
+                 <Avatar className="h-8 w-8 border">
+                  <AvatarImage src="https://placehold.co/40x40.png?text=U2" alt="User 2" data-ai-hint="user avatar"/>
+                  <AvatarFallback>U2</AvatarFallback>
+                </Avatar>
+                 <p className="text-xs text-muted-foreground">(Mock users)</p>
+              </div>
+              
+              <MockPomodoroTimer />
+              <MockSharedNotepad />
+              <MockGroupChat />
+
             </CardContent>
           </Card>
 
