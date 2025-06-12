@@ -277,16 +277,9 @@ export function PostCard({ post }: PostCardProps) {
             <AvatarFallback>{post.userName.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link href={`/profile/${post.userName}`} onClick={(e) => e.preventDefault()} className="hover:underline">
-                  <CardTitle className="text-base font-semibold text-foreground">{post.userName}</CardTitle>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Viewing other user profiles - Coming Soon!</p>
-              </TooltipContent>
-            </Tooltip>
+              <Link href={`/profile/${encodeURIComponent(post.userName)}`} className="hover:underline">
+                <CardTitle className="text-base font-semibold text-foreground">{post.userName}</CardTitle>
+              </Link>
             <CardDescription className="text-xs text-muted-foreground">
               {timeAgo} &bull; Expires in {timeLeft}
             </CardDescription>
