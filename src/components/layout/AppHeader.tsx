@@ -5,14 +5,15 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { MenuIcon, UserCircle, LogIn, LogOut, Loader2 } from 'lucide-react';
+import { MenuIcon, UserCircle, LogIn, LogOut, Loader2, Bell } from 'lucide-react';
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { NavLinks } from './NavLinks';
-import { useAuth } from '@/context/AuthContext'; // Import useAuth
+import { useAuth } from '@/context/AuthContext';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"; // Added Tooltip imports
 
 export function AppHeader() {
   const { isMobile } = useSidebar();
-  const { user, loading, logout } = useAuth(); // Get auth state and functions
+  const { user, loading, logout } = useAuth();
 
   const getAvatarFallback = () => {
     if (user?.displayName) {
@@ -42,7 +43,49 @@ export function AppHeader() {
         <SidebarTrigger className="hidden md:flex" />
       )}
 
-      <div className="flex w-full items-center justify-end gap-4 md:ml-auto md:gap-2 lg:gap-4">
+      <div className="flex w-full items-center justify-end gap-2 md:ml-auto md:gap-2 lg:gap-4">
+        <TooltipProvider>
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative rounded-full">
+                    <Bell className="h-5 w-5" />
+                    {/* Mock notification dot */}
+                    <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                    </span>
+                    <span className="sr-only">Notifications</span>
+                  </Button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Notifications</p>
+              </TooltipContent>
+            </Tooltip>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem disabled className="text-muted-foreground text-sm text-center justify-center py-4">
+                No new notifications
+              </DropdownMenuItem>
+              {/* Example of a notification item - can be used later
+              <DropdownMenuItem>
+                <div className="flex flex-col">
+                  <span className="font-medium">New message from Alice</span>
+                  <span className="text-xs text-muted-foreground">2 minutes ago</span>
+                </div>
+              </DropdownMenuItem>
+              */}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem disabled className="text-center justify-center text-xs text-muted-foreground">
+                Notification system coming soon
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TooltipProvider>
+
         {loading ? (
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         ) : user ? (
@@ -64,7 +107,6 @@ export function AppHeader() {
               <Link href="/profile" passHref>
                 <DropdownMenuItem>Profile</DropdownMenuItem>
               </Link>
-              {/* <DropdownMenuItem>Settings</DropdownMenuItem> */}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout}>
                 <LogOut className="mr-2 h-4 w-4" />
