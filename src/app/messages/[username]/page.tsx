@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Send, Paperclip, Smile, AlertCircle, IndianRupee } from "lucide-react";
+import { ArrowLeft, Send, Paperclip, Smile, AlertCircle, IndianRupee, Clock } from "lucide-react";
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -106,10 +106,11 @@ export default function ChatPage() {
       <Alert variant="default" className="mt-4 max-w-3xl mx-auto bg-primary/10 border-primary/30">
         <AlertCircle className="h-5 w-5 text-primary" />
         <AlertTitle className="font-headline text-primary">Feature Under Development</AlertTitle>
-        <AlertDescription className="text-foreground/80">
-          This is a placeholder chat interface. Full real-time messaging capabilities are planned.
-          The first month of general messaging is free. After that, to initiate a new chat with a specific person, 
-          it will cost <IndianRupee className="inline h-3 w-3" />19 for one month of access. This payment by the initiator enables the chat for both users.
+        <AlertDescription className="text-foreground/80 space-y-1">
+          <p>This is a placeholder chat interface. Full real-time messaging capabilities are planned.</p>
+          <p>The first month of general messaging is free. After that, to initiate a new chat with a specific person, 
+          it will cost <IndianRupee className="inline h-3 w-3" />19 for one month of access. This payment by the initiator enables the chat for both users.</p>
+          <p className="flex items-center"><Clock className="h-4 w-4 mr-1.5 text-primary/80" /> All messages in this chat will automatically delete after 48 hours.</p>
         </AlertDescription>
       </Alert>
     </div>

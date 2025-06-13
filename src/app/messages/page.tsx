@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Inbox, MessageCircle, CreditCard, IndianRupee, Users } from "lucide-react";
+import { Inbox, MessageCircle, CreditCard, IndianRupee, Users, Clock } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -20,7 +20,7 @@ export default function MessagesPage() {
         <MessageCircle className="mx-auto h-16 w-16 text-primary mb-4" />
         <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary">Messages</h1>
         <p className="text-xl text-foreground/80 max-w-xl mx-auto">
-          Your conversations with other EduVerse users.
+          Your conversations with other EduVerse users. Messages auto-delete after 48 hours.
         </p>
       </header>
 
@@ -56,7 +56,7 @@ export default function MessagesPage() {
             <Inbox className="mr-3 h-6 w-6 text-primary" /> Inbox
           </CardTitle>
           <CardDescription>
-            Select a conversation to view messages.
+            Select a conversation to view messages. Remember, messages vanish after 48 hours.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -89,8 +89,10 @@ export default function MessagesPage() {
            <Alert variant="default" className="mt-6 bg-primary/10 border-primary/30">
               <MessageCircle className="h-5 w-5 text-primary" />
               <AlertTitle className="font-headline text-primary">Feature Under Development</AlertTitle>
-              <AlertDescription className="text-foreground/80">
-                This is a placeholder for the messaging inbox. Full real-time messaging capabilities are planned. The initial month of messaging is free. Afterwards, starting a new chat with a person will cost <IndianRupee className="inline h-3 w-3" />19 for one month of access with that specific user (one-time payment by initiator enables chat for both). The conversations listed are for demonstration.
+              <AlertDescription className="text-foreground/80 space-y-1">
+                <p>This is a placeholder for the messaging inbox. Full real-time messaging capabilities are planned. The conversations listed are for demonstration.</p>
+                <p>The initial month of messaging is free. Afterwards, starting a new chat with a person will cost <IndianRupee className="inline h-3 w-3" />19 for one month of access with that specific user (one-time payment by initiator enables chat for both).</p>
+                <p className="flex items-center"><Clock className="h-4 w-4 mr-1.5 text-primary/80" /> All messages will automatically delete after 48 hours.</p>
               </AlertDescription>
             </Alert>
         </CardContent>
