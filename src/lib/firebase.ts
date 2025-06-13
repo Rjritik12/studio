@@ -14,6 +14,15 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
+// Log the projectId to help debug configuration issues
+console.log("Firebase Initializing with Project ID:", firebaseConfig.projectId);
+if (!firebaseConfig.apiKey) {
+  console.error(
+    "Firebase API Key is missing. Check your .env.local file, ensure it's prefixed with NEXT_PUBLIC_, and restart your dev server."
+  );
+}
+
+
 let app: FirebaseApp;
 if (!getApps().length) {
   app = initializeApp(firebaseConfig);
