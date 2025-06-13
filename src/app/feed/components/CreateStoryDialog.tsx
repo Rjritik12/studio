@@ -79,7 +79,7 @@ export function CreateStoryDialog({ isOpen, onClose, onStoryCreate, currentUserN
     onStoryCreate(imageDataUri);
     setIsLoading(false);
     toast({ title: "Story Posted!", description: "Your story has been added (locally for this session)." });
-    handleClose();
+    handleCloseDialog();
   };
 
   const handleCloseDialog = () => {
