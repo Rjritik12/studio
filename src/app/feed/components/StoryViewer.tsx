@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import Link from 'next/link'; // Added Link import
 
 export interface StoryItem {
   id: string;
@@ -125,13 +126,15 @@ export function StoryViewer({
             </div>
             {/* Header: Avatar, Username, Close button */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Avatar className="w-8 h-8 border-2 border-white">
-                  <AvatarImage src={currentStory.avatarUrl} alt={currentStory.username} data-ai-hint="user avatar story"/>
-                  <AvatarFallback>{currentStory.username.substring(0, 1).toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <span className="text-white font-semibold text-sm">{currentStory.username}</span>
-              </div>
+              <Link href={`/profile/${encodeURIComponent(currentStory.username)}`} passHref>
+                <a className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity" onClick={onClose}> {/* Added onClick to close dialog when navigating */}
+                  <Avatar className="w-8 h-8 border-2 border-white">
+                    <AvatarImage src={currentStory.avatarUrl} alt={currentStory.username} data-ai-hint="user avatar story"/>
+                    <AvatarFallback>{currentStory.username.substring(0, 1).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <span className="font-semibold text-sm">{currentStory.username}</span>
+                </a>
+              </Link>
               <DialogClose asChild>
                 <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 hover:text-white">
                   <X className="w-6 h-6" />
