@@ -107,10 +107,11 @@ export default function ChatPage() {
         <AlertCircle className="h-5 w-5 text-primary" />
         <AlertTitle className="font-headline text-primary">Feature Under Development</AlertTitle>
         <AlertDescription className="text-foreground/80">
-          This is a placeholder chat interface. Full real-time messaging capabilities, including a subscription model (free first month, then <IndianRupee className="inline h-3 w-3" />19/month via UPI), are planned for future updates.
+          This is a placeholder chat interface. Full real-time messaging capabilities are planned.
+          The first month of general messaging is free. After that, to initiate a new chat with a specific person, 
+          it will cost <IndianRupee className="inline h-3 w-3" />19 for one month of access. This payment by the initiator enables the chat for both users.
         </AlertDescription>
       </Alert>
     </div>
   );
 }
-

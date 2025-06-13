@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Inbox, MessageCircle, CreditCard, IndianRupee } from "lucide-react";
+import { Inbox, MessageCircle, CreditCard, IndianRupee, Users } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -31,8 +31,12 @@ export default function MessagesPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-4">
+          <p className="text-foreground/90 mb-2">
+            Enjoy unlimited messaging <span className="font-semibold text-primary">free for your first month!</span>
+          </p>
           <p className="text-foreground/90 mb-3">
-            Enjoy unlimited messaging <span className="font-semibold text-primary">free for your first month!</span> After your trial, continue connecting for just <IndianRupee className="inline h-4 w-4" />19/month.
+            After your trial, unlock new conversations for just <IndianRupee className="inline h-4 w-4" />19 per person for one month of chat. 
+            The person starting the chat pays, and the conversation is enabled for both users.
           </p>
           <p className="text-sm text-muted-foreground mb-3">
             Secure UPI payments will be supported.
@@ -86,7 +90,7 @@ export default function MessagesPage() {
               <MessageCircle className="h-5 w-5 text-primary" />
               <AlertTitle className="font-headline text-primary">Feature Under Development</AlertTitle>
               <AlertDescription className="text-foreground/80">
-                This is a placeholder for the messaging inbox. Full real-time messaging capabilities, including the subscription model (free first month, then ₹19/month), are planned for future updates. The conversations listed are for demonstration.
+                This is a placeholder for the messaging inbox. Full real-time messaging capabilities are planned. The initial month of messaging is free. Afterwards, starting a new chat with a person will cost <IndianRupee className="inline h-3 w-3" />19 for one month of access with that specific user (one-time payment by initiator enables chat for both). The conversations listed are for demonstration.
               </AlertDescription>
             </Alert>
         </CardContent>
