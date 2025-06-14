@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { BadgePercent, Edit3, ShieldCheck, Star, Clock, AlertCircle, LogIn, Loader2, LogOut, CreditCard, IndianRupee } from "lucide-react";
+import { BadgePercent, Edit3, ShieldCheck, Star, Clock, AlertCircle, LogIn, Loader2, LogOut, CreditCard, Archive } from "lucide-react";
 import Image from "next/image";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -27,17 +27,16 @@ export default function ProfilePage() {
     badges: ["Quiz Master", "Streak King", "Study Buddy"],
     timeCapsulesUsed: 1,
     timeCapsulesLimit: 3,
-    joinDate: "January 1, 2024", // This might be fetched from Firestore in a real app
-    messagingStatus: "Free Trial Active", // or "Premium Active" or "Inactive"
+    joinDate: "January 1, 2024", 
+    messagingStatus: "Free Trial Active", 
   };
 
   useEffect(() => {
     if (!loading && !user) {
-      // router.push('/login?redirect=/profile'); // Redirect to login if not authenticated
+      // router.push('/login?redirect=/profile'); 
     }
-    // Mock an end date for the free trial for display purposes
     const today = new Date();
-    const trialEndDate = new Date(today.setDate(today.getDate() + (30 - (Math.floor(Math.random() * 15))))); // Random end date within next 15-30 days
+    const trialEndDate = new Date(today.setDate(today.getDate() + (30 - (Math.floor(Math.random() * 15))))); 
     setMockSubscriptionEndDate(trialEndDate.toLocaleDateString());
   }, [user, loading, router]);
 
@@ -69,11 +68,10 @@ export default function ProfilePage() {
     );
   }
   
-  // If user is authenticated
   const displayName = user.displayName || user.email?.split('@')[0] || "EduVerse User";
   const displayEmail = user.email || "No email provided";
   const avatarUrl = user.photoURL || `https://placehold.co/128x128.png?text=${displayName.substring(0,1).toUpperCase()}`;
-
+  const joinDate = user.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : mockUserStats.joinDate;
 
   return (
     <TooltipProvider>
@@ -106,18 +104,22 @@ export default function ProfilePage() {
                 </TooltipContent>
               </Tooltip>
             </CardHeader>
-            <CardContent className="text-sm text-foreground/80 space-y-3">
-              <p>Joined: {user.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : mockUserStats.joinDate}</p>
-              
-              <Separator />
+            <CardContent className="text-sm text-foreground/80 space-y-4">
               <div>
-                <p className="font-medium flex items-center"><CreditCard className="mr-2 h-4 w-4 text-muted-foreground"/>Messaging Subscription:</p>
-                <p className="text-primary">{mockUserStats.messagingStatus}</p>
+                <p className="text-xs text-muted-foreground">Joined</p>
+                <p className="font-medium">{joinDate}</p>
+              </div>
+              
+              <div className="p-3 bg-foreground/5 rounded-md shadow-sm">
+                <p className="font-medium flex items-center text-base mb-1">
+                  <CreditCard className="mr-2 h-5 w-5 text-primary"/>Messaging
+                </p>
+                <p className="text-primary font-semibold">{mockUserStats.messagingStatus}</p>
                 {mockUserStats.messagingStatus === "Free Trial Active" && <p className="text-xs text-muted-foreground">(Ends {mockSubscriptionEndDate})</p>}
                 {mockUserStats.messagingStatus === "Premium Active" && <p className="text-xs text-muted-foreground">(Renews {mockSubscriptionEndDate})</p>}
                  <Tooltip>
                     <TooltipTrigger asChild>
-                        <Button variant="link" className="p-0 h-auto text-primary text-xs mt-1" disabled>
+                        <Button variant="link" className="p-0 h-auto text-primary text-xs mt-1.5" disabled>
                             Manage Subscription
                         </Button>
                     </TooltipTrigger>
@@ -125,21 +127,25 @@ export default function ProfilePage() {
                 </Tooltip>
               </div>
 
-              <Separator />
-              <div className="flex items-center justify-between">
-                  <span className="font-medium">Time Capsules:</span>
-                  <span>{mockUserStats.timeCapsulesUsed} / {mockUserStats.timeCapsulesLimit} used this month</span>
+              <div className="p-3 bg-foreground/5 rounded-md shadow-sm">
+                <p className="font-medium flex items-center text-base mb-1">
+                    <Archive className="mr-2 h-5 w-5 text-primary"/>Time Capsules
+                </p>
+                <div className="flex items-center justify-between">
+                  <span>Usage:</span>
+                  <span className="font-semibold">{mockUserStats.timeCapsulesUsed} / {mockUserStats.timeCapsulesLimit} <span className="text-xs text-muted-foreground">this month</span></span>
+                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="link" className="p-0 h-auto text-primary text-xs mt-1.5" disabled>Purchase More</Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Feature coming soon!</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="link" className="p-0 h-auto text-primary text-xs mt-1" disabled>Purchase More</Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Feature coming soon!</p>
-                </TooltipContent>
-              </Tooltip>
-               <Separator />
-               <Button onClick={logout} variant="outline" className="w-full mt-2">
+              
+               <Button onClick={logout} variant="outline" className="w-full mt-3">
                   <LogOut className="mr-2 h-4 w-4" /> Logout
                 </Button>
             </CardContent>
