@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, type ChangeEvent, type FormEvent } from 'r
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, BookOpenCheck, HelpCircle, LayoutGrid, Swords, Users, Camera, Upload, Trash2, Lightbulb, VideoOff, AlertCircle } from "lucide-react";
+import { ArrowRight, BookOpenCheck, HelpCircle, LayoutGrid, Swords, Users, Camera, Upload, Trash2, Lightbulb, VideoOff, AlertCircle, Sparkles, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
+import { solveImageProblem, type SolveImageProblemOutput } from '@/ai/flows/solve-image-problem-flow';
 
 export default function HomePage() {
   const features = [
@@ -28,6 +29,9 @@ export default function HomePage() {
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [problemDescription, setProblemDescription] = useState("");
   const [isProcessingSolution, setIsProcessingSolution] = useState(false);
+  const [solutionText, setSolutionText] = useState<string | null>(null);
+  const [solutionError, setSolutionError] = useState<string | null>(null);
+
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -46,7 +50,6 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    // Cleanup webcam stream when component unmounts or webcam is closed
     return () => {
       clearWebcamStream();
     };
@@ -118,19 +121,17 @@ export default function HomePage() {
   };
 
   const openWebcam = async () => {
-    clearPreview(); // Clear any existing uploaded image
+    clearPreview(); 
     if (!hasCameraPermission || hasCameraPermission === false) {
       const stream = await requestCameraPermission();
       if (stream) {
         setIsWebcamOpen(true);
       }
     } else if (hasCameraPermission === true && streamRef.current === null) {
-        // Permission was granted but stream lost, re-acquire
         const stream = await requestCameraPermission();
         if (stream) setIsWebcamOpen(true);
     } else {
       setIsWebcamOpen(true);
-       // Ensure video stream is playing if already permitted and stream exists
       if (videoRef.current && streamRef.current && videoRef.current.srcObject !== streamRef.current) {
         videoRef.current.srcObject = streamRef.current;
       }
@@ -161,7 +162,7 @@ export default function HomePage() {
   const clearPreview = () => {
     setImagePreview(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = ""; // Reset file input
+      fileInputRef.current.value = ""; 
     }
     if (isWebcamOpen) {
       closeWebcam();
@@ -179,16 +180,26 @@ export default function HomePage() {
       return;
     }
     setIsProcessingSolution(true);
-    // Placeholder for AI call
-    toast({
-      title: 'Processing Solution (Mock)',
-      description: 'This is where the AI would analyze the image and your description. This feature is not yet fully implemented.',
-    });
-    console.log("Image for solution:", imagePreview.substring(0,50) + "...");
-    console.log("Problem description:", problemDescription);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsProcessingSolution(false);
+    setSolutionText(null);
+    setSolutionError(null);
+
+    try {
+      const result: SolveImageProblemOutput = await solveImageProblem({
+        imageDataUri: imagePreview,
+        description: problemDescription || undefined,
+      });
+      setSolutionText(result.solution);
+    } catch (error: any) {
+      console.error("Error getting solution:", error);
+      setSolutionError(error.message || "Failed to get solution from AI. Please try again.");
+      toast({
+        variant: 'destructive',
+        title: 'AI Solution Error',
+        description: error.message || "An unexpected error occurred.",
+      });
+    } finally {
+      setIsProcessingSolution(false);
+    }
   };
 
 
@@ -246,7 +257,7 @@ export default function HomePage() {
                     <Lightbulb className="mx-auto h-12 w-12 text-accent mb-3" />
                     <CardTitle className="font-headline text-3xl text-accent">Snap & Solve</CardTitle>
                     <CardDescription className="text-lg text-foreground/80 max-w-xl mx-auto">
-                        Got a tricky problem? Upload an image or use your webcam, and let AI help you out! (AI backend coming soon)
+                        Got a tricky problem? Upload an image or use your webcam, and let AI help you out!
                     </CardDescription>
                 </CardHeader>
                 <form onSubmit={handleGetSolution}>
@@ -319,15 +330,44 @@ export default function HomePage() {
                             className="w-full max-w-md bg-accent hover:bg-accent/90 text-accent-foreground text-lg py-3" 
                             disabled={!imagePreview || isProcessingSolution}
                         >
-                            {isProcessingSolution ? <Upload className="mr-2 h-5 w-5 animate-spin" /> : <Lightbulb className="mr-2 h-5 w-5" />}
-                            Get Solution (Mock)
+                            {isProcessingSolution ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Lightbulb className="mr-2 h-5 w-5" />}
+                            Get AI Solution
                         </Button>
-                        <p className="text-xs text-muted-foreground text-center">
-                            Note: Actual AI-powered image solving is not yet implemented. This is a UI demonstration.
-                        </p>
                     </CardFooter>
                 </form>
             </Card>
+
+            {isProcessingSolution && (
+                <Card className="mt-6 shadow-md">
+                    <CardContent className="p-6 text-center">
+                        <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-3" />
+                        <p className="text-lg text-muted-foreground">AI is analyzing your problem, please wait...</p>
+                    </CardContent>
+                </Card>
+            )}
+
+            {solutionError && !isProcessingSolution && (
+                 <Alert variant="destructive" className="mt-6">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Error Getting Solution</AlertTitle>
+                    <AlertDescription>{solutionError}</AlertDescription>
+                </Alert>
+            )}
+
+            {solutionText && !isProcessingSolution && (
+                <Card className="mt-6 shadow-xl border-green-500/50">
+                    <CardHeader className="bg-green-500/10 dark:bg-green-700/20">
+                        <CardTitle className="font-headline text-2xl text-green-700 dark:text-green-400 flex items-center">
+                            <Sparkles className="mr-2 h-7 w-7" /> AI Generated Solution
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                        <div className="prose prose-sm sm:prose lg:prose-lg dark:prose-invert max-w-none text-foreground/90 whitespace-pre-wrap">
+                            {solutionText}
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
         </section>
 
 
