@@ -273,24 +273,24 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
                        questions.length >= 5 ? [Math.floor(questions.length * 0.4)] : [];
 
     return (
-      <Card className="mb-4 shadow-md">
-        <CardHeader className="pb-2 pt-3">
-          <CardTitle className="font-headline text-md text-center text-primary">Progress Ladder</CardTitle>
+      <Card className="mb-6 shadow-lg border-2 border-primary/30">
+        <CardHeader className="pb-2 pt-3 bg-primary/5 rounded-t-lg">
+          <CardTitle className="font-headline text-md text-center text-primary">Question Ladder</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-wrap justify-center gap-1.5 px-2 py-2">
+        <CardContent className="flex flex-wrap justify-center gap-2 p-3">
           {ladderSteps.map((step) => (
             <div
               key={step}
               className={cn(
-                "w-7 h-7 md:w-8 md:h-8 flex items-center justify-center rounded-full text-xs font-semibold border-2 transition-all duration-300",
-                currentQuestionIndex + 1 === step ? "bg-primary text-primary-foreground border-primary-foreground scale-110 shadow-lg" : 
-                currentQuestionIndex + 1 > step ? "bg-green-500 text-white border-green-700 opacity-75" : 
-                safeHavens.includes(step) ? "bg-yellow-400 border-yellow-600 text-yellow-900" : 
-                "bg-card border-border text-muted-foreground" 
+                "w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full text-xs font-semibold border-2 transition-all duration-300",
+                currentQuestionIndex + 1 === step ? "bg-primary text-primary-foreground border-white scale-110 shadow-xl ring-2 ring-primary ring-offset-1" : 
+                currentQuestionIndex + 1 > step ? "bg-green-500 text-white border-green-600 opacity-80" : 
+                safeHavens.includes(step) ? "bg-yellow-400 border-yellow-600 text-yellow-900 font-bold" : 
+                "bg-card border-border text-muted-foreground hover:bg-muted/50" 
               )}
               title={`Question ${step}`}
             >
-              {step}
+              Q{step}
             </div>
           ))}
         </CardContent>
@@ -427,3 +427,4 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
     </div>
   );
 }
+
