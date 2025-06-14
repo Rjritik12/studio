@@ -18,6 +18,7 @@ const TutorStudySessionInputSchema = z.object({
     .string()
     .describe('The student’s notes that need to be converted to flashcards or used for practice questions.'),
   doubt: z.string().describe('A specific doubt or question from the student.'),
+  imageDataUri: z.string().optional().describe("An optional image provided by the student, as a data URI (e.g., 'data:image/png;base64,...'). This image might relate to their notes or their doubt."),
 });
 export type TutorStudySessionInput = z.infer<typeof TutorStudySessionInputSchema>;
 
@@ -55,12 +56,18 @@ The student has the following doubt:
 Here are the student's notes:
 "{{{notes}}}"
 
+{{#if imageDataUri}}
+The student also provided an image related to their doubt or notes:
+{{media url=imageDataUri}}
+Please consider this image in your response and analysis.
+{{/if}}
+
 Your task is to:
-1.  Address the student's doubt clearly and concisely.
-2.  Analyze the provided notes. Based on their content and nature, decide if creating flashcards would be an effective study strategy.
-    - If flashcards are recommended and the notes are suitable, generate them as a JSON array assigned to the 'flashcards' field. Each element in the array should be an object with a 'question' key (string) and an 'answer' key (string). For example: "flashcards": [{"question": "What is photosynthesis?", "answer": "The process by which green plants use sunlight, water, and carbon dioxide to create their own food."}]. State in your flashcardRecommendation that they were generated.
-    - If flashcards are not recommended or the notes are unsuitable for them, explain why in the flashcardRecommendation and do not provide flashcards (the 'flashcards' field should be omitted or an empty array).
-3.  If the notes are suitable and cover distinct concepts, generate 2-3 multiple-choice practice questions based on the material in the notes. Each question should have four options and a correct answer. If notes are too brief or unsuitable for practice questions, do not generate them.
+1.  Address the student's doubt clearly and concisely, taking the image into account if provided.
+2.  Analyze the provided notes (and image, if any). Based on their content and nature, decide if creating flashcards would be an effective study strategy.
+    - If flashcards are recommended and the notes/image are suitable, generate them as a JSON array assigned to the 'flashcards' field. Each element in the array should be an object with a 'question' key (string) and an 'answer' key (string). For example: "flashcards": [{"question": "What is photosynthesis?", "answer": "The process by which green plants use sunlight, water, and carbon dioxide to create their own food."}]. State in your flashcardRecommendation that they were generated.
+    - If flashcards are not recommended or the notes/image are unsuitable for them, explain why in the flashcardRecommendation and do not provide flashcards (the 'flashcards' field should be omitted or an empty array).
+3.  If the notes (and image, if any) are suitable and cover distinct concepts, generate 2-3 multiple-choice practice questions based on the material. Each question should have four options and a correct answer. If notes/image are too brief or unsuitable for practice questions, do not generate them.
 `,
 });
 
@@ -75,3 +82,4 @@ const tutorStudySessionFlow = ai.defineFlow(
     return output!;
   }
 );
+

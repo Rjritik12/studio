@@ -51,12 +51,14 @@ export async function handleQuizSetup(formData: FormData): Promise<HandleQuizSet
 const studySessionSchema = z.object({
   notes: z.string().min(1, "Notes cannot be empty"),
   doubt: z.string().min(1, "Doubt cannot be empty"),
+  imageDataUri: z.string().optional(), // Added optional imageDataUri
 });
 
 export async function handleStudySession(formData: FormData): Promise<TutorStudySessionOutput | { error: string }> {
   const rawFormData = {
     notes: formData.get("notes"),
     doubt: formData.get("doubt"),
+    imageDataUri: formData.get("imageDataUri") as string | undefined, // Get as string or undefined
   };
 
   const validatedFields = studySessionSchema.safeParse(rawFormData);
@@ -66,7 +68,16 @@ export async function handleStudySession(formData: FormData): Promise<TutorStudy
   }
 
   try {
-    const studyData = await tutorStudySession(validatedFields.data as TutorStudySessionInput);
+    // Construct the input for tutorStudySession, ensuring imageDataUri is passed correctly
+    const inputForTutor: TutorStudySessionInput = {
+      notes: validatedFields.data.notes,
+      doubt: validatedFields.data.doubt,
+    };
+    if (validatedFields.data.imageDataUri) {
+      inputForTutor.imageDataUri = validatedFields.data.imageDataUri;
+    }
+
+    const studyData = await tutorStudySession(inputForTutor);
     return studyData;
   } catch (e) {
     console.error("Error in AI study session:", e);
