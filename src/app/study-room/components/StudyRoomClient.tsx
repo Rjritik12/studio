@@ -123,15 +123,15 @@ export function StudyRoomClient() {
                 </div>
               </div>
             )}
-            {studyData.flashcards && typeof studyData.flashcards === 'string' && ( // Fallback if AI still returns string
+            {studyData.flashcards && typeof studyData.flashcards === 'string' && ( 
                  <div>
                     <h3 className="font-semibold text-xl text-foreground mb-3">Generated Flashcards (Raw Data):</h3>
                     <Alert variant="default" className="bg-amber-50 border-amber-300 dark:bg-amber-900/30 dark:border-amber-700">
                         <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                         <AlertTitle className="font-semibold text-amber-700 dark:text-amber-300">Flashcard Parsing Issue</AlertTitle>
                         <AlertDescription className="text-amber-700/90 dark:text-amber-300/90 mt-1">
-                            The AI provided flashcard data as a string, but we expected a structured array.
-                            You can see the raw data below to copy or format it manually.
+                            The AI provided flashcard data as a string, but we expected a structured array of question/answer pairs.
+                            You can see the raw data below to copy or format it manually. We are working on improving this.
                         </AlertDescription>
                     </Alert>
                     <Textarea value={studyData.flashcards} readOnly rows={8} className="bg-muted/50 text-sm mt-3 focus-visible:ring-0 focus-visible:ring-offset-0" />
