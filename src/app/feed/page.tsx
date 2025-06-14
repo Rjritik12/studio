@@ -273,7 +273,7 @@ export default function FeedPage() {
         
         <Separator className="my-8"/>
 
-        <div className="max-w-2xl mx-auto mb-8">
+        <div className="w-full md:max-w-2xl md:mx-auto mb-8">
           <div className="flex flex-col sm:flex-row gap-4">
             <Tooltip>
               <TooltipTrigger asChild className="relative flex-grow">
@@ -309,7 +309,7 @@ export default function FeedPage() {
           </div>
         </div>
 
-        <div className="max-w-2xl mx-auto space-y-6 pb-20"> {/* Added padding-bottom for FAB visibility */}
+        <div className="w-full md:max-w-2xl md:mx-auto space-y-6 pb-20"> {/* Added padding-bottom for FAB visibility */}
           {posts.map(post => (
             <PostCard key={post.id} post={post} />
           ))}
