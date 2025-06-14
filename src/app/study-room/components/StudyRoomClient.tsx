@@ -146,11 +146,17 @@ export function StudyRoomClient() {
     const notesValue = (form.elements.namedItem('notes') as HTMLTextAreaElement).value;
     const doubtValue = (form.elements.namedItem('doubt') as HTMLTextAreaElement).value;
 
-    if (!notesValue.trim() || !doubtValue.trim()) {
-      setError("Notes and doubt fields cannot be empty.");
-      setIsLoading(false);
-      return;
+    if (!notesValue.trim() && !imageDataUriForAI && !doubtValue.trim()) {
+       setError("Please provide notes, an image, or a doubt to get help.");
+       setIsLoading(false);
+       return;
     }
+     if (!doubtValue.trim()){
+        setError("Your Doubt/Question field cannot be empty.");
+        setIsLoading(false);
+        return;
+    }
+
 
     const formData = new FormData();
     formData.append('notes', notesValue);
@@ -179,34 +185,19 @@ export function StudyRoomClient() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="notes" className="text-foreground/90 text-lg">Your Notes</Label>
+              <Label htmlFor="notes" className="text-foreground/90 text-lg">Your Notes (Text and/or Image)</Label>
               <Textarea
                 id="notes"
                 name="notes"
-                placeholder="Paste your study notes here..."
+                placeholder="Paste your study notes here, or describe the image if you upload one..."
                 rows={6}
                 className="border-input focus:border-primary transition-colors"
-                required
                 disabled={isLoading}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="doubt" className="text-foreground/90 text-lg">Your Doubt/Question</Label>
-              <Textarea
-                id="doubt"
-                name="doubt"
-                placeholder="What are you stuck on? Ask Gemini..."
-                rows={3}
-                className="border-input focus:border-primary transition-colors"
-                required
-                disabled={isLoading}
-              />
-            </div>
-
-            <Separator className="my-6" />
-
+            
+            {/* Visual Context Elements Moved Here */}
             <div>
-                <Label className="text-foreground/90 text-lg mb-2 block">Visual Context (Optional)</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <Button type="button" variant="outline" onClick={triggerFileUpload} disabled={isWebcamOpen || isLoading}>
                         <Upload className="mr-2 h-5 w-5" /> Upload Image
@@ -249,9 +240,8 @@ export function StudyRoomClient() {
 
                 {imagePreview && (
                     <div className="space-y-3 flex flex-col items-center mt-4">
-                        <Label className="text-md font-medium">Image Preview:</Label>
                         <div className="relative w-full max-w-md border rounded-md overflow-hidden shadow-md bg-muted">
-                            <Image src={imagePreview} alt="Problem preview" width={600} height={400} className="object-contain aspect-video w-full" data-ai-hint="study image preview"/>
+                            <Image src={imagePreview} alt="Notes/Problem preview" width={600} height={400} className="object-contain aspect-video w-full" data-ai-hint="study image preview"/>
                         </div>
                         <Button type="button" variant="outline" size="sm" onClick={handleClearImageAndWebcam} disabled={isLoading}>
                             <Trash2 className="mr-2 h-4 w-4" /> Clear Image
@@ -260,6 +250,20 @@ export function StudyRoomClient() {
                 )}
             </div>
 
+            <Separator className="my-6" />
+
+            <div className="space-y-2">
+              <Label htmlFor="doubt" className="text-foreground/90 text-lg">Your Doubt/Question (Required)</Label>
+              <Textarea
+                id="doubt"
+                name="doubt"
+                placeholder="What are you stuck on? Ask Gemini..."
+                rows={3}
+                className="border-input focus:border-primary transition-colors"
+                required
+                disabled={isLoading}
+              />
+            </div>
 
             {error && <p className="text-sm text-destructive mt-4">{error}</p>}
           </CardContent>
@@ -327,7 +331,7 @@ export function StudyRoomClient() {
                         <AlertTitle className="font-semibold text-amber-700 dark:text-amber-300">Flashcard Parsing Issue</AlertTitle>
                         <AlertDescription className="text-amber-700/90 dark:text-amber-300/90 mt-1">
                             The AI provided flashcard data as a string, but we expected a structured array of question/answer pairs.
-                            You can see the raw data below to copy or format it manually. This usually happens if the notes are not well-suited for distinct flashcard generation.
+                            You can see the raw data below to copy or format it manually. This usually happens if the notes are not well-suited for distinct flashcard generation or if the AI could not extract clear pairs.
                         </AlertDescription>
                     </Alert>
                     <Textarea value={studyData.flashcards} readOnly rows={8} className="bg-muted/50 text-sm mt-3 focus-visible:ring-0 focus-visible:ring-offset-0" />
@@ -349,3 +353,4 @@ export function StudyRoomClient() {
     </div>
   );
 }
+
