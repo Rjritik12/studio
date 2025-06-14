@@ -79,7 +79,10 @@ const tutorStudySessionFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await tutorPrompt(input);
-    return output!;
+    if (!output) {
+      throw new Error("AI failed to generate a valid response matching the output schema.");
+    }
+    return output;
   }
 );
 

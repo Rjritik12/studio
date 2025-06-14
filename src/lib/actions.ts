@@ -49,16 +49,16 @@ export async function handleQuizSetup(formData: FormData): Promise<HandleQuizSet
 
 
 const studySessionSchema = z.object({
-  notes: z.string().min(1, "Notes cannot be empty"),
+  notes: z.string(),
   doubt: z.string().min(1, "Doubt cannot be empty"),
-  imageDataUri: z.string().optional(), // Added optional imageDataUri
+  imageDataUri: z.string().optional(), 
 });
 
 export async function handleStudySession(formData: FormData): Promise<TutorStudySessionOutput | { error: string }> {
   const rawFormData = {
     notes: formData.get("notes"),
     doubt: formData.get("doubt"),
-    imageDataUri: formData.get("imageDataUri") as string | undefined, // Get as string or undefined
+    imageDataUri: formData.get("imageDataUri") as string | undefined, 
   };
 
   const validatedFields = studySessionSchema.safeParse(rawFormData);
@@ -68,7 +68,6 @@ export async function handleStudySession(formData: FormData): Promise<TutorStudy
   }
 
   try {
-    // Construct the input for tutorStudySession, ensuring imageDataUri is passed correctly
     const inputForTutor: TutorStudySessionInput = {
       notes: validatedFields.data.notes,
       doubt: validatedFields.data.doubt,
@@ -81,7 +80,13 @@ export async function handleStudySession(formData: FormData): Promise<TutorStudy
     return studyData;
   } catch (e) {
     console.error("Error in AI study session:", e);
-    return { error: "Failed to process study session. Please try again." };
+    let errorMessage = "Failed to process study session. Please try again.";
+    if (e instanceof Error) {
+        errorMessage = e.message;
+    } else if (typeof e === 'string') {
+        errorMessage = e;
+    }
+    return { error: errorMessage };
   }
 }
 
@@ -107,3 +112,4 @@ export async function handleFlipQuestion(input: GenerateSingleQuizQuestionInput)
     return { error: "Failed to flip question. Please try again." };
   }
 }
+
