@@ -138,7 +138,6 @@ export function StudyRoomClient() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsLoading(true);
     setError(null);
     setStudyData(null);
 
@@ -146,17 +145,16 @@ export function StudyRoomClient() {
     const notesValue = (form.elements.namedItem('notes') as HTMLTextAreaElement).value;
     const doubtValue = (form.elements.namedItem('doubt') as HTMLTextAreaElement).value;
 
-    if (!notesValue.trim() && !imageDataUriForAI && !doubtValue.trim()) {
-       setError("Please provide notes, an image, or a doubt to get help.");
-       setIsLoading(false);
-       return;
-    }
-     if (!doubtValue.trim()){
+    if (!doubtValue.trim()){
         setError("Your Doubt/Question field cannot be empty.");
-        setIsLoading(false);
         return;
     }
+    if (!notesValue.trim() && !imageDataUriForAI) {
+       setError("Please provide either notes or an image along with your doubt.");
+       return;
+    }
 
+    setIsLoading(true); // Set loading state only after validation passes
 
     const formData = new FormData();
     formData.append('notes', notesValue);
@@ -165,13 +163,18 @@ export function StudyRoomClient() {
       formData.append('imageDataUri', imageDataUriForAI);
     }
 
-    const result = await handleStudySession(formData);
-    setIsLoading(false);
-
-    if ('error' in result) {
-      setError(result.error);
-    } else {
-      setStudyData(result);
+    try {
+      const result = await handleStudySession(formData);
+      if ('error' in result) {
+        setError(result.error);
+      } else {
+        setStudyData(result);
+      }
+    } catch (clientError) {
+      console.error("Client error calling handleStudySession:", clientError);
+      setError("An unexpected client-side error occurred. Please check your connection and try again.");
+    } finally {
+      setIsLoading(false); // Ensure loading is set to false in all cases
     }
   };
 
@@ -196,7 +199,6 @@ export function StudyRoomClient() {
               />
             </div>
             
-            {/* Visual Context Elements Moved Here */}
             <div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <Button type="button" variant="outline" onClick={triggerFileUpload} disabled={isWebcamOpen || isLoading}>
