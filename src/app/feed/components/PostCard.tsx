@@ -72,6 +72,7 @@ export function PostCard({ post }: PostCardProps) {
 
   const [isPostLiked, setIsPostLiked] = useState(false);
   const [localPostLikes, setLocalPostLikes] = useState(post.likes);
+  const [animateLike, setAnimateLike] = useState(false);
   
   const [topLevelCommentText, setTopLevelCommentText] = useState('');
   const [replyText, setReplyText] = useState<Record<string, string>>({}); // Stores reply input text for each commentId
@@ -103,6 +104,8 @@ export function PostCard({ post }: PostCardProps) {
   const handlePostLikeClick = () => {
     setIsPostLiked(!isPostLiked);
     setLocalPostLikes(prevLikes => isPostLiked ? prevLikes - 1 : prevLikes + 1);
+    setAnimateLike(true);
+    setTimeout(() => setAnimateLike(false), 300); // Duration of the animation
   };
 
   const handlePostTopLevelComment = () => {
@@ -203,7 +206,7 @@ export function PostCard({ post }: PostCardProps) {
         <AvatarFallback>{comment.author.substring(0,1)}</AvatarFallback>
       </Avatar>
       <div className="flex-1">
-        <div className={cn("p-2.5 rounded-md bg-background shadow-sm", isReply ? "text-xs" : "text-sm")}>
+        <div className={cn("p-2.5 rounded-lg bg-background shadow-sm", isReply ? "text-xs" : "text-sm")}>
           <div className="flex items-center justify-between">
             <span className="font-semibold text-card-foreground text-xs">{comment.author}</span>
             <span className="text-xs text-muted-foreground">{formatTimeAgo(comment.createdAt)}</span>
@@ -245,13 +248,13 @@ export function PostCard({ post }: PostCardProps) {
               value={replyText[comment.id] || ''}
               onChange={(e) => handleReplyTextChange(comment.id, e.target.value)}
               rows={1}
-              className="flex-1 resize-none bg-input/50 focus:border-primary transition-colors text-xs min-h-[36px] h-9 leading-tight"
+              className="flex-1 resize-none bg-background focus:border-primary transition-colors text-xs min-h-[36px] h-9 leading-tight"
             />
             <Button 
               onClick={() => handlePostReply(comment.id)} 
               disabled={!replyText[comment.id]?.trim()} 
-              size="sm" 
-              className="self-start bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-9 px-3"
+              size="icon" 
+              className="self-start bg-primary hover:bg-primary/90 text-primary-foreground h-9 w-9"
               aria-label="Post reply"
             >
               <Send className="h-3.5 w-3.5" />
@@ -328,12 +331,17 @@ export function PostCard({ post }: PostCardProps) {
               variant="ghost" 
               size="sm" 
               className={cn(
-                "flex items-center gap-1.5 hover:text-primary",
+                "flex items-center gap-1.5 hover:text-primary transition-colors duration-150",
                 isPostLiked && "text-rose-500 hover:text-rose-600"
               )}
               onClick={handlePostLikeClick}
             >
-              <Heart className={cn("h-4 w-4", isPostLiked ? "fill-rose-500 text-rose-500" : "text-muted-foreground")} />
+              <Heart className={cn(
+                  "h-4 w-4 transition-all duration-300 ease-out", 
+                  isPostLiked ? "fill-rose-500 text-rose-500" : "text-muted-foreground",
+                  animateLike && "transform scale-125"
+                )}
+              />
               <span className="text-xs">{localPostLikes}</span>
             </Button>
             <div className="flex items-center gap-1.5">
@@ -393,8 +401,8 @@ export function PostCard({ post }: PostCardProps) {
             <Button 
               onClick={handlePostTopLevelComment} 
               disabled={!topLevelCommentText.trim()} 
-              size="sm" 
-              className="self-start bg-primary hover:bg-primary/90 text-primary-foreground"
+              size="icon" 
+              className="self-start bg-primary hover:bg-primary/90 text-primary-foreground h-10 w-10"
               aria-label="Post comment"
             >
               <Send className="h-4 w-4" />
