@@ -30,7 +30,18 @@ export async function handleQuizSetup(formData: FormData): Promise<HandleQuizSet
   const validatedFields = quizSetupSchema.safeParse(rawFormData);
 
   if (!validatedFields.success) {
-    return { error: validatedFields.error.flatten().fieldErrorsToString() };
+    const flatErrors = validatedFields.error.flatten();
+    const errorMessages: string[] = [];
+    if (flatErrors.formErrors.length) {
+      errorMessages.push(...flatErrors.formErrors);
+    }
+    for (const field in flatErrors.fieldErrors) {
+      const fieldErrors = flatErrors.fieldErrors[field as keyof typeof flatErrors.fieldErrors];
+      if (fieldErrors) {
+        errorMessages.push(`${field}: ${fieldErrors.join(', ')}`);
+      }
+    }
+    return { error: errorMessages.join('; ') || "Validation failed. Please check your inputs." };
   }
   
   try {
@@ -64,7 +75,18 @@ export async function handleStudySession(formData: FormData): Promise<TutorStudy
   const validatedFields = studySessionSchema.safeParse(rawFormData);
 
   if (!validatedFields.success) {
-    return { error: validatedFields.error.flatten().fieldErrorsToString() };
+    const flatErrors = validatedFields.error.flatten();
+    const errorMessages: string[] = [];
+    if (flatErrors.formErrors.length) {
+      errorMessages.push(...flatErrors.formErrors);
+    }
+    for (const field in flatErrors.fieldErrors) {
+      const fieldErrors = flatErrors.fieldErrors[field as keyof typeof flatErrors.fieldErrors];
+      if (fieldErrors) {
+        errorMessages.push(`${field}: ${fieldErrors.join(', ')}`);
+      }
+    }
+    return { error: errorMessages.join('; ') || "Validation failed. Please check your inputs." };
   }
 
   try {
