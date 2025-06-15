@@ -329,7 +329,7 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
                 key={option}
                 variant="outline"
                 className={cn(
-                  "p-4 h-auto text-base justify-start text-left whitespace-normal break-words relative flex-col items-start", 
+                  "p-4 h-auto text-base justify-start text-left whitespace-normal break-words relative overflow-hidden", // Added overflow-hidden
                   "border-2 rounded-lg transition-all duration-200 ease-in-out", 
                   selectedAnswer === option && answerStatus === 'correct' && 'bg-green-500 border-green-700 text-white hover:bg-green-600',
                   selectedAnswer === option && answerStatus === 'incorrect' && 'bg-red-500 border-red-700 text-white hover:bg-red-600',
@@ -340,27 +340,25 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
                 onClick={() => handleAnswer(option)}
                 disabled={!!selectedAnswer || gameOver || lifelines['50-50'].isLoading || lifelines['Flip'].isLoading || lifelines['AI_Hint'].isLoading || lifelines['Audience_Poll'].isLoading}
               >
-                <div className="w-full flex items-center justify-between"> 
+                {audiencePollResults && audiencePollResults[option] !== undefined && !selectedAnswer && (
+                  <div
+                    className="absolute left-0 top-0 bottom-0 bg-accent/20 dark:bg-accent/40 transition-all duration-500 ease-out z-0"
+                    style={{ width: `${audiencePollResults[option]}%` }}
+                  />
+                )}
+                <div className="w-full flex items-center justify-between relative z-10"> {/* Content on top */}
                   <span>{option}</span> 
                   <span className="flex items-center">
                     {selectedAnswer === option && answerStatus === 'correct' && <CheckCircle className="ml-2 h-5 w-5 text-white" />}
                     {selectedAnswer === option && answerStatus === 'incorrect' && <XCircle className="ml-2 h-5 w-5 text-white" />}
                     {selectedAnswer && selectedAnswer !== option && option === currentQuestion.correctAnswer && <CheckCircle className="ml-2 h-5 w-5 text-green-700 dark:text-green-200" />}
                     {audiencePollResults && audiencePollResults[option] !== undefined && !selectedAnswer && ( 
-                      <span className="ml-2 text-xs font-bold bg-accent/80 text-accent-foreground px-2 py-0.5 rounded">
+                      <span className="ml-2 text-xs font-bold bg-accent/90 text-accent-foreground px-2 py-0.5 rounded shadow-sm">
                         {audiencePollResults[option]}%
                       </span>
                     )}
                   </span>
                 </div>
-                {audiencePollResults && audiencePollResults[option] !== undefined && (
-                  <div className="w-full h-2 bg-muted rounded-full mt-2 overflow-hidden">
-                    <div
-                      className="h-full bg-accent/70 transition-all duration-500 ease-out"
-                      style={{ width: `${audiencePollResults[option]}%` }}
-                    />
-                  </div>
-                )}
               </Button>
             ))}
           </div>
