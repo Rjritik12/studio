@@ -7,19 +7,21 @@ import { Separator } from "@/components/ui/separator";
 import { BadgePercent, Star, ShieldCheck, UserCheck, BarChart3, UserPlus, MessageSquare, Rss, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useParams, useRouter } from 'next/navigation'; // Added useRouter
+import { useParams, useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import Link from "next/link"; // Added Link
+import Link from "next/link";
+import { PostCard } from "@/app/feed/components/PostCard"; // Import PostCard
+import type { Post } from "@/lib/types"; // Import Post type
 
 export default function UserProfilePage() {
   const params = useParams();
   const username = typeof params.username === 'string' ? decodeURIComponent(params.username) : "User";
   const { toast } = useToast();
   const { user: authUser } = useAuth();
-  const router = useRouter(); // Initialize useRouter
+  const router = useRouter();
 
   const [isFollowing, setIsFollowing] = useState(false);
   const [mockUserStats, setMockUserStats] = useState({
@@ -28,16 +30,51 @@ export default function UserProfilePage() {
     badges: [] as string[],
     joinDate: new Date().toLocaleDateString(),
   });
+  const [mockUserPosts, setMockUserPosts] = useState<Post[]>([]);
+
+  const avatarFallback = username.substring(0, 1).toUpperCase();
+  const avatarUrl = `https://placehold.co/128x128.png?text=${avatarFallback}`;
 
   useEffect(() => {
+    // Simulate fetching user stats
     setMockUserStats({
       xp: Math.floor(Math.random() * 2000) + 500,
       level: Math.floor(Math.random() * 10) + 3,
       badges: ["Quiz Enthusiast", "Active Learner", "Community Helper"].sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 2) + 1),
       joinDate: new Date(Date.now() - Math.floor(Math.random() * 365 * 24 * 60 * 60 * 1000)).toLocaleDateString(),
     });
-    setIsFollowing(false); 
-  }, [username]);
+    setIsFollowing(false);
+
+    // Generate mock posts specific to this user profile
+    const generatedPosts: Post[] = [
+      {
+        id: `post1-${username}`,
+        userName: username,
+        userAvatar: avatarUrl,
+        content: `Hello from ${username}! Just sharing a quick note about my studies today. Focused on astrophysics! ✨`,
+        type: 'note',
+        likes: Math.floor(Math.random() * 50),
+        commentsCount: Math.floor(Math.random() * 10),
+        createdAt: Date.now() - Math.floor(Math.random() * 24 * 3600000), // Within last 24 hours
+        expiresAt: Date.now() + (48 * 3600000) - Math.floor(Math.random() * 24 * 3600000), // Expires in next 24-48 hours
+      },
+      {
+        id: `post2-${username}`,
+        userName: username,
+        userAvatar: avatarUrl,
+        content: `Check out this interesting article I found on quantum computing. What are your thoughts?`,
+        type: 'link',
+        linkUrl: 'https://example.com/quantum-article',
+        likes: Math.floor(Math.random() * 30),
+        commentsCount: Math.floor(Math.random() * 5),
+        createdAt: Date.now() - Math.floor(Math.random() * 48 * 3600000), // Within last 48 hours
+        expiresAt: Date.now() + (48 * 3600000) - Math.floor(Math.random() * 48 * 3600000),
+      },
+    ];
+    // Only include posts that haven't "expired" for the mock
+    setMockUserPosts(generatedPosts.filter(post => post.expiresAt > Date.now()));
+
+  }, [username, avatarUrl]);
 
 
   const handleFollowToggle = () => {
@@ -48,9 +85,6 @@ export default function UserProfilePage() {
     });
   };
   
-  const avatarFallback = username.substring(0, 1).toUpperCase();
-  const avatarUrl = `https://placehold.co/128x128.png?text=${avatarFallback}`;
-
   const isOwnProfilePage = authUser && (authUser.displayName === username || authUser.email?.split('@')[0] === username);
 
   return (
@@ -76,7 +110,7 @@ export default function UserProfilePage() {
           <CardContent className="text-sm text-foreground/80">
             <p>Joined: {mockUserStats.joinDate}</p>
             <Separator className="my-4" />
-            {!isOwnProfilePage && authUser && ( // Only show if not own profile AND user is logged in
+            {!isOwnProfilePage && authUser && (
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button onClick={handleFollowToggle} className="flex-1">
                   {isFollowing ? <UserCheck className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
@@ -154,12 +188,19 @@ export default function UserProfilePage() {
             <Rss className="mr-2 h-5 w-5 text-primary" /> Recent Posts by {username}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <Alert variant="default" className="bg-amber-50 border-amber-300 dark:bg-amber-900/30 dark:border-amber-700">
+        <CardContent className="space-y-6">
+          {mockUserPosts.length > 0 ? (
+            mockUserPosts.map(post => (
+              <PostCard key={post.id} post={post} />
+            ))
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-4">No recent active posts to display for {username} in this mock view.</p>
+          )}
+          <Alert variant="default" className="bg-amber-50 border-amber-300 dark:bg-amber-900/30 dark:border-amber-700 mt-4">
             <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-            <AlertTitle className="font-semibold text-amber-700 dark:text-amber-300">Feature in Development</AlertTitle>
+            <AlertTitle className="font-semibold text-amber-700 dark:text-amber-300">Mock Posts Displayed</AlertTitle>
             <AlertDescription className="text-amber-700/90 dark:text-amber-300/90 mt-1">
-              Displaying {username}'s actual recent posts here requires backend integration for persistent post storage. This feature is planned for future updates!
+              The posts above are for demonstration purposes. Displaying {username}'s actual recent posts requires backend integration for persistent post storage. This feature is planned for future updates!
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -169,9 +210,10 @@ export default function UserProfilePage() {
         <BarChart3 className="h-5 w-5 text-primary" />
         <AlertTitle className="font-headline text-primary">Public Profile View</AlertTitle>
         <AlertDescription className="text-foreground/80">
-          This is a basic public profile. More interactive features and user-specific content for public profiles are planned for future updates.
+          This is a public profile. More interactive features and user-specific content are planned for future updates.
         </AlertDescription>
       </Alert>
     </div>
   );
 }
+
