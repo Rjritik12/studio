@@ -177,7 +177,7 @@ export default function FeedPage() {
 
   return (
     <TooltipProvider>
-      <div className="container mx-auto py-8 px-2 md:px-4 lg:px-6 relative"> {/* Added relative for FAB positioning context */}
+      <div className="container mx-auto py-8 px-4 md:px-6 relative"> {/* Changed px-2 to px-4 */}
         <header className="text-center mb-8">
           <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-3">Community Feed</h1>
           <p className="text-lg text-foreground/80 max-w-xl mx-auto">
@@ -192,7 +192,7 @@ export default function FeedPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="px-2 sm:px-4 pb-4">
-            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"> {/* Changed gap-4 to gap-2 */}
               {!authLoading && authUser && !currentUserHasStories && (
                 <StoryBubble 
                   username={currentUserNameOrDefault} 
@@ -348,5 +348,3 @@ export default function FeedPage() {
     </TooltipProvider>
   );
 }
-
-    
