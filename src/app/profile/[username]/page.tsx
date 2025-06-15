@@ -1,10 +1,9 @@
-
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BadgePercent, Star, ShieldCheck, UserCheck, BarChart3, UserPlus, MessageSquare, Rss, AlertCircle, BarChartHorizontal, Edit3 } from "lucide-react"; 
+import { BadgePercent, Star, ShieldCheck, UserCheck, BarChart3, UserPlus, MessageSquare, Rss, AlertCircle, Edit3 } from "lucide-react"; 
 import Image from "next/image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useParams, useRouter } from 'next/navigation';
@@ -110,7 +109,7 @@ export default function UserProfilePage() {
               <AvatarFallback className="text-4xl">{avatarFallback}</AvatarFallback>
             </Avatar>
             <CardTitle className="font-headline text-2xl">{username}</CardTitle>
-            <CardDescription>EduVerse Member</CardDescription>
+            <CardDescription>Level {mockUserStats.level} EduVerse Explorer</CardDescription>
           </CardHeader>
           <CardContent className="text-sm text-foreground/80">
             <div className="flex justify-around text-center mb-4">
@@ -129,7 +128,13 @@ export default function UserProfilePage() {
             </div>
             <p>Joined: {mockUserStats.joinDate}</p>
             <Separator className="my-4" />
-            {!isOwnPublicProfile && authUser && (
+            {isOwnPublicProfile ? (
+                 <Button variant="outline" className="w-full" asChild>
+                    <Link href="/profile">
+                    <Edit3 className="mr-2 h-4 w-4" /> Edit Profile & Settings
+                    </Link>
+                </Button>
+            ) : authUser ? (
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button onClick={handleFollowToggle} className="flex-1">
                   {isFollowing ? <UserCheck className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
@@ -141,18 +146,10 @@ export default function UserProfilePage() {
                   </Link>
                 </Button>
               </div>
-            )}
-             {!authUser && (
+            ) : (
                 <p className="text-xs text-center text-muted-foreground">
                     <Link href="/login" className="text-primary hover:underline">Login</Link> to follow or message.
                 </p>
-            )}
-            {isOwnPublicProfile && (
-              <Button variant="outline" className="w-full" asChild>
-                <Link href="/profile">
-                  <Edit3 className="mr-2 h-4 w-4" /> Edit Your Profile & Settings
-                </Link>
-              </Button>
             )}
             <Separator className="my-4" />
             <p className="text-muted-foreground text-xs">This is {username}'s public profile. Information shared here is visible to other EduVerse users.</p>
@@ -204,35 +201,34 @@ export default function UserProfilePage() {
                 </div>
               </CardContent>
             </Card>
+            <Card className="shadow-xl w-full"> 
+              <CardHeader>
+                <CardTitle className="font-headline text-xl flex items-center">
+                  <Rss className="mr-2 h-5 w-5 text-primary" /> Recent Posts by {username}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {mockUserPosts.length > 0 ? (
+                  mockUserPosts.map(post => (
+                    <PostCard key={post.id} post={post} />
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">No recent active posts to display for {username} in this mock view.</p>
+                )}
+                <Alert variant="default" className="bg-amber-50 border-amber-300 dark:bg-amber-900/30 dark:border-amber-700 mt-4">
+                  <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  <AlertTitle className="font-semibold text-amber-700 dark:text-amber-300">Mock Posts Displayed</AlertTitle>
+                  <AlertDescription className="text-amber-700/90 dark:text-amber-300/90 mt-1">
+                    The posts above are for demonstration purposes. Displaying {username}'s actual recent posts requires backend integration for persistent post storage. This feature is planned for future updates!
+                  </AlertDescription>
+                </Alert>
+              </CardContent>
+            </Card>
         </div>
       </div>
-       {/* This card will be below the grid now */}
-      <Card className="shadow-xl w-full mt-8"> 
-          <CardHeader>
-            <CardTitle className="font-headline text-xl flex items-center">
-              <Rss className="mr-2 h-5 w-5 text-primary" /> Recent Posts by {username}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {mockUserPosts.length > 0 ? (
-              mockUserPosts.map(post => (
-                <PostCard key={post.id} post={post} />
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">No recent active posts to display for {username} in this mock view.</p>
-            )}
-            <Alert variant="default" className="bg-amber-50 border-amber-300 dark:bg-amber-900/30 dark:border-amber-700 mt-4">
-              <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              <AlertTitle className="font-semibold text-amber-700 dark:text-amber-300">Mock Posts Displayed</AlertTitle>
-              <AlertDescription className="text-amber-700/90 dark:text-amber-300/90 mt-1">
-                The posts above are for demonstration purposes. Displaying {username}'s actual recent posts requires backend integration for persistent post storage. This feature is planned for future updates!
-              </AlertDescription>
-            </Alert>
-          </CardContent>
-        </Card>
       
       <Alert variant="default" className="mt-10 max-w-2xl mx-auto bg-primary/10 border-primary/30">
-        <BarChartHorizontal className="h-5 w-5 text-primary" /> 
+        <UserCheck className="h-5 w-5 text-primary" /> 
         <AlertTitle className="font-headline text-primary">Public Profile View</AlertTitle>
         <AlertDescription className="text-foreground/80">
           This is a public profile. More interactive features and user-specific content are planned for future updates.
@@ -241,3 +237,4 @@ export default function UserProfilePage() {
     </div>
   );
 }
+

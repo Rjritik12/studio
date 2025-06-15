@@ -1,9 +1,8 @@
-
 "use client";
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, LayoutGrid, HelpCircle, User, LogIn, MessageSquare } from 'lucide-react'; 
+import { Home, LayoutGrid, HelpCircle, UserCircle, LogIn, MessageSquare, SettingsIcon as ProfileSettingsIcon } from 'lucide-react'; 
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 
@@ -17,11 +16,16 @@ export function AppFooter() {
     { href: '/quiz', label: 'Quiz', icon: HelpCircle },
   ];
 
-  const loggedInItems = [
-    ...navItemsBase,
-    { href: '/messages', label: 'Messages', icon: MessageSquare },
-    { href: '/profile', label: 'Profile', icon: User }, 
-  ];
+  const getLoggedInItems = () => {
+    const publicProfileLink = user ? `/profile/${encodeURIComponent(user.displayName || user.email?.split('@')[0] || 'me')}` : '/login';
+    return [
+      ...navItemsBase,
+      { href: '/messages', label: 'Messages', icon: MessageSquare },
+      { href: publicProfileLink, label: 'Profile', icon: UserCircle }, // Public profile
+      // { href: '/profile', label: 'Settings', icon: ProfileSettingsIcon }, // Settings page if needed as a 5th item
+    ];
+  };
+
 
   const loggedOutItems = [
     ...navItemsBase,
@@ -43,8 +47,9 @@ export function AppFooter() {
     );
   }
 
-  const currentNavItems = user ? loggedInItems : loggedOutItems;
-  const displayItems = currentNavItems.slice(0, 5);
+  const currentNavItems = user ? getLoggedInItems() : loggedOutItems;
+  // Ensure we always show 5 items, or fewer if not enough are defined
+  const displayItems = currentNavItems.slice(0, 5); 
 
 
   return (
@@ -53,8 +58,12 @@ export function AppFooter() {
         {displayItems.map((item) => {
           const Icon = item.icon;
           let isActive = pathname === item.href;
-          if (item.href === '/profile' && pathname.startsWith('/profile/')) {
-             isActive = pathname === '/profile';
+          
+          // Check for dynamic profile route
+          if (item.label === 'Profile' && pathname.startsWith('/profile/')) {
+             isActive = pathname === item.href; // Ensure it matches the specific user's profile link
+          } else if (item.label === 'Settings' && pathname === '/profile') {
+             isActive = true; // For the settings page
           }
 
 
@@ -76,3 +85,4 @@ export function AppFooter() {
     </footer>
   );
 }
+

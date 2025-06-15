@@ -1,9 +1,8 @@
-
 "use client";
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, HelpCircle, Swords, Users, LayoutGrid, User, BookOpen, LogIn, MessageSquare } from 'lucide-react'; 
+import { Home, HelpCircle, Swords, Users, LayoutGrid, UserCircle, BookOpen, LogIn, MessageSquare, SettingsIcon as ProfileSettingsIcon } from 'lucide-react'; 
 import { SidebarMenuButton } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext'; 
@@ -16,7 +15,21 @@ const navItemsBase = [
   { href: '/feed', label: 'Social Feed', icon: LayoutGrid, requiresAuth: false },
 ];
 
-const profileNavItem = { href: '/profile', label: 'Profile', icon: User, requiresAuth: true };
+// Profile link will now point to the user's public profile
+const publicProfileNavItem = (username: string) => ({ 
+  href: `/profile/${encodeURIComponent(username)}`, 
+  label: 'My Profile', 
+  icon: UserCircle, 
+  requiresAuth: true 
+});
+
+const accountSettingsNavItem = { 
+  href: '/profile', // This is now the "Edit Profile & Settings" page
+  label: 'Account Settings', 
+  icon: ProfileSettingsIcon, 
+  requiresAuth: true 
+};
+
 const loginNavItem = { href: '/login', label: 'Login', icon: LogIn, requiresAuth: false };
 const messagesNavItem = { href: '/messages', label: 'Messages', icon: MessageSquare, requiresAuth: true };
 
@@ -36,7 +49,9 @@ export function NavLinks({ isMobile = false, onLinkClick }: NavLinksProps) {
     const items = [...navItemsBase];
     if (user) {
       items.push(messagesNavItem); 
-      items.push(profileNavItem); 
+      const userProfileName = user.displayName || user.email?.split('@')[0] || 'me';
+      items.push(publicProfileNavItem(userProfileName));
+      items.push(accountSettingsNavItem);
     } else {
       if (pathname !== '/login' && pathname !== '/signup') {
          items.push(loginNavItem);
@@ -50,7 +65,7 @@ export function NavLinks({ isMobile = false, onLinkClick }: NavLinksProps) {
   if (loading && !isMobile) { 
     return (
       <div className={cn("flex flex-col gap-2", isMobile ? "mt-6" : "")}>
-        {[...Array(6)].map((_, i) => ( 
+        {[...Array(7)].map((_, i) => ( 
           <SidebarMenuButton key={i} asChild={false} disabled className={cn("justify-start", isMobile && "text-lg py-3")}>
              <div className="mr-2 h-5 w-5 bg-muted rounded animate-pulse" />
              <span className="h-4 w-24 bg-muted rounded animate-pulse" />
@@ -70,9 +85,14 @@ export function NavLinks({ isMobile = false, onLinkClick }: NavLinksProps) {
         }
         
         let isActive = pathname === item.href;
-        if (item.href === '/profile' && pathname.startsWith('/profile/')) { 
-            isActive = pathname === '/profile'; 
+        // Special handling for dynamic /profile/[username] routes for "My Profile"
+        if (item.label === 'My Profile' && pathname.startsWith('/profile/') && item.href.startsWith('/profile/')) {
+            // Check if current path matches the dynamic href for "My Profile"
+            isActive = pathname === item.href;
+        } else if (item.label === 'Account Settings' && pathname === '/profile') {
+            isActive = true;
         } else if (pathname.startsWith(item.href) && item.href !== '/') {
+             // For other non-dynamic routes like /feed, /quiz etc.
             isActive = true;
         }
 
@@ -98,3 +118,4 @@ export function NavLinks({ isMobile = false, onLinkClick }: NavLinksProps) {
     </nav>
   );
 }
+
