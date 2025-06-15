@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { BadgePercent, Edit3, ShieldCheck, Star, Clock, AlertCircle, LogIn, Loader2, LogOut, CreditCard, Archive } from "lucide-react";
+import { BadgePercent, Edit3, ShieldCheck, Star, Clock, AlertCircle, LogIn, Loader2, LogOut, CreditCard, Archive, Rss } from "lucide-react";
 import Image from "next/image";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -197,6 +197,24 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
         </div>
+
+        <Card className="mt-8 shadow-xl w-full">
+          <CardHeader>
+            <CardTitle className="font-headline text-xl flex items-center">
+              <Rss className="mr-2 h-5 w-5 text-primary" /> My Active Posts
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Alert variant="default" className="bg-amber-50 border-amber-300 dark:bg-amber-900/30 dark:border-amber-700">
+              <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              <AlertTitle className="font-semibold text-amber-700 dark:text-amber-300">Feature in Development</AlertTitle>
+              <AlertDescription className="text-amber-700/90 dark:text-amber-300/90 mt-1">
+                Displaying your active posts here requires backend integration for persistent post storage. This feature is planned for future updates! You can see your newly created posts on the Community Feed, and they will expire after 48 hours.
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
+
         <Alert variant="default" className="mt-10 max-w-2xl mx-auto bg-primary/10 border-primary/30">
           <AlertCircle className="h-5 w-5 text-primary" />
           <AlertTitle className="font-headline text-primary">Profile Enhancements Coming Soon!</AlertTitle>

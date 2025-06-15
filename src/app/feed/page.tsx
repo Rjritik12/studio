@@ -203,6 +203,8 @@ export default function FeedPage() {
   const currentUserAvatarOrDefault = authUser?.photoURL || `https://placehold.co/64x64.png?text=${currentUserNameOrDefault.substring(0,1).toUpperCase()}`;
   const currentUserHasStories = authUser && mockStoriesData.some(story => story.username === currentUserNameOrDefault);
 
+  const activePosts = posts.filter(post => post.expiresAt > Date.now());
+
   return (
     <TooltipProvider>
       <div className="container mx-auto py-8 px-4 relative">
@@ -337,16 +339,16 @@ export default function FeedPage() {
         </div>
 
         <div className="w-full md:max-w-2xl md:mx-auto space-y-6 pb-20">
-          {posts.map(post => (
+          {activePosts.map(post => (
             <PostCard key={post.id} post={post} />
           ))}
-          {posts.length === 0 && (
+          {activePosts.length === 0 && (
             <Card className="text-center py-6 sm:py-10 shadow-sm bg-card">
               <CardContent className="flex flex-col items-center gap-3 sm:gap-4">
                 <MessagesSquare className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground/50" />
                 <p className="text-lg sm:text-xl font-medium text-card-foreground">It's quiet in here...</p>
                 <p className="text-xs sm:text-sm text-muted-foreground">
-                  No posts yet. Why not be the first to share something?
+                  {posts.length > 0 ? "No active posts. Old posts might have expired." : "No posts yet. Why not be the first to share something?"}
                 </p>
               </CardContent>
             </Card>
@@ -375,6 +377,4 @@ export default function FeedPage() {
     </TooltipProvider>
   );
 }
-
-
     

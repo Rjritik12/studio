@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ImagePlus, LinkIcon, Loader2, StickyNote, UploadCloud, X } from 'lucide-react';
 import type { Post } from '@/lib/types';
 import Image from 'next/image';
+import { useToast } from '@/hooks/use-toast';
 
 interface CreatePostFormProps {
   onPostCreate: (postData: Omit<Post, 'id' | 'likes' | 'commentsCount' | 'createdAt' | 'expiresAt' | 'userAvatar' | 'userName'>) => void;
@@ -23,6 +24,7 @@ export function CreatePostForm({ onPostCreate }: CreatePostFormProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [linkUrl, setLinkUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleTypeChange = (newType: Post['type']) => {
     setType(newType);
@@ -39,7 +41,7 @@ export function CreatePostForm({ onPostCreate }: CreatePostFormProps) {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        alert("File is too large. Please select an image under 5MB.");
+        toast({ title: "Upload Error", description: "File is too large. Please select an image under 5MB.", variant: "destructive" });
         event.target.value = ''; 
         setImageUrl('');
         setImagePreview(null);
@@ -78,20 +80,20 @@ export function CreatePostForm({ onPostCreate }: CreatePostFormProps) {
     if (type === 'link') {
       if (!linkUrl.trim()) {
         setIsLoading(false);
-        alert("Link URL is required for link posts."); 
+        toast({ title: "Validation Error", description: "Link URL is required for link posts.", variant: "destructive" });
         return;
       }
       postData.linkUrl = linkUrl;
     } else if ((type === 'image' || type === 'meme')) {
       if (!content.trim() && !imageUrl.trim()) {
         setIsLoading(false);
-        alert("For Meme/Image posts, please provide either content (description) or an uploaded image.");
+        toast({ title: "Validation Error", description: "For Meme/Image posts, please provide either content or an image.", variant: "destructive" });
         return;
       }
     } else {
        if (!content.trim()) {
         setIsLoading(false);
-        alert("Content cannot be empty for this post type.");
+        toast({ title: "Validation Error", description: "Content cannot be empty for this post type.", variant: "destructive" });
         return;
       }
     }
