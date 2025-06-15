@@ -234,45 +234,11 @@ export default function HomePage() {
       </header>
 
       <main className="container mx-auto px-4 md:px-6">
-        <section className="mb-16">
-          <h2 className="font-headline text-3xl font-semibold text-center mb-10 text-foreground">Explore Features</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature) => (
-              <Card key={feature.title} className="hover:shadow-lg transition-shadow duration-300 ease-in-out flex flex-col">
-                <CardHeader className="flex flex-row items-center gap-4 pb-4">
-                  <feature.icon className="w-10 h-10 text-primary" />
-                  <CardTitle className="font-headline text-xl">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <CardDescription className="text-foreground/80 mb-4">{feature.description}</CardDescription>
-                   <Image 
-                    src={`https://placehold.co/600x400.png`} 
-                    alt={feature.title} 
-                    width={600} 
-                    height={400} 
-                    className="rounded-md mb-4 object-cover aspect-video"
-                    data-ai-hint={feature.dataAiHint}
-                    />
-                </CardContent>
-                <div className="p-6 pt-0 mt-auto">
-                  <Link href={feature.href} passHref>
-                    <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                      Go to {feature.title} <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        <Separator className="my-12" />
-
         <section className="mb-16" id="snap-solve">
             <Card className="shadow-xl border-accent/50">
                 <CardHeader className="text-center">
                     <Lightbulb className="mx-auto h-12 w-12 text-accent mb-3" />
-                    <CardTitle className="font-headline text-3xl text-accent">Snap & Solve</CardTitle>
+                    <CardTitle className="font-headline text-3xl text-accent">Snap &amp; Solve</CardTitle>
                     <CardDescription className="text-lg text-foreground/80 max-w-xl mx-auto">
                         Got a tricky problem? Upload an image or use your webcam, and let AI help you out!
                     </CardDescription>
@@ -401,7 +367,40 @@ export default function HomePage() {
                 </Card>
             )}
         </section>
+        
+        <Separator className="my-12" />
 
+        <section className="mb-16">
+          <h2 className="font-headline text-3xl font-semibold text-center mb-10 text-foreground">Explore Features</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map((feature) => (
+              <Card key={feature.title} className="hover:shadow-lg transition-shadow duration-300 ease-in-out flex flex-col">
+                <CardHeader className="flex flex-row items-center gap-4 pb-4">
+                  <feature.icon className="w-10 h-10 text-primary" />
+                  <CardTitle className="font-headline text-xl">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <CardDescription className="text-foreground/80 mb-4">{feature.description}</CardDescription>
+                   <Image 
+                    src={`https://placehold.co/600x400.png`} 
+                    alt={feature.title} 
+                    width={600} 
+                    height={400} 
+                    className="rounded-md mb-4 object-cover aspect-video"
+                    data-ai-hint={feature.dataAiHint}
+                    />
+                </CardContent>
+                <div className="p-6 pt-0 mt-auto">
+                  <Link href={feature.href} passHref>
+                    <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+                      Go to {feature.title} <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
 
         <section className="py-12 bg-card rounded-lg shadow-md">
           <div className="container mx-auto px-4 md:px-6 text-center">
@@ -417,5 +416,3 @@ export default function HomePage() {
       </main>
     </div>
   );
-}
-
