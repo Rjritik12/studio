@@ -139,7 +139,7 @@ export default function UserProfilePage() {
             <Separator className="my-3" />
             {isOwnPublicProfile ? (
                  <Button variant="outline" className="w-full" asChild>
-                    <Link href="/profile">
+                    <Link href="/profile"> {/* Links to Account Settings */}
                         <Edit3 className="mr-2 h-4 w-4" /> Edit Your Profile & Settings
                     </Link>
                 </Button>
@@ -219,9 +219,11 @@ export default function UserProfilePage() {
         <UserCheck className="h-5 w-5 text-primary" /> 
         <AlertTitle className="font-headline text-primary">Public Profile View</AlertTitle>
         <AlertDescription className="text-foreground/80">
-          This is {username}'s public profile. Social features like following and messaging are prototyped. Post data is mock.
+          This is {username}'s public profile. Social features like following, messaging, and posts are prototyped with mock data.
         </AlertDescription>
       </Alert>
     </div>
   );
 }
+
+    
