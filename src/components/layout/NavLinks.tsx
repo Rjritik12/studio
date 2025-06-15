@@ -24,8 +24,8 @@ const publicProfileNavItem = (username: string) => ({
 });
 
 const loginNavItem = { href: '/login', label: 'Login', icon: LogIn, requiresAuth: false };
-const messagesNavItem = { href: '/messages', label: 'Messages', icon: MessageSquare, requiresAuth: true };
-const groupsNavItem = { href: '/groups', label: 'Study Groups', icon: Users, requiresAuth: true };
+const messagesNavItem = { href: '/messages', label: 'Messages & Groups', icon: MessageSquare, requiresAuth: true };
+// const groupsNavItem = { href: '/groups', label: 'Study Groups', icon: Users, requiresAuth: true }; Removed
 
 
 interface NavLinksProps {
@@ -42,7 +42,7 @@ export function NavLinks({ isMobile = false, onLinkClick }: NavLinksProps) {
 
     const items = [...navItemsBase];
     if (user) {
-      items.push(groupsNavItem); // Added Study Groups
+      // items.push(groupsNavItem); // Removed Study Groups
       items.push(messagesNavItem);
       const userProfileName = user.displayName || user.email?.split('@')[0] || 'me';
       items.push(publicProfileNavItem(userProfileName));
@@ -59,7 +59,7 @@ export function NavLinks({ isMobile = false, onLinkClick }: NavLinksProps) {
   if (loading && !isMobile) {
     return (
       <div className={cn("flex flex-col gap-2", isMobile ? "mt-6" : "")}>
-        {[...Array(currentNavItems.length || 7)].map((_, i) => ( // Adjusted for potential groups item
+        {[...Array(currentNavItems.length || 6)].map((_, i) => ( // Adjusted for potential items
           <SidebarMenuButton key={i} asChild={false} disabled className={cn("justify-start", isMobile && "text-lg py-3")}>
              <div className="mr-2 h-5 w-5 bg-muted rounded animate-pulse" />
              <span className="h-4 w-24 bg-muted rounded animate-pulse" />
