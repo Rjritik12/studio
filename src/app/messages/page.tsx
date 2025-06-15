@@ -81,35 +81,6 @@ export default function MessagesPage() {
           </p>
         </header>
 
-        <Card className="max-w-2xl mx-auto shadow-lg mb-8 border-accent">
-          <CardHeader className="bg-accent/10">
-            <CardTitle className="font-headline text-xl flex items-center text-accent">
-              <CreditCard className="mr-3 h-6 w-6" /> Messaging Subscription
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-4">
-            <p className="text-foreground/90 mb-2">
-              Enjoy unlimited messaging <span className="font-semibold text-primary">free for your first month!</span>
-            </p>
-            <p className="text-foreground/90 mb-3">
-              After your trial, unlock new conversations for just <IndianRupee className="inline h-4 w-4" />19 per person for one month of chat. 
-              The person starting the chat pays, and the conversation is enabled for both users.
-            </p>
-            <p className="text-sm text-muted-foreground mb-3">
-              Secure UPI & Card payments will be supported.
-            </p>
-            <Button 
-              className="w-full" 
-              onClick={() => setIsPaymentDialogOpen(true)} 
-            >
-              Activate Full Messaging (Mock <IndianRupee className="inline h-3.5 w-3.5 ml-1"/>19)
-            </Button>
-            <p className="text-xs text-center text-muted-foreground mt-2">
-              (This is a prototype - no actual charges or payments are processed.)
-            </p>
-          </CardContent>
-        </Card>
-
         <Card className="max-w-2xl mx-auto shadow-xl mb-8">
           <CardHeader>
             <CardTitle className="font-headline text-2xl flex items-center">
