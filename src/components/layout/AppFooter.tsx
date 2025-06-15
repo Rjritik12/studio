@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -21,8 +22,7 @@ export function AppFooter() {
     return [
       ...navItemsBase,
       { href: '/messages', label: 'Messages', icon: MessageSquare },
-      { href: publicProfileLink, label: 'Profile', icon: UserCircle }, // Public profile
-      // { href: '/profile', label: 'Settings', icon: ProfileSettingsIcon }, // Settings page if needed as a 5th item
+      { href: publicProfileLink, label: 'Profile', icon: UserCircle }, 
     ];
   };
 
@@ -59,11 +59,10 @@ export function AppFooter() {
           const Icon = item.icon;
           let isActive = pathname === item.href;
           
-          // Check for dynamic profile route
-          if (item.label === 'Profile' && pathname.startsWith('/profile/')) {
-             isActive = pathname === item.href; // Ensure it matches the specific user's profile link
-          } else if (item.label === 'Settings' && pathname === '/profile') {
-             isActive = true; // For the settings page
+          if (item.label === 'Profile' && pathname.startsWith('/profile/') && item.href.startsWith('/profile/')) {
+             isActive = pathname === item.href;
+          } else if (item.label !== 'Home' && pathname.startsWith(item.href) && item.href !== '/') {
+             isActive = true;
           }
 
 
@@ -85,4 +84,3 @@ export function AppFooter() {
     </footer>
   );
 }
-

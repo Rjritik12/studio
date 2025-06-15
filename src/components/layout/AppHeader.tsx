@@ -1,10 +1,11 @@
+
 "use client"
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { MenuIcon, UserCircle, LogIn, LogOut, Loader2, Bell, Edit3, SettingsIcon as ProfileSettingsIcon } from 'lucide-react'; 
+import { MenuIcon, UserCircle, LogIn, LogOut, Loader2, Bell, BarChart3, SettingsIcon as ProfileSettingsIcon } from 'lucide-react'; 
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { NavLinks } from './NavLinks';
 import { useAuth } from '@/context/AuthContext';
@@ -24,7 +25,9 @@ export function AppHeader() {
     return <UserCircle className="h-6 w-6" />;
   };
   
-  const currentUserPublicProfileLink = user ? `/profile/${encodeURIComponent(user.displayName || user.email?.split('@')[0] || 'me')}` : '/profile';
+  const currentUserPublicProfileLink = user ? `/profile/${encodeURIComponent(user.displayName || user.email?.split('@')[0] || 'me')}` : '/login'; // Fallback to login if user not loaded
+  const accountSettingsLink = '/profile';
+
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-md">
@@ -104,9 +107,9 @@ export function AppHeader() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/profile"> 
+                <Link href={accountSettingsLink}> 
                   <ProfileSettingsIcon className="mr-2 h-4 w-4" /> 
-                  Edit Profile & Settings
+                  Account Settings
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -127,4 +130,3 @@ export function AppHeader() {
     </header>
   );
 }
-
