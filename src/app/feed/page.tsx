@@ -206,17 +206,17 @@ export default function FeedPage() {
   return (
     <TooltipProvider>
       <div className="container mx-auto py-8 px-4 relative">
-        <header className="text-center mb-8">
+        <header className="text-center mb-6">
           <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-3">Community Feed</h1>
           <p className="text-base sm:text-lg text-foreground/80 max-w-xl mx-auto">
             Share notes, ask questions, and connect with fellow learners. Posts vanish after 48 hours!
           </p>
         </header>
 
-        <Card className="mb-8 shadow-sm">
+        <Card className="mb-6 shadow-sm">
           <CardHeader className="pb-2 pt-3 sm:pb-3 sm:pt-4">
-            <CardTitle className="text-lg font-semibold flex items-center">
-                <ImageIconLucide className="h-5 w-5 mr-2 text-primary" /> Stories
+            <CardTitle className="text-base sm:text-lg font-semibold flex items-center">
+                <ImageIconLucide className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-primary" /> Stories
             </CardTitle>
           </CardHeader>
           <CardContent className="px-2 sm:px-4 pb-4">
@@ -260,7 +260,7 @@ export default function FeedPage() {
         <Tooltip>
             <TooltipTrigger asChild>
                 <Button
-                    className="fixed bottom-22 right-6 md:bottom-8 md:right-8 h-14 w-14 md:h-16 md:w-16 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center"
+                    className="fixed bottom-22 right-6 md:bottom-8 md:right-8 h-12 w-12 md:h-14 md:w-14 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center"
                     size="icon"
                     onClick={() => {
                         if (authLoading) return;
@@ -272,7 +272,7 @@ export default function FeedPage() {
                     }}
                     aria-label="Create new post"
                     >
-                    <Plus className="h-7 w-7 md:h-8 md:w-8" />
+                    <Plus className="h-6 w-6 md:h-7 md:w-7" />
                 </Button>
             </TooltipTrigger>
             <TooltipContent side="left" className="mr-2">
@@ -298,9 +298,9 @@ export default function FeedPage() {
             </DialogContent>
         </Dialog>
         
-        <Separator className="my-8"/>
+        <Separator className="my-6"/>
 
-        <div className="w-full md:max-w-2xl md:mx-auto mb-8">
+        <div className="w-full md:max-w-2xl md:mx-auto mb-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <Tooltip>
               <TooltipTrigger asChild className="relative flex-grow">

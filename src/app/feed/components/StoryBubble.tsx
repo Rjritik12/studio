@@ -26,7 +26,7 @@ export function StoryBubble({
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center w-20 text-center group focus:outline-none"
+      className="flex flex-col items-center w-[70px] sm:w-20 text-center group focus:outline-none"
       aria-label={isAddStory ? "Add to your story" : `View ${username}'s story`}
     >
       <div
@@ -39,19 +39,20 @@ export function StoryBubble({
            !isAddStory && "hover:scale-105"
         )}
       >
-        <Avatar className={cn("h-16 w-16 border-2", isAddStory ? "border-border hover:border-primary/50" : "border-background")}>
+        <Avatar className={cn("h-14 w-14 sm:h-16 sm:w-16 border-2", isAddStory ? "border-border hover:border-primary/50" : "border-background")}>
           <AvatarImage src={avatarUrl} alt={username} data-ai-hint="user story avatar" />
           <AvatarFallback>{avatarFallback}</AvatarFallback>
         </Avatar>
         {isAddStory && (
           <div className="absolute bottom-0 right-0 bg-background rounded-full p-0.5">
-            <PlusCircle className="h-6 w-6 text-primary group-hover:text-primary/80 transition-colors" />
+            <PlusCircle className="h-5 w-5 sm:h-6 sm-6 text-primary group-hover:text-primary/80 transition-colors" />
           </div>
         )}
       </div>
-      <p className={cn("mt-1.5 text-xs font-medium truncate w-full", isAddStory ? "text-muted-foreground group-hover:text-foreground" : "text-foreground/90")}>
+      <p className={cn("mt-1 text-xs font-medium truncate w-full", isAddStory ? "text-muted-foreground group-hover:text-foreground" : "text-foreground/90")}>
         {isAddStory ? "Your Story" : username}
       </p>
     </button>
   );
 }
+
