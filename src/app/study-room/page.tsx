@@ -1,13 +1,10 @@
 
 import { StudyRoomClient } from './components/StudyRoomClient';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Lightbulb, Brain, Clock, Archive, UserCircle } from 'lucide-react';
+import { Users, Lightbulb, Brain, Clock, Archive, UserCircle, Search } from 'lucide-react';
 import Image from 'next/image';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { MockPomodoroTimer } from './components/MockPomodoroTimer';
-import { MockSharedNotepad } from './components/MockSharedNotepad';
-import { MockGroupChat } from './components/MockGroupChat';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ConceptExplorer } from './components/ConceptExplorer'; // Import the new component
 
 
 export default function StudyRoomPage() {
@@ -17,7 +14,7 @@ export default function StudyRoomPage() {
         <Brain className="h-16 w-16 text-primary mx-auto mb-4" />
         <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary mb-4">AI Study Room</h1>
         <p className="text-xl text-foreground/80 max-w-2xl mx-auto">
-          Collaborate with peers and get AI-powered assistance from Gemini. Your dedicated space for focused learning.
+          Get AI-powered assistance from Gemini. Your dedicated space for focused learning and concept exploration.
         </p>
       </header>
 
@@ -27,30 +24,7 @@ export default function StudyRoomPage() {
         </div>
         
         <aside className="lg:col-span-1 space-y-6">
-          <Card className="shadow-lg">
-            <CardHeader className="pb-3">
-              <CardTitle className="font-headline text-xl flex items-center"><Users className="mr-2 h-6 w-6 text-accent" /> Co-Study Features (Mock)</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <p className="text-sm text-foreground/80">Study with:</p>
-                <Avatar className="h-8 w-8 border">
-                  <AvatarImage src="https://placehold.co/40x40.png?text=U1" alt="User 1" data-ai-hint="user avatar"/>
-                  <AvatarFallback>U1</AvatarFallback>
-                </Avatar>
-                 <Avatar className="h-8 w-8 border">
-                  <AvatarImage src="https://placehold.co/40x40.png?text=U2" alt="User 2" data-ai-hint="user avatar"/>
-                  <AvatarFallback>U2</AvatarFallback>
-                </Avatar>
-                 <p className="text-xs text-muted-foreground">(Mock users)</p>
-              </div>
-              
-              <MockPomodoroTimer />
-              <MockSharedNotepad />
-              <MockGroupChat />
-
-            </CardContent>
-          </Card>
+          <ConceptExplorer />
 
           <Card className="shadow-lg">
             <CardHeader>
@@ -79,8 +53,8 @@ export default function StudyRoomPage() {
             <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             <AlertTitle className="font-semibold text-blue-700 dark:text-blue-300">Session & Content Information</AlertTitle>
             <AlertDescription className="text-blue-700/90 dark:text-blue-300/90 mt-1 space-y-1">
-                <p>Study sessions are ephemeral and auto-delete after 2 hours of inactivity.</p>
-                <p className="flex items-center"><Archive className="h-4 w-4 mr-1.5 text-blue-500 dark:text-blue-300" /> Use a "Time Capsule" to save important AI generations (3 per month free - feature coming soon).</p>
+                <p>AI Tutor sessions (notes, doubt, image) are processed on demand and results are displayed. They are not stored long-term unless you manually save the output.</p>
+                <p className="flex items-center"><Archive className="h-4 w-4 mr-1.5 text-blue-500 dark:text-blue-300" /> Concept Explorer results are also generated on demand. Consider copying important information.</p>
             </AlertDescription>
           </Alert>
         </aside>

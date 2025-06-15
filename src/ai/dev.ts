@@ -7,3 +7,4 @@ import '@/ai/flows/tutor-study-session.ts';
 import '@/ai/flows/get-quiz-question-hint.ts';
 import '@/ai/flows/generate-single-quiz-question.ts';
 import '@/ai/flows/solve-image-problem-flow.ts'; // Added new flow
+import '@/ai/flows/explore-concept-flow.ts'; // Added Concept Explorer flow

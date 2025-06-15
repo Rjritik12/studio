@@ -52,3 +52,14 @@ export type HintOutput = GetQuizQuestionHintOutput;
 export type FlipQuestionInput = GenerateSingleQuizQuestionInput;
 export type FlipQuestionOutput = SingleQuestionOutput;
 export type FlippedQuizQuestion = NewSingleQuizQuestion;
+
+// Types for Concept Explorer
+export interface ExploreConceptInput {
+  concept: string;
+}
+
+export interface ExploreConceptOutput {
+  explanation: string;
+  relatedTerms: string[];
+  analogy?: string;
+}

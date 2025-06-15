@@ -5,6 +5,9 @@ import { generateQuizQuestions, GenerateQuizQuestionsInput, GenerateQuizQuestion
 import { tutorStudySession, TutorStudySessionInput, TutorStudySessionOutput } from "@/ai/flows/tutor-study-session";
 import { getQuizQuestionHint, GetQuizQuestionHintInput, GetQuizQuestionHintOutput } from "@/ai/flows/get-quiz-question-hint";
 import { generateSingleQuizQuestion, GenerateSingleQuizQuestionInput, GenerateSingleQuizQuestionOutput } from "@/ai/flows/generate-single-quiz-question";
+import { exploreConcept, ExploreConceptInputSchema as GenkitExploreConceptInputSchema } from "@/ai/flows/explore-concept-flow"; // Renamed import
+import type { ExploreConceptInput, ExploreConceptOutput } from "@/lib/types";
+
 
 import { z } from "zod";
 
@@ -135,3 +138,35 @@ export async function handleFlipQuestion(input: GenerateSingleQuizQuestionInput)
   }
 }
 
+// Server action for Concept Explorer
+const exploreConceptClientSchema = z.object({
+  concept: z.string().min(1, "Concept cannot be empty."),
+});
+
+export async function handleExploreConcept(formData: FormData): Promise<ExploreConceptOutput | { error: string }> {
+  const rawFormData = {
+    concept: formData.get("concept"),
+  };
+
+  const validatedFields = exploreConceptClientSchema.safeParse(rawFormData);
+
+  if (!validatedFields.success) {
+    return { error: validatedFields.error.flatten().fieldErrors.concept?.join(", ") || "Invalid concept input." };
+  }
+
+  try {
+    // The Genkit flow itself uses Zod for input validation based on ExploreConceptInputSchema,
+    // so we are passing the validated client-side data.
+    const result = await exploreConcept(validatedFields.data as ExploreConceptInput);
+    return result;
+  } catch (e) {
+    console.error("Error exploring concept:", e);
+    let errorMessage = "Failed to explore concept. Please try again.";
+     if (e instanceof Error) {
+        errorMessage = e.message;
+    } else if (typeof e === 'string') {
+        errorMessage = e;
+    }
+    return { error: errorMessage };
+  }
+}
