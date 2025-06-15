@@ -1,9 +1,10 @@
+
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BadgePercent, Star, ShieldCheck, UserCheck, BarChart3, UserPlus, MessageSquare, Rss, AlertCircle, Edit3 } from "lucide-react"; 
+import { BadgePercent, Star, ShieldCheck, UserCheck, BarChartHorizontal, UserPlus, MessageSquare, Rss, AlertCircle, Edit3 } from "lucide-react"; 
 import Image from "next/image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useParams, useRouter } from 'next/navigation';
@@ -19,7 +20,7 @@ export default function UserProfilePage() {
   const params = useParams();
   const username = typeof params.username === 'string' ? decodeURIComponent(params.username) : "User";
   const { toast } = useToast();
-  const { user: authUser } = useAuth();
+  const { user: authUser, loading: authLoading } = useAuth();
   const router = useRouter();
 
   const [isFollowing, setIsFollowing] = useState(false);
@@ -27,7 +28,6 @@ export default function UserProfilePage() {
     xp: 0,
     level: 0,
     badges: [] as string[],
-    joinDate: new Date().toLocaleDateString(),
     postsCount: 0,
     followersCount: 0,
     followingCount: 0,
@@ -35,54 +35,59 @@ export default function UserProfilePage() {
   const [mockUserPosts, setMockUserPosts] = useState<Post[]>([]);
 
   const avatarFallback = username.substring(0, 1).toUpperCase();
-  const avatarUrl = `https://placehold.co/128x128.png?text=${avatarFallback}`;
+  // Use a consistent placeholder URL or derive from username if no authUser photoURL is available
+  const profileAvatarUrl = `https://placehold.co/128x128.png?text=${avatarFallback}`;
   
   const isOwnPublicProfile = authUser && (authUser.displayName === username || authUser.email?.split('@')[0] === username);
 
   useEffect(() => {
     const generatedPosts: Post[] = [
       {
-        id: `post1-profile-${username}`,
+        id: `post1-public-profile-${username}`,
         userName: username,
-        userAvatar: avatarUrl,
-        content: `Hello from ${username}'s profile! Just sharing a quick note about my studies today. Focused on astrophysics! ✨`,
+        userAvatar: profileAvatarUrl,
+        content: `This is a mock post from ${username}'s public profile! Exploring new study techniques.`,
         type: 'note',
-        likes: Math.floor(Math.random() * 50),
-        commentsCount: Math.floor(Math.random() * 10),
-        createdAt: Date.now() - Math.floor(Math.random() * 24 * 3600000), 
-        expiresAt: Date.now() + (48 * 3600000) - Math.floor(Math.random() * 24 * 3600000), 
+        likes: Math.floor(Math.random() * 70) + 5,
+        commentsCount: Math.floor(Math.random() * 15) + 2,
+        createdAt: Date.now() - Math.floor(Math.random() * 20 * 3600000), 
+        expiresAt: Date.now() + (48 * 3600000) - Math.floor(Math.random() * 20 * 3600000), 
       },
       {
-        id: `post2-profile-${username}`,
+        id: `post2-public-profile-${username}`,
         userName: username,
-        userAvatar: avatarUrl,
-        content: `Check out this interesting article I found on quantum computing. (Viewed from ${username}'s profile page). What are your thoughts?`,
+        userAvatar: profileAvatarUrl,
+        content: `Sharing a cool link I found about space exploration, viewed from ${username}'s profile.`,
         type: 'link',
-        linkUrl: 'https://example.com/quantum-article-profile',
-        likes: Math.floor(Math.random() * 30),
-        commentsCount: Math.floor(Math.random() * 5),
-        createdAt: Date.now() - Math.floor(Math.random() * 48 * 3600000), 
-        expiresAt: Date.now() + (48 * 3600000) - Math.floor(Math.random() * 48 * 3600000),
+        linkUrl: 'https://example.com/space-exploration-profile',
+        likes: Math.floor(Math.random() * 40) + 3,
+        commentsCount: Math.floor(Math.random() * 8) + 1,
+        createdAt: Date.now() - Math.floor(Math.random() * 40 * 3600000), 
+        expiresAt: Date.now() + (48 * 3600000) - Math.floor(Math.random() * 40 * 3600000),
       },
     ];
     const activePosts = generatedPosts.filter(post => post.expiresAt > Date.now());
     setMockUserPosts(activePosts);
 
     setMockUserStats({
-      xp: Math.floor(Math.random() * 2000) + 500,
-      level: Math.floor(Math.random() * 10) + 3,
-      badges: ["Quiz Enthusiast", "Active Learner", "Community Helper"].sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 2) + 1),
-      joinDate: new Date(Date.now() - Math.floor(Math.random() * 365 * 24 * 60 * 60 * 1000)).toLocaleDateString(),
-      postsCount: activePosts.length + Math.floor(Math.random() * 5), // Add some random older posts count
-      followersCount: Math.floor(Math.random() * 500),
-      followingCount: Math.floor(Math.random() * 200),
+      xp: Math.floor(Math.random() * 2500) + 800,
+      level: Math.floor(Math.random() * 12) + 5,
+      badges: ["Quiz Master", "Avid Learner", "Top Contributor"].sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 2) + 1),
+      postsCount: activePosts.length + Math.floor(Math.random() * 10),
+      followersCount: Math.floor(Math.random() * 700) + 50,
+      followingCount: Math.floor(Math.random() * 300) + 20,
     });
-    setIsFollowing(false); 
+    setIsFollowing(Math.random() < 0.3); // Randomly follow some users for demo
 
-  }, [username, avatarUrl]);
+  }, [username, profileAvatarUrl]);
 
 
   const handleFollowToggle = () => {
+     if (authLoading) return;
+    if (!authUser) {
+      toast({ title: "Login Required", description: "Please log in to follow users.", variant: "destructive" });
+      return;
+    }
     setIsFollowing(!isFollowing);
     toast({
       title: !isFollowing ? `Followed ${username}` : `Unfollowed ${username}`,
@@ -93,48 +98,47 @@ export default function UserProfilePage() {
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
-      <header className="text-center mb-12">
-        <UserCheck className="mx-auto h-16 w-16 text-primary mb-4" />
-        <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary mb-4">{username}'s Profile</h1>
-        <p className="text-xl text-foreground/80 max-w-2xl mx-auto">
-          Viewing the public profile of {username}.
+      <header className="text-center mb-10">
+        <UserCheck className="mx-auto h-12 w-12 md:h-16 md:w-16 text-primary mb-3" />
+        <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-3">{username}'s Profile</h1>
+        <p className="text-lg sm:text-xl text-foreground/80 max-w-xl mx-auto">
+          Discover {username}'s contributions and achievements in EduVerse.
         </p>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 items-start">
         <Card className="lg:col-span-1 shadow-xl">
-          <CardHeader className="items-center text-center">
-            <Avatar className="w-32 h-32 mb-4 border-4 border-primary shadow-md">
-              <AvatarImage src={avatarUrl} alt={username} data-ai-hint="profile picture user" />
-              <AvatarFallback className="text-4xl">{avatarFallback}</AvatarFallback>
+          <CardHeader className="items-center text-center p-4 md:p-6">
+            <Avatar className="w-24 h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 mb-4 border-4 border-primary shadow-md">
+              <AvatarImage src={profileAvatarUrl} alt={username} data-ai-hint="profile picture user" />
+              <AvatarFallback className="text-3xl md:text-4xl">{avatarFallback}</AvatarFallback>
             </Avatar>
-            <CardTitle className="font-headline text-2xl">{username}</CardTitle>
+            <CardTitle className="font-headline text-xl md:text-2xl">{username}</CardTitle>
             <CardDescription>Level {mockUserStats.level} EduVerse Explorer</CardDescription>
           </CardHeader>
-          <CardContent className="text-sm text-foreground/80">
-            <div className="flex justify-around text-center mb-4">
+          <CardContent className="text-sm text-foreground/80 p-4 md:p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-around text-center mb-4 sm:gap-2">
               <div>
-                <p className="font-bold text-lg text-foreground">{mockUserStats.postsCount}</p>
+                <p className="font-bold text-base md:text-lg text-foreground">{mockUserStats.postsCount}</p>
                 <p className="text-xs text-muted-foreground">Posts</p>
               </div>
               <div>
-                <p className="font-bold text-lg text-foreground">{mockUserStats.followersCount}</p>
+                <p className="font-bold text-base md:text-lg text-foreground">{mockUserStats.followersCount + (isFollowing && !isOwnPublicProfile ? 1 : 0)}</p>
                 <p className="text-xs text-muted-foreground">Followers</p>
               </div>
               <div>
-                <p className="font-bold text-lg text-foreground">{mockUserStats.followingCount}</p>
+                <p className="font-bold text-base md:text-lg text-foreground">{mockUserStats.followingCount}</p>
                 <p className="text-xs text-muted-foreground">Following</p>
               </div>
             </div>
-            <p>Joined: {mockUserStats.joinDate}</p>
-            <Separator className="my-4" />
+            <Separator className="my-3" />
             {isOwnPublicProfile ? (
                  <Button variant="outline" className="w-full" asChild>
                     <Link href="/profile">
-                    <Edit3 className="mr-2 h-4 w-4" /> Edit Profile & Settings
+                        <Edit3 className="mr-2 h-4 w-4" /> Edit Your Profile & Settings
                     </Link>
                 </Button>
-            ) : authUser ? (
+            ) : authUser && !authLoading ? (
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button onClick={handleFollowToggle} className="flex-1">
                   {isFollowing ? <UserCheck className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
@@ -146,68 +150,54 @@ export default function UserProfilePage() {
                   </Link>
                 </Button>
               </div>
-            ) : (
-                <p className="text-xs text-center text-muted-foreground">
-                    <Link href="/login" className="text-primary hover:underline">Login</Link> to follow or message.
+            ) : !authLoading && !authUser ? (
+                 <p className="text-xs text-center text-muted-foreground">
+                    <Link href="/login" className="text-primary hover:underline">Login</Link> to follow or message {username}.
                 </p>
-            )}
-            <Separator className="my-4" />
-            <p className="text-muted-foreground text-xs">This is {username}'s public profile. Information shared here is visible to other EduVerse users.</p>
+            ) : null }
           </CardContent>
         </Card>
 
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-6 md:space-y-8">
             <Card className="shadow-xl">
               <CardHeader>
-                <CardTitle className="font-headline text-xl">Stats & Achievements</CardTitle>
+                <CardTitle className="font-headline text-lg md:text-xl flex items-center"><BarChartHorizontal className="mr-2 h-5 w-5 text-primary" /> Stats & Achievements</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-center">
-                  <div className="p-4 bg-foreground/5 rounded-lg">
-                    <Star className="h-10 w-10 text-accent mx-auto mb-2" />
-                    <p className="text-2xl font-bold text-foreground">{mockUserStats.xp} XP</p>
-                    <p className="text-sm text-muted-foreground">Level {mockUserStats.level}</p>
+              <CardContent className="space-y-4 md:space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
+                  <div className="p-3 md:p-4 bg-foreground/5 rounded-lg">
+                    <Star className="h-8 w-8 md:h-10 md:w-10 text-accent mx-auto mb-1" />
+                    <p className="text-xl md:text-2xl font-bold text-foreground">{mockUserStats.xp} XP</p>
+                    <p className="text-xs md:text-sm text-muted-foreground">Level {mockUserStats.level}</p>
                   </div>
-                  <div className="p-4 bg-foreground/5 rounded-lg">
-                    <ShieldCheck className="h-10 w-10 text-accent mx-auto mb-2" />
-                    <p className="text-2xl font-bold text-foreground">{mockUserStats.badges.length} Badges</p>
-                    <p className="text-sm text-muted-foreground">Collected</p>
+                  <div className="p-3 md:p-4 bg-foreground/5 rounded-lg">
+                    <ShieldCheck className="h-8 w-8 md:h-10 md:w-10 text-accent mx-auto mb-1" />
+                    <p className="text-xl md:text-2xl font-bold text-foreground">{mockUserStats.badges.length} Badges</p>
+                    <p className="text-xs md:text-sm text-muted-foreground">Collected</p>
                   </div>
                 </div>
                 
                 <div>
-                  <h3 className="font-semibold text-lg mb-3 text-foreground">Badges Earned:</h3>
-                  <div className="flex flex-wrap gap-3">
+                  <h3 className="font-semibold text-base md:text-lg mb-2 text-foreground">Badges Earned:</h3>
+                  <div className="flex flex-wrap gap-2">
                     {mockUserStats.badges.map(badge => (
-                      <span key={badge} className="px-3 py-1 text-sm rounded-full bg-primary/10 text-primary font-medium flex items-center gap-1.5">
-                        <BadgePercent className="h-4 w-4"/> {badge}
+                      <span key={badge} className="px-2.5 py-1 text-xs md:text-sm rounded-full bg-primary/10 text-primary font-medium flex items-center gap-1">
+                        <BadgePercent className="h-3.5 w-3.5"/> {badge}
                       </span>
                     ))}
-                    {mockUserStats.badges.length === 0 && <p className="text-sm text-muted-foreground">No badges earned yet.</p>}
+                    {mockUserStats.badges.length === 0 && <p className="text-xs md:text-sm text-muted-foreground">No badges earned yet.</p>}
                   </div>
-                </div>
-                <Separator />
-                <div className="mt-4">
-                  <h3 className="font-semibold text-lg mb-3 text-foreground">Activity Overview</h3>
-                   <Image 
-                    src="https://placehold.co/600x300.png" 
-                    alt="Generic activity graph"
-                    width={600}
-                    height={300}
-                    className="rounded-lg object-cover aspect-[2/1] w-full"
-                    data-ai-hint="user activity chart" 
-                  />
-                  <p className="text-xs text-muted-foreground text-center mt-2">Detailed activity tracking is illustrative.</p>
                 </div>
               </CardContent>
             </Card>
+
             <Card className="shadow-xl w-full"> 
               <CardHeader>
-                <CardTitle className="font-headline text-xl flex items-center">
+                <CardTitle className="font-headline text-lg md:text-xl flex items-center">
                   <Rss className="mr-2 h-5 w-5 text-primary" /> Recent Posts by {username}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 md:space-y-6">
                 {mockUserPosts.length > 0 ? (
                   mockUserPosts.map(post => (
                     <PostCard key={post.id} post={post} />
@@ -227,11 +217,11 @@ export default function UserProfilePage() {
         </div>
       </div>
       
-      <Alert variant="default" className="mt-10 max-w-2xl mx-auto bg-primary/10 border-primary/30">
+      <Alert variant="default" className="mt-8 md:mt-10 max-w-2xl mx-auto bg-primary/10 border-primary/30">
         <UserCheck className="h-5 w-5 text-primary" /> 
         <AlertTitle className="font-headline text-primary">Public Profile View</AlertTitle>
         <AlertDescription className="text-foreground/80">
-          This is a public profile. More interactive features and user-specific content are planned for future updates.
+          This is {username}'s public profile. More interactive features and user-specific content are planned for future updates.
         </AlertDescription>
       </Alert>
     </div>
