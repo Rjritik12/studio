@@ -3,10 +3,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, HelpCircle, Swords, Users, LayoutGrid, UserCircle, LogIn, MessageSquare, SettingsIcon as ProfileSettingsIcon } from 'lucide-react'; 
+import { Home, HelpCircle, Swords, Users, LayoutGrid, UserCircle, LogIn, MessageSquare, SettingsIcon as ProfileSettingsIcon } from 'lucide-react';
 import { SidebarMenuButton } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/context/AuthContext'; 
+import { useAuth } from '@/context/AuthContext';
 
 const navItemsBase = [
   { href: '/', label: 'Dashboard', icon: Home, requiresAuth: false },
@@ -16,15 +16,16 @@ const navItemsBase = [
   { href: '/feed', label: 'Social Feed', icon: LayoutGrid, requiresAuth: false },
 ];
 
-const publicProfileNavItem = (username: string) => ({ 
-  href: `/profile/${encodeURIComponent(username)}`, 
+const publicProfileNavItem = (username: string) => ({
+  href: `/profile/${encodeURIComponent(username)}`,
   label: 'My Profile', // For sidebar clarity, can be more verbose
-  icon: UserCircle, 
-  requiresAuth: true 
+  icon: UserCircle,
+  requiresAuth: true
 });
 
 const loginNavItem = { href: '/login', label: 'Login', icon: LogIn, requiresAuth: false };
 const messagesNavItem = { href: '/messages', label: 'Messages', icon: MessageSquare, requiresAuth: true };
+const groupsNavItem = { href: '/groups', label: 'Study Groups', icon: Users, requiresAuth: true };
 
 
 interface NavLinksProps {
@@ -37,11 +38,12 @@ export function NavLinks({ isMobile = false, onLinkClick }: NavLinksProps) {
   const { user, loading } = useAuth();
 
   const getNavItems = () => {
-    if (loading) return []; 
-    
+    if (loading) return [];
+
     const items = [...navItemsBase];
     if (user) {
-      items.push(messagesNavItem); 
+      items.push(groupsNavItem); // Added Study Groups
+      items.push(messagesNavItem);
       const userProfileName = user.displayName || user.email?.split('@')[0] || 'me';
       items.push(publicProfileNavItem(userProfileName));
     } else {
@@ -54,10 +56,10 @@ export function NavLinks({ isMobile = false, onLinkClick }: NavLinksProps) {
 
   const currentNavItems = getNavItems();
 
-  if (loading && !isMobile) { 
+  if (loading && !isMobile) {
     return (
       <div className={cn("flex flex-col gap-2", isMobile ? "mt-6" : "")}>
-        {[...Array(currentNavItems.length || 6)].map((_, i) => (
+        {[...Array(currentNavItems.length || 7)].map((_, i) => ( // Adjusted for potential groups item
           <SidebarMenuButton key={i} asChild={false} disabled className={cn("justify-start", isMobile && "text-lg py-3")}>
              <div className="mr-2 h-5 w-5 bg-muted rounded animate-pulse" />
              <span className="h-4 w-24 bg-muted rounded animate-pulse" />
@@ -73,14 +75,18 @@ export function NavLinks({ isMobile = false, onLinkClick }: NavLinksProps) {
       {currentNavItems.map((item) => {
         const Icon = item.icon;
         if (item.requiresAuth && !user && !loading) {
-          return null; 
+          return null;
         }
-        
+
         let isActive = pathname === item.href;
-        if (item.label === 'My Profile' && pathname.startsWith('/profile/') && item.href.startsWith('/profile/')) {
-            isActive = pathname === item.href;
-        } else if (item.label !== 'Dashboard' && pathname.startsWith(item.href) && item.href !== '/') {
+        // More specific active state logic for nested routes or specific parent routes
+        if (item.href !== '/' && pathname.startsWith(item.href)) {
             isActive = true;
+        }
+        if (item.label === 'Dashboard' && pathname === '/') { // Ensure Dashboard is only active for exact match
+            isActive = true;
+        } else if (item.label === 'Dashboard' && pathname !== '/') {
+            isActive = false;
         }
 
 
@@ -89,7 +95,7 @@ export function NavLinks({ isMobile = false, onLinkClick }: NavLinksProps) {
             <SidebarMenuButton
               asChild={false}
               onClick={onLinkClick}
-              isActive={isActive} 
+              isActive={isActive}
               tooltip={item.label}
               className={cn(
                 "justify-start",

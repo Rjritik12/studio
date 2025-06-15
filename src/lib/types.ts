@@ -1,6 +1,6 @@
 
 import type { GenerateQuizQuestionsOutput } from '@/ai/flows/generate-quiz-questions';
-import type { TutorStudySessionOutput } from '@/ai/flows/tutor-study-session'; 
+import type { TutorStudySessionOutput } from '@/ai/flows/tutor-study-session';
 import type { GetQuizQuestionHintInput, GetQuizQuestionHintOutput } from '@/ai/flows/get-quiz-question-hint';
 import type { GenerateSingleQuizQuestionInput, GenerateSingleQuizQuestionOutput as SingleQuestionOutput, SingleQuizQuestion as NewSingleQuizQuestion } from '@/ai/flows/generate-single-quiz-question';
 
@@ -18,15 +18,15 @@ export type GeneratedQuizData = GenerateQuizQuestionsOutput;
 export interface Post {
   id: string;
   userName: string;
-  userAvatar: string; 
-  content: string; 
+  userAvatar: string;
+  content: string;
   type: 'note' | 'question' | 'meme' | 'link' | 'image';
   likes: number;
   commentsCount: number;
-  createdAt: number; 
-  expiresAt: number; 
-  imageUrl?: string; 
-  linkUrl?: string; 
+  createdAt: number;
+  expiresAt: number;
+  imageUrl?: string;
+  linkUrl?: string;
 }
 
 export interface Flashcard {
@@ -62,4 +62,14 @@ export interface ExploreConceptOutput {
   explanation: string;
   relatedTerms: string[];
   analogy?: string;
+}
+
+// Types for Mock Study Groups
+export interface MockStudyGroup {
+  id: string;
+  name: string;
+  description: string;
+  memberCount: number;
+  avatarUrl: string;
+  createdBy: string; // User who created it (mock)
 }
