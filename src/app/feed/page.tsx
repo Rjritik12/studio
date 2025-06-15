@@ -110,7 +110,17 @@ export default function FeedPage() {
       setStoriesForViewer(userStoryItems);
       setStoryViewerStartIndex(0);
       setIsStoryViewerOpen(true);
-      const groupIndex = uniqueUserStories.findIndex(s => s.username === username);
+      // Determine the correct group index based on the potentially reordered uniqueUserStories list
+      const currentAuthUserName = authUser ? (authUser.displayName || authUser.email?.split('@')[0] || "CurrentUser") : null;
+      let orderedUniqueUserStoriesForIndex: MockStory[] = [...uniqueUserStories];
+      if (currentAuthUserName) {
+        const currentUserIndexInUnique = orderedUniqueUserStoriesForIndex.findIndex(s => s.username === currentAuthUserName);
+        if (currentUserIndexInUnique > 0) {
+            const [storyToMove] = orderedUniqueUserStoriesForIndex.splice(currentUserIndexInUnique, 1);
+            orderedUniqueUserStoriesForIndex.unshift(storyToMove);
+        }
+      }
+      const groupIndex = orderedUniqueUserStoriesForIndex.findIndex(s => s.username === username);
       setCurrentUserStoryGroupIndex(groupIndex);
     }
   };
@@ -123,10 +133,27 @@ export default function FeedPage() {
   
   const navigateStorySet = (direction: 'next' | 'prev') => {
     let nextGroupIndex = currentUserStoryGroupIndex + (direction === 'next' ? 1 : -1);
-    const filteredUniqueUsers = uniqueUserStories.filter(u => u.username !== (authUser?.displayName || authUser?.email?.split('@')[0] || "CurrentUser"));
-    const displayableUniqueUserStories = authUser && uniqueUserStories.find(u => u.username === (authUser.displayName || authUser.email?.split('@')[0] || "CurrentUser")) 
-      ? [uniqueUserStories.find(u => u.username === (authUser.displayName || authUser.email?.split('@')[0] || "CurrentUser"))!, ...filteredUniqueUsers]
-      : filteredUniqueUsers;
+
+    const currentAuthUserName = authUser ? (authUser.displayName || authUser.email?.split('@')[0] || "CurrentUser") : null;
+    let tempDisplayableStories: MockStory[] = [];
+
+    if (Array.isArray(uniqueUserStories)) {
+        const currentUserOwnStory = currentAuthUserName ? uniqueUserStories.find(s => s.username === currentAuthUserName) : undefined;
+        const otherUsersStories = uniqueUserStories.filter(s => s.username !== currentAuthUserName);
+
+        if (currentUserOwnStory) {
+            tempDisplayableStories = [currentUserOwnStory, ...otherUsersStories];
+        } else {
+            tempDisplayableStories = otherUsersStories;
+        }
+    }
+    const displayableUniqueUserStories = tempDisplayableStories;
+
+
+    if (displayableUniqueUserStories.length === 0) {
+        handleStoryViewerClose();
+        return;
+    }
 
     if (nextGroupIndex >= displayableUniqueUserStories.length) {
       nextGroupIndex = 0; 
@@ -147,6 +174,8 @@ export default function FeedPage() {
         setStoryViewerStartIndex(0);
         setCurrentUserStoryGroupIndex(nextGroupIndex);
       } else {
+        // This case should ideally not happen if displayableUniqueUserStories is derived correctly
+        // from users who actually have stories in mockStoriesData.
         handleStoryViewerClose();
       }
     } else {
@@ -177,7 +206,7 @@ export default function FeedPage() {
 
   return (
     <TooltipProvider>
-      <div className="container mx-auto py-8 px-4 md:px-6 relative"> {/* Changed px-2 to px-4 */}
+      <div className="container mx-auto py-8 px-4 relative">
         <header className="text-center mb-8">
           <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-3">Community Feed</h1>
           <p className="text-lg text-foreground/80 max-w-xl mx-auto">
@@ -192,7 +221,7 @@ export default function FeedPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="px-2 sm:px-4 pb-4">
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"> {/* Changed gap-4 to gap-2 */}
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
               {!authLoading && authUser && !currentUserHasStories && (
                 <StoryBubble 
                   username={currentUserNameOrDefault} 
@@ -229,7 +258,6 @@ export default function FeedPage() {
           </CardContent>
         </Card>
         
-        {/* Create Post FAB */}
         <Tooltip>
             <TooltipTrigger asChild>
                 <Button
@@ -309,7 +337,7 @@ export default function FeedPage() {
           </div>
         </div>
 
-        <div className="w-full md:max-w-2xl md:mx-auto space-y-6 pb-20"> {/* Added padding-bottom for FAB visibility */}
+        <div className="w-full md:max-w-2xl md:mx-auto space-y-6 pb-20">
           {posts.map(post => (
             <PostCard key={post.id} post={post} />
           ))}
@@ -348,3 +376,4 @@ export default function FeedPage() {
     </TooltipProvider>
   );
 }
+
