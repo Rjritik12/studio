@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useRef, type ChangeEvent, type FormEvent } from 'react';
@@ -90,6 +89,9 @@ export default function HomePage() {
   };
 
   const triggerFileUpload = () => {
+    if (isWebcamOpen) { // If webcam is open, close it before opening file dialog
+        closeWebcam();
+    }
     fileInputRef.current?.click();
   };
 
@@ -127,30 +129,24 @@ export default function HomePage() {
   const openWebcam = async () => {
     clearPreview(); // Clear any uploaded image and previous solutions
 
-    // If permission is already granted and stream is active, just ensure it's visible
-    if (hasCameraPermission && streamRef.current) {
-      if (videoRef.current && videoRef.current.srcObject !== streamRef.current) {
-        videoRef.current.srcObject = streamRef.current; // Re-attach if necessary
-      }
-      setIsWebcamOpen(true);
-      return;
+    const stream = await requestCameraPermission(); 
+    if (stream) {
+      setIsWebcamOpen(true); // Show webcam view
+    } else {
+      setIsWebcamOpen(false); // Ensure webcam view is hidden if permission failed
+      // hasCameraPermission state is already set by requestCameraPermission
     }
-
-    // If permission was previously denied, or not yet determined, or stream is lost
-    const stream = await requestCameraPermission(); // This updates hasCameraPermission and attaches stream
-    setIsWebcamOpen(true); // Set to true to show webcam view or permission denied alert
   };
 
 
   const closeWebcam = () => {
     clearWebcamStream();
     setIsWebcamOpen(false);
-    // Note: We don't reset hasCameraPermission here. If granted, it remains granted.
-    // If denied, it remains denied. User might just want to close the feed.
+    // Don't reset hasCameraPermission here, let it persist user's choice
   };
 
   const captureImage = () => {
-    if (videoRef.current && canvasRef.current && streamRef.current) {
+    if (videoRef.current && canvasRef.current && streamRef.current && videoRef.current.readyState >= videoRef.current.HAVE_METADATA) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
       canvas.width = video.videoWidth;
@@ -164,6 +160,12 @@ export default function HomePage() {
         setSolutionError(null);
       }
       closeWebcam(); // Close webcam after capture
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Webcam Error",
+            description: "Could not capture image. Webcam might not be ready."
+        });
     }
   };
 
@@ -174,8 +176,6 @@ export default function HomePage() {
     if (fileInputRef.current) {
       fileInputRef.current.value = ""; 
     }
-    // Note: This function no longer closes the webcam directly.
-    // The "Clear Image" button will have its own handler if it needs to close an open webcam.
   };
   
   const handleClearImageAndWebcam = () => {
@@ -262,19 +262,18 @@ export default function HomePage() {
                             )}
                         </div>
                         
-                        {/* Container for webcam and its controls */}
                         <div className="flex flex-col items-center w-full max-w-md mx-auto">
                             <video
                                 ref={videoRef}
                                 className={cn(
                                     "w-full aspect-video rounded-md border bg-muted",
-                                    isWebcamOpen && hasCameraPermission ? "block" : "hidden"
+                                    isWebcamOpen && hasCameraPermission === true ? "block" : "hidden"
                                 )}
                                 autoPlay
                                 muted
                                 playsInline
                             />
-                            {isWebcamOpen && hasCameraPermission && (
+                            {isWebcamOpen && hasCameraPermission === true && (
                                 <Button
                                     type="button"
                                     onClick={captureImage}
@@ -284,13 +283,12 @@ export default function HomePage() {
                                     <Camera className="mr-2 h-5 w-5" /> Capture Photo
                                 </Button>
                             )}
-                            {/* Alert if user tried to open webcam (isWebcamOpen=true) but permission is denied (hasCameraPermission=false) */}
-                            {isWebcamOpen && hasCameraPermission === false && (
+                            {hasCameraPermission === false && ( // Show if permission was explicitly denied
                                 <Alert variant="destructive" className="w-full mt-2">
                                     <AlertCircle className="h-4 w-4" />
                                     <AlertTitle>Camera Access Denied</AlertTitle>
                                     <AlertDescription>
-                                        To capture an image, EduVerse needs camera access. Please enable camera permissions in your browser settings and try again.
+                                        To capture an image, EduVerse needs camera access. Please enable camera permissions in your browser settings and try again. You can still upload an image.
                                     </AlertDescription>
                                 </Alert>
                             )}
@@ -303,10 +301,21 @@ export default function HomePage() {
                                 <div className="relative w-full max-w-md border rounded-md overflow-hidden shadow-md bg-muted">
                                     <Image src={imagePreview} alt="Problem preview" width={600} height={400} className="object-contain aspect-video w-full" data-ai-hint="problem preview" />
                                 </div>
-                                <Button type="button" variant="outline" size="sm" onClick={handleClearImageAndWebcam} disabled={isProcessingSolution}>
-                                    <Trash2 className="mr-2 h-4 w-4" /> Clear Image
-                                </Button>
                             </div>
+                        )}
+                        
+                        {(imagePreview || (isWebcamOpen && hasCameraPermission)) && (
+                             <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={handleClearImageAndWebcam} 
+                                disabled={isProcessingSolution}
+                                className="w-full max-w-xs mx-auto block"
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" /> 
+                                {isWebcamOpen && hasCameraPermission ? "Close Webcam & Clear" : "Clear Image"}
+                            </Button>
                         )}
                         
                         <div>
@@ -416,4 +425,3 @@ export default function HomePage() {
       </main>
     </div>
   );
-
