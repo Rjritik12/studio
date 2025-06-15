@@ -113,6 +113,7 @@ export default function FeedPage() {
       
       const currentAuthUserName = authUser ? (authUser.displayName || authUser.email?.split('@')[0] || "CurrentUser") : null;
       let orderedUniqueUserStoriesForIndex: MockStory[] = [];
+
       if (Array.isArray(uniqueUserStories)) {
           const currentUserOwnStory = currentAuthUserName ? uniqueUserStories.find(s => s.username === currentAuthUserName) : undefined;
           const otherUsersStories = uniqueUserStories.filter(s => s.username !== currentAuthUserName);
@@ -207,13 +208,13 @@ export default function FeedPage() {
       <div className="container mx-auto py-8 px-4 relative">
         <header className="text-center mb-8">
           <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-3">Community Feed</h1>
-          <p className="text-lg text-foreground/80 max-w-xl mx-auto">
+          <p className="text-base sm:text-lg text-foreground/80 max-w-xl mx-auto">
             Share notes, ask questions, and connect with fellow learners. Posts vanish after 48 hours!
           </p>
         </header>
 
         <Card className="mb-8 shadow-sm">
-          <CardHeader className="pb-3 pt-4">
+          <CardHeader className="pb-2 pt-3 sm:pb-3 sm:pt-4">
             <CardTitle className="text-lg font-semibold flex items-center">
                 <ImageIconLucide className="h-5 w-5 mr-2 text-primary" /> Stories
             </CardTitle>
@@ -340,11 +341,11 @@ export default function FeedPage() {
             <PostCard key={post.id} post={post} />
           ))}
           {posts.length === 0 && (
-            <Card className="text-center py-10 shadow-sm bg-card">
-              <CardContent className="flex flex-col items-center gap-4">
-                <MessagesSquare className="h-16 w-16 text-muted-foreground/50" />
-                <p className="text-xl font-medium text-card-foreground">It's quiet in here...</p>
-                <p className="text-sm text-muted-foreground">
+            <Card className="text-center py-6 sm:py-10 shadow-sm bg-card">
+              <CardContent className="flex flex-col items-center gap-3 sm:gap-4">
+                <MessagesSquare className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground/50" />
+                <p className="text-lg sm:text-xl font-medium text-card-foreground">It's quiet in here...</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   No posts yet. Why not be the first to share something?
                 </p>
               </CardContent>
@@ -375,3 +376,5 @@ export default function FeedPage() {
   );
 }
 
+
+    
