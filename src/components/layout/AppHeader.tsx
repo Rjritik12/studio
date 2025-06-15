@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { MenuIcon, UserCircle, LogIn, LogOut, Loader2, Bell, BarChart3 } from 'lucide-react'; // Added BarChart3
+import { MenuIcon, UserCircle, LogIn, LogOut, Loader2, Bell, BarChart3, SettingsIcon } from 'lucide-react'; // Added SettingsIcon
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { NavLinks } from './NavLinks';
 import { useAuth } from '@/context/AuthContext';
@@ -24,6 +24,8 @@ export function AppHeader() {
     }
     return <UserCircle className="h-6 w-6" />;
   };
+  
+  const currentUserProfileLink = user ? `/profile/${encodeURIComponent(user.displayName || user.email?.split('@')[0] || 'me')}` : '/profile';
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-md">
@@ -70,14 +72,6 @@ export function AppHeader() {
               <DropdownMenuItem disabled className="text-muted-foreground text-sm text-center justify-center py-4">
                 No new notifications
               </DropdownMenuItem>
-              {/* Example of a notification item - can be used later
-              <DropdownMenuItem>
-                <div className="flex flex-col">
-                  <span className="font-medium">New message from Alice</span>
-                  <span className="text-xs text-muted-foreground">2 minutes ago</span>
-                </div>
-              </DropdownMenuItem>
-              */}
               <DropdownMenuSeparator />
               <DropdownMenuItem disabled className="text-center justify-center text-xs text-muted-foreground">
                 Notification system coming soon
@@ -105,15 +99,15 @@ export function AppHeader() {
               <DropdownMenuLabel>{user.displayName || user.email || 'My Account'}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/profile">
-                  <UserCircle className="mr-2 h-4 w-4" />
-                  Profile
+                <Link href="/profile"> {/* This now correctly points to "My Account" page */}
+                  <SettingsIcon className="mr-2 h-4 w-4" /> {/* Changed icon */}
+                  My Account
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/profile">
+                <Link href={currentUserProfileLink}> {/* Points to current user's public profile */}
                   <BarChart3 className="mr-2 h-4 w-4" />
-                  My Stats & Achievements
+                  View My Public Profile
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

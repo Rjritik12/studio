@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, HelpCircle, Swords, Users, LayoutGrid, User, BookOpen, LogIn, MessageCircle } from 'lucide-react'; // Added MessageCircle
+import { Home, HelpCircle, Swords, Users, LayoutGrid, User, BookOpen, LogIn, MessageCircle, SettingsIcon } from 'lucide-react'; // Added SettingsIcon
 import { SidebarMenuButton } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext'; 
@@ -17,7 +17,7 @@ const navItemsBase = [
 ];
 
 const messagesNavItem = { href: '/messages', label: 'Messages', icon: MessageCircle, requiresAuth: true };
-const profileNavItem = { href: '/profile', label: 'Profile', icon: User, requiresAuth: true };
+const myAccountNavItem = { href: '/profile', label: 'My Account', icon: SettingsIcon, requiresAuth: true }; // Changed
 const loginNavItem = { href: '/login', label: 'Login', icon: LogIn, requiresAuth: false };
 
 
@@ -35,8 +35,8 @@ export function NavLinks({ isMobile = false, onLinkClick }: NavLinksProps) {
     
     const items = [...navItemsBase];
     if (user) {
-      items.push(messagesNavItem); // Add messages link if user is logged in
-      items.push(profileNavItem);
+      items.push(messagesNavItem); 
+      items.push(myAccountNavItem); // Use new "My Account" item
     } else {
       if (pathname !== '/login' && pathname !== '/signup') {
          items.push(loginNavItem);
@@ -50,7 +50,7 @@ export function NavLinks({ isMobile = false, onLinkClick }: NavLinksProps) {
   if (loading && !isMobile) { 
     return (
       <div className={cn("flex flex-col gap-2", isMobile ? "mt-6" : "")}>
-        {[...Array(6)].map((_, i) => ( // Increased array size for potential new item
+        {[...Array(6)].map((_, i) => ( 
           <SidebarMenuButton key={i} asChild={false} disabled className={cn("justify-start", isMobile && "text-lg py-3")}>
              <div className="mr-2 h-5 w-5 bg-muted rounded animate-pulse" />
              <span className="h-4 w-24 bg-muted rounded animate-pulse" />
@@ -68,13 +68,23 @@ export function NavLinks({ isMobile = false, onLinkClick }: NavLinksProps) {
         if (item.requiresAuth && !user && !loading) {
           return null; 
         }
+        
+        // Special active check for public profiles: /profile/[username] should not make /profile (My Account) active
+        let isActive = pathname === item.href;
+        if (item.href === '/profile' && pathname.startsWith('/profile/')) { 
+            // This is the My Account link. If current path is a dynamic profile, it's not active.
+            isActive = pathname === '/profile'; 
+        } else if (pathname.startsWith(item.href) && item.href !== '/') {
+            isActive = true;
+        }
+
 
         return (
           <Link href={item.href} key={item.label} passHref>
             <SidebarMenuButton
               asChild={false}
               onClick={onLinkClick}
-              isActive={pathname.startsWith(item.href) && (item.href !== '/' || pathname === '/')} // More robust active check for nested routes
+              isActive={isActive} 
               tooltip={item.label}
               className={cn(
                 "justify-start",

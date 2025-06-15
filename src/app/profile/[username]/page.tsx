@@ -4,7 +4,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BadgePercent, Star, ShieldCheck, UserCheck, BarChart3, UserPlus, MessageSquare, Rss, AlertCircle } from "lucide-react";
+import { BadgePercent, Star, ShieldCheck, UserCheck, BarChart3, UserPlus, MessageSquare, Rss, AlertCircle, BarChartHorizontal } from "lucide-react"; // Added BarChartHorizontal
 import Image from "next/image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useParams, useRouter } from 'next/navigation';
@@ -29,21 +29,18 @@ export default function UserProfilePage() {
     level: 0,
     badges: [] as string[],
     joinDate: new Date().toLocaleDateString(),
+    postsCount: 0,
+    followersCount: 0,
+    followingCount: 0,
   });
   const [mockUserPosts, setMockUserPosts] = useState<Post[]>([]);
 
   const avatarFallback = username.substring(0, 1).toUpperCase();
   const avatarUrl = `https://placehold.co/128x128.png?text=${avatarFallback}`;
+  
+  const isOwnPublicProfile = authUser && (authUser.displayName === username || authUser.email?.split('@')[0] === username);
 
   useEffect(() => {
-    setMockUserStats({
-      xp: Math.floor(Math.random() * 2000) + 500,
-      level: Math.floor(Math.random() * 10) + 3,
-      badges: ["Quiz Enthusiast", "Active Learner", "Community Helper"].sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 2) + 1),
-      joinDate: new Date(Date.now() - Math.floor(Math.random() * 365 * 24 * 60 * 60 * 1000)).toLocaleDateString(),
-    });
-    setIsFollowing(false);
-
     const generatedPosts: Post[] = [
       {
         id: `post1-profile-${username}`,
@@ -60,7 +57,7 @@ export default function UserProfilePage() {
         id: `post2-profile-${username}`,
         userName: username,
         userAvatar: avatarUrl,
-        content: `Check out this interesting article I found on quantum computing. What are your thoughts? (Viewed from ${username}'s profile)`,
+        content: `Check out this interesting article I found on quantum computing. (Viewed from ${username}'s profile page). What are your thoughts?`,
         type: 'link',
         linkUrl: 'https://example.com/quantum-article-profile',
         likes: Math.floor(Math.random() * 30),
@@ -69,7 +66,19 @@ export default function UserProfilePage() {
         expiresAt: Date.now() + (48 * 3600000) - Math.floor(Math.random() * 48 * 3600000),
       },
     ];
-    setMockUserPosts(generatedPosts.filter(post => post.expiresAt > Date.now()));
+    const activePosts = generatedPosts.filter(post => post.expiresAt > Date.now());
+    setMockUserPosts(activePosts);
+
+    setMockUserStats({
+      xp: Math.floor(Math.random() * 2000) + 500,
+      level: Math.floor(Math.random() * 10) + 3,
+      badges: ["Quiz Enthusiast", "Active Learner", "Community Helper"].sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 2) + 1),
+      joinDate: new Date(Date.now() - Math.floor(Math.random() * 365 * 24 * 60 * 60 * 1000)).toLocaleDateString(),
+      postsCount: activePosts.length + Math.floor(Math.random() * 5), // Add some random older posts count
+      followersCount: Math.floor(Math.random() * 500),
+      followingCount: Math.floor(Math.random() * 200),
+    });
+    setIsFollowing(false); // Reset follow state on profile change
 
   }, [username, avatarUrl]);
 
@@ -82,7 +91,6 @@ export default function UserProfilePage() {
     });
   };
   
-  const isOwnProfilePage = authUser && (authUser.displayName === username || authUser.email?.split('@')[0] === username);
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
@@ -105,9 +113,23 @@ export default function UserProfilePage() {
             <CardDescription>EduVerse Member</CardDescription>
           </CardHeader>
           <CardContent className="text-sm text-foreground/80">
+            <div className="flex justify-around text-center mb-4">
+              <div>
+                <p className="font-bold text-lg text-foreground">{mockUserStats.postsCount}</p>
+                <p className="text-xs text-muted-foreground">Posts</p>
+              </div>
+              <div>
+                <p className="font-bold text-lg text-foreground">{mockUserStats.followersCount}</p>
+                <p className="text-xs text-muted-foreground">Followers</p>
+              </div>
+              <div>
+                <p className="font-bold text-lg text-foreground">{mockUserStats.followingCount}</p>
+                <p className="text-xs text-muted-foreground">Following</p>
+              </div>
+            </div>
             <p>Joined: {mockUserStats.joinDate}</p>
             <Separator className="my-4" />
-            {!isOwnProfilePage && authUser && (
+            {!isOwnPublicProfile && authUser && (
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button onClick={handleFollowToggle} className="flex-1">
                   {isFollowing ? <UserCheck className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
@@ -125,11 +147,15 @@ export default function UserProfilePage() {
                     <Link href="/login" className="text-primary hover:underline">Login</Link> to follow or message.
                 </p>
             )}
-            {isOwnProfilePage && (
-              <p className="text-xs text-center text-muted-foreground mt-2">This is your public profile view.</p>
+            {isOwnPublicProfile && (
+              <Button variant="outline" className="w-full" asChild>
+                <Link href="/profile">
+                  <Edit3 className="mr-2 h-4 w-4" /> Edit Your Profile & Settings
+                </Link>
+              </Button>
             )}
             <Separator className="my-4" />
-            <p className="text-muted-foreground text-xs">More user details and settings will be available here in the future for profile owners.</p>
+            <p className="text-muted-foreground text-xs">This is {username}'s public profile. Information shared here is visible to other EduVerse users.</p>
           </CardContent>
         </Card>
 
@@ -206,7 +232,7 @@ export default function UserProfilePage() {
       </div>
       
       <Alert variant="default" className="mt-10 max-w-2xl mx-auto bg-primary/10 border-primary/30">
-        <BarChart3 className="h-5 w-5 text-primary" />
+        <BarChartHorizontal className="h-5 w-5 text-primary" /> {/* Corrected Icon */}
         <AlertTitle className="font-headline text-primary">Public Profile View</AlertTitle>
         <AlertDescription className="text-foreground/80">
           This is a public profile. More interactive features and user-specific content are planned for future updates.

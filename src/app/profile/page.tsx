@@ -5,8 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Edit3, Clock, AlertCircle, LogIn, Loader2, LogOut, CreditCard, Archive, Rss } from "lucide-react";
-import Image from "next/image";
+import { Edit3, Clock, AlertCircle, LogIn, Loader2, LogOut, CreditCard, Archive, SettingsIcon } from "lucide-react"; // Changed UserCircle to SettingsIcon
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/context/AuthContext"; // Import useAuth
@@ -20,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 
 
-export default function ProfilePage() {
+export default function MyAccountPage() { // Renamed component for clarity
   const { user, loading, logout } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -91,7 +90,7 @@ export default function ProfilePage() {
           <AlertCircle className="h-5 w-5" />
           <AlertTitle className="font-headline">Access Denied</AlertTitle>
           <AlertDescription>
-            You need to be logged in to view your profile.
+            You need to be logged in to view your account details.
           </AlertDescription>
         </Alert>
         <Button asChild className="mt-6">
@@ -112,21 +111,22 @@ export default function ProfilePage() {
     <TooltipProvider>
       <div className="container mx-auto py-8 px-4 md:px-6">
         <header className="text-center mb-12">
-          <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary mb-4">My Profile</h1>
+          <SettingsIcon className="mx-auto h-16 w-16 text-primary mb-4" />
+          <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary mb-4">My Account</h1>
           <p className="text-xl text-foreground/80 max-w-2xl mx-auto">
-            View your progress, achievements, and manage your account settings.
+            Manage your profile information, preferences, and account settings.
           </p>
         </header>
 
-        <div className="space-y-8">
+        <div className="w-full max-w-lg mx-auto space-y-8"> {/* Changed to single column layout */}
           {/* Profile Card */}
-          <Card className="w-full max-w-lg mx-auto shadow-xl">
+          <Card className="shadow-xl">
             <CardHeader className="items-center text-center">
               <Avatar className="w-32 h-32 mb-4 border-4 border-primary shadow-md">
                 <AvatarImage src={avatarUrl} alt={displayName} data-ai-hint="profile picture"/>
                 <AvatarFallback className="text-4xl">{displayName.substring(0,1).toUpperCase()}</AvatarFallback>
               </Avatar>
-              <CardTitle className="font-headline text-2xl">{tempDisplayName || displayName}</CardTitle> {/* Show tempDisplayName if edited */}
+              <CardTitle className="font-headline text-2xl">{tempDisplayName || displayName}</CardTitle>
               <CardDescription>{displayEmail}</CardDescription>
               <Button variant="outline" size="sm" className="mt-3" onClick={handleEditProfileOpen}>
                 <Edit3 className="mr-2 h-4 w-4" /> Edit Profile
@@ -176,23 +176,6 @@ export default function ProfilePage() {
                <Button onClick={logout} variant="outline" className="w-full mt-3">
                   <LogOut className="mr-2 h-4 w-4" /> Logout
                 </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="w-full max-w-2xl mx-auto shadow-xl">
-            <CardHeader>
-              <CardTitle className="font-headline text-xl flex items-center">
-                <Rss className="mr-2 h-5 w-5 text-primary" /> My Active Posts
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Alert variant="default" className="bg-amber-50 border-amber-300 dark:bg-amber-900/30 dark:border-amber-700">
-                <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                <AlertTitle className="font-semibold text-amber-700 dark:text-amber-300">Feature in Development</AlertTitle>
-                <AlertDescription className="text-amber-700/90 dark:text-amber-300/90 mt-1">
-                  Displaying your active posts here requires backend integration for persistent post storage. This feature is planned for future updates! You can see your newly created posts on the Community Feed, and they will expire after 48 hours.
-                </AlertDescription>
-              </Alert>
             </CardContent>
           </Card>
 
