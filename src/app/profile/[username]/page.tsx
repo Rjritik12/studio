@@ -13,8 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
-import { PostCard } from "@/app/feed/components/PostCard"; // Import PostCard
-import type { Post } from "@/lib/types"; // Import Post type
+import { PostCard } from "@/app/feed/components/PostCard";
+import type { Post } from "@/lib/types";
 
 export default function UserProfilePage() {
   const params = useParams();
@@ -36,7 +36,6 @@ export default function UserProfilePage() {
   const avatarUrl = `https://placehold.co/128x128.png?text=${avatarFallback}`;
 
   useEffect(() => {
-    // Simulate fetching user stats
     setMockUserStats({
       xp: Math.floor(Math.random() * 2000) + 500,
       level: Math.floor(Math.random() * 10) + 3,
@@ -45,33 +44,31 @@ export default function UserProfilePage() {
     });
     setIsFollowing(false);
 
-    // Generate mock posts specific to this user profile
     const generatedPosts: Post[] = [
       {
-        id: `post1-${username}`,
+        id: `post1-profile-${username}`,
         userName: username,
         userAvatar: avatarUrl,
-        content: `Hello from ${username}! Just sharing a quick note about my studies today. Focused on astrophysics! ✨`,
+        content: `Hello from ${username}'s profile! Just sharing a quick note about my studies today. Focused on astrophysics! ✨`,
         type: 'note',
         likes: Math.floor(Math.random() * 50),
         commentsCount: Math.floor(Math.random() * 10),
-        createdAt: Date.now() - Math.floor(Math.random() * 24 * 3600000), // Within last 24 hours
-        expiresAt: Date.now() + (48 * 3600000) - Math.floor(Math.random() * 24 * 3600000), // Expires in next 24-48 hours
+        createdAt: Date.now() - Math.floor(Math.random() * 24 * 3600000), 
+        expiresAt: Date.now() + (48 * 3600000) - Math.floor(Math.random() * 24 * 3600000), 
       },
       {
-        id: `post2-${username}`,
+        id: `post2-profile-${username}`,
         userName: username,
         userAvatar: avatarUrl,
-        content: `Check out this interesting article I found on quantum computing. What are your thoughts?`,
+        content: `Check out this interesting article I found on quantum computing. What are your thoughts? (Viewed from ${username}'s profile)`,
         type: 'link',
-        linkUrl: 'https://example.com/quantum-article',
+        linkUrl: 'https://example.com/quantum-article-profile',
         likes: Math.floor(Math.random() * 30),
         commentsCount: Math.floor(Math.random() * 5),
-        createdAt: Date.now() - Math.floor(Math.random() * 48 * 3600000), // Within last 48 hours
+        createdAt: Date.now() - Math.floor(Math.random() * 48 * 3600000), 
         expiresAt: Date.now() + (48 * 3600000) - Math.floor(Math.random() * 48 * 3600000),
       },
     ];
-    // Only include posts that haven't "expired" for the mock
     setMockUserPosts(generatedPosts.filter(post => post.expiresAt > Date.now()));
 
   }, [username, avatarUrl]);
@@ -136,75 +133,77 @@ export default function UserProfilePage() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2 shadow-xl">
-          <CardHeader>
-            <CardTitle className="font-headline text-xl">Stats & Achievements</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-center">
-              <div className="p-4 bg-foreground/5 rounded-lg">
-                <Star className="h-10 w-10 text-accent mx-auto mb-2" />
-                <p className="text-2xl font-bold text-foreground">{mockUserStats.xp} XP</p>
-                <p className="text-sm text-muted-foreground">Level {mockUserStats.level}</p>
-              </div>
-              <div className="p-4 bg-foreground/5 rounded-lg">
-                <ShieldCheck className="h-10 w-10 text-accent mx-auto mb-2" />
-                <p className="text-2xl font-bold text-foreground">{mockUserStats.badges.length} Badges</p>
-                <p className="text-sm text-muted-foreground">Collected</p>
-              </div>
-            </div>
+        <div className="lg:col-span-2 space-y-8">
+            <Card className="shadow-xl">
+              <CardHeader>
+                <CardTitle className="font-headline text-xl">Stats & Achievements</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-center">
+                  <div className="p-4 bg-foreground/5 rounded-lg">
+                    <Star className="h-10 w-10 text-accent mx-auto mb-2" />
+                    <p className="text-2xl font-bold text-foreground">{mockUserStats.xp} XP</p>
+                    <p className="text-sm text-muted-foreground">Level {mockUserStats.level}</p>
+                  </div>
+                  <div className="p-4 bg-foreground/5 rounded-lg">
+                    <ShieldCheck className="h-10 w-10 text-accent mx-auto mb-2" />
+                    <p className="text-2xl font-bold text-foreground">{mockUserStats.badges.length} Badges</p>
+                    <p className="text-sm text-muted-foreground">Collected</p>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold text-lg mb-3 text-foreground">Badges Earned:</h3>
+                  <div className="flex flex-wrap gap-3">
+                    {mockUserStats.badges.map(badge => (
+                      <span key={badge} className="px-3 py-1 text-sm rounded-full bg-primary/10 text-primary font-medium flex items-center gap-1.5">
+                        <BadgePercent className="h-4 w-4"/> {badge}
+                      </span>
+                    ))}
+                    {mockUserStats.badges.length === 0 && <p className="text-sm text-muted-foreground">No badges earned yet.</p>}
+                  </div>
+                </div>
+                <Separator />
+                <div className="mt-4">
+                  <h3 className="font-semibold text-lg mb-3 text-foreground">Activity Overview</h3>
+                   <Image 
+                    src="https://placehold.co/600x300.png" 
+                    alt="Generic activity graph"
+                    width={600}
+                    height={300}
+                    className="rounded-lg object-cover aspect-[2/1] w-full"
+                    data-ai-hint="user activity chart" 
+                  />
+                  <p className="text-xs text-muted-foreground text-center mt-2">Detailed activity tracking is illustrative.</p>
+                </div>
+              </CardContent>
+            </Card>
             
-            <div>
-              <h3 className="font-semibold text-lg mb-3 text-foreground">Badges Earned:</h3>
-              <div className="flex flex-wrap gap-3">
-                {mockUserStats.badges.map(badge => (
-                  <span key={badge} className="px-3 py-1 text-sm rounded-full bg-primary/10 text-primary font-medium flex items-center gap-1.5">
-                    <BadgePercent className="h-4 w-4"/> {badge}
-                  </span>
-                ))}
-                {mockUserStats.badges.length === 0 && <p className="text-sm text-muted-foreground">No badges earned yet.</p>}
-              </div>
-            </div>
-            <Separator />
-            <div className="mt-4">
-              <h3 className="font-semibold text-lg mb-3 text-foreground">Activity Overview</h3>
-               <Image 
-                src="https://placehold.co/600x300.png" 
-                alt="Generic activity graph"
-                width={600}
-                height={300}
-                className="rounded-lg object-cover aspect-[2/1] w-full"
-                data-ai-hint="user activity chart" 
-              />
-              <p className="text-xs text-muted-foreground text-center mt-2">Detailed activity tracking is illustrative.</p>
-            </div>
-          </CardContent>
-        </Card>
+            <Card className="shadow-xl w-full">
+              <CardHeader>
+                <CardTitle className="font-headline text-xl flex items-center">
+                  <Rss className="mr-2 h-5 w-5 text-primary" /> Recent Posts by {username}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {mockUserPosts.length > 0 ? (
+                  mockUserPosts.map(post => (
+                    <PostCard key={post.id} post={post} />
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">No recent active posts to display for {username} in this mock view.</p>
+                )}
+                <Alert variant="default" className="bg-amber-50 border-amber-300 dark:bg-amber-900/30 dark:border-amber-700 mt-4">
+                  <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  <AlertTitle className="font-semibold text-amber-700 dark:text-amber-300">Mock Posts Displayed</AlertTitle>
+                  <AlertDescription className="text-amber-700/90 dark:text-amber-300/90 mt-1">
+                    The posts above are for demonstration purposes. Displaying {username}'s actual recent posts requires backend integration for persistent post storage. This feature is planned for future updates!
+                  </AlertDescription>
+                </Alert>
+              </CardContent>
+            </Card>
+        </div>
       </div>
-      
-      <Card className="mt-8 shadow-xl w-full">
-        <CardHeader>
-          <CardTitle className="font-headline text-xl flex items-center">
-            <Rss className="mr-2 h-5 w-5 text-primary" /> Recent Posts by {username}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {mockUserPosts.length > 0 ? (
-            mockUserPosts.map(post => (
-              <PostCard key={post.id} post={post} />
-            ))
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">No recent active posts to display for {username} in this mock view.</p>
-          )}
-          <Alert variant="default" className="bg-amber-50 border-amber-300 dark:bg-amber-900/30 dark:border-amber-700 mt-4">
-            <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-            <AlertTitle className="font-semibold text-amber-700 dark:text-amber-300">Mock Posts Displayed</AlertTitle>
-            <AlertDescription className="text-amber-700/90 dark:text-amber-300/90 mt-1">
-              The posts above are for demonstration purposes. Displaying {username}'s actual recent posts requires backend integration for persistent post storage. This feature is planned for future updates!
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
       
       <Alert variant="default" className="mt-10 max-w-2xl mx-auto bg-primary/10 border-primary/30">
         <BarChart3 className="h-5 w-5 text-primary" />
