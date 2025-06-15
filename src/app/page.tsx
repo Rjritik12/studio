@@ -374,7 +374,7 @@ export default function HomePage() {
           <h2 className="font-headline text-3xl font-semibold text-center mb-10 text-foreground">Explore Features</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature) => (
-              <Card key={feature.title} className="hover:shadow-lg transition-shadow duration-300 ease-in-out flex flex-col">
+              <Card key={feature.title} className="hover:shadow-xl transition-all duration-300 ease-in-out hover:scale-[1.02] hover:border-primary/30 border-transparent border-2 flex flex-col">
                 <CardHeader className="flex flex-row items-center gap-4 pb-4">
                   <feature.icon className="w-10 h-10 text-primary" />
                   <CardTitle className="font-headline text-xl">{feature.title}</CardTitle>
@@ -416,3 +416,4 @@ export default function HomePage() {
       </main>
     </div>
   );
+

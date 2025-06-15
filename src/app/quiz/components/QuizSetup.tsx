@@ -63,7 +63,7 @@ export function QuizSetup({ onQuizSetup, isLoading, error }: QuizSetupProps) {
   };
 
   return (
-    <Card className="w-full max-w-lg mx-auto">
+    <Card className="w-full max-w-lg mx-auto shadow-xl border-2 border-primary/20">
       <CardHeader>
         <CardTitle className="font-headline text-2xl">Setup Your Quiz</CardTitle>
         <CardDescription>Choose your topic, difficulty, and number of questions to start.</CardDescription>
@@ -116,4 +116,3 @@ export function QuizSetup({ onQuizSetup, isLoading, error }: QuizSetupProps) {
     </Card>
   );
 }
-

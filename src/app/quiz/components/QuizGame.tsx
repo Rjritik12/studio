@@ -285,7 +285,7 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
                 "w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full text-xs font-semibold border-2 transition-all duration-300",
                 currentQuestionIndex + 1 === step ? "bg-primary text-primary-foreground border-white scale-110 shadow-xl ring-2 ring-primary ring-offset-1" : 
                 currentQuestionIndex + 1 > step ? "bg-green-500 text-white border-green-600 opacity-80" : 
-                safeHavens.includes(step) ? "bg-yellow-400 border-yellow-600 text-yellow-900 font-bold" : 
+                safeHavens.includes(step) ? "bg-accent/80 border-accent text-accent-foreground font-bold shadow-md ring-1 ring-accent/50 transform scale-105" : 
                 "bg-card border-border text-muted-foreground hover:bg-muted/50" 
               )}
               title={`Question ${step}`}
