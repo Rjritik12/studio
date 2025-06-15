@@ -35,8 +35,10 @@ export default function UserProfilePage() {
   const [mockUserPosts, setMockUserPosts] = useState<Post[]>([]);
 
   const avatarFallback = username.substring(0, 1).toUpperCase();
-  // Use a consistent placeholder URL or derive from username if no authUser photoURL is available
-  const profileAvatarUrl = `https://placehold.co/128x128.png?text=${avatarFallback}`;
+  // Use authUser's photoURL if viewing own profile and it exists, otherwise placeholder
+  const profileAvatarUrl = authUser?.photoURL && (authUser.displayName === username || authUser.email?.split('@')[0] === username) 
+                           ? authUser.photoURL 
+                           : `https://placehold.co/128x128.png?text=${avatarFallback}`;
   
   const isOwnPublicProfile = authUser && (authUser.displayName === username || authUser.email?.split('@')[0] === username);
 
@@ -45,7 +47,7 @@ export default function UserProfilePage() {
       {
         id: `post1-public-profile-${username}`,
         userName: username,
-        userAvatar: profileAvatarUrl,
+        userAvatar: profileAvatarUrl, // Use the determined profileAvatarUrl
         content: `This is a mock post from ${username}'s public profile! Exploring new study techniques.`,
         type: 'note',
         likes: Math.floor(Math.random() * 70) + 5,
@@ -56,7 +58,7 @@ export default function UserProfilePage() {
       {
         id: `post2-public-profile-${username}`,
         userName: username,
-        userAvatar: profileAvatarUrl,
+        userAvatar: profileAvatarUrl, // Use the determined profileAvatarUrl
         content: `Sharing a cool link I found about space exploration, viewed from ${username}'s profile.`,
         type: 'link',
         linkUrl: 'https://example.com/space-exploration-profile',
@@ -77,9 +79,9 @@ export default function UserProfilePage() {
       followersCount: Math.floor(Math.random() * 700) + 50,
       followingCount: Math.floor(Math.random() * 300) + 20,
     });
-    setIsFollowing(Math.random() < 0.3); // Randomly follow some users for demo
+    setIsFollowing(Math.random() < 0.3); 
 
-  }, [username, profileAvatarUrl]);
+  }, [username, profileAvatarUrl]); // profileAvatarUrl dependency is enough as it derives from authUser
 
 
   const handleFollowToggle = () => {
@@ -98,7 +100,7 @@ export default function UserProfilePage() {
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
-      <header className="text-center mb-10">
+      <header className="text-center mb-6 md:mb-10">
         <UserCheck className="mx-auto h-12 w-12 md:h-16 md:w-16 text-primary mb-3" />
         <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-3">{username}'s Profile</h1>
         <p className="text-lg sm:text-xl text-foreground/80 max-w-xl mx-auto">
@@ -106,7 +108,7 @@ export default function UserProfilePage() {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 items-start">
         <Card className="lg:col-span-1 shadow-xl">
           <CardHeader className="items-center text-center p-4 md:p-6">
             <Avatar className="w-24 h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 mb-4 border-4 border-primary shadow-md">
@@ -217,7 +219,7 @@ export default function UserProfilePage() {
         </div>
       </div>
       
-      <Alert variant="default" className="mt-8 md:mt-10 max-w-2xl mx-auto bg-primary/10 border-primary/30">
+      <Alert variant="default" className="mt-6 md:mt-8 lg:mt-10 max-w-2xl mx-auto bg-primary/10 border-primary/30">
         <UserCheck className="h-5 w-5 text-primary" /> 
         <AlertTitle className="font-headline text-primary">Public Profile View</AlertTitle>
         <AlertDescription className="text-foreground/80">
