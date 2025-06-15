@@ -46,13 +46,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(result.user);
       return result.user;
     } catch (e: any) {
-      // Handle common errors specifically if needed, e.g., popup closed by user
-      if (e.code === 'auth/popup-closed-by-user') {
-        setError('Sign-in process was cancelled.');
-      } else {
-        setError(e.message || 'Failed to sign in with Google.');
+      console.error("Google Sign-In Raw Error Object:", e); // Log the full error object
+      
+      let errorMessage = 'Failed to sign in with Google. Please try again.';
+      if (e.code) {
+        switch (e.code) {
+          case 'auth/popup-closed-by-user':
+            errorMessage = 'Sign-in process was cancelled by the user.';
+            break;
+          case 'auth/network-request-failed':
+            errorMessage = 'Network error. Please check your internet connection and try again.';
+            break;
+          case 'auth/operation-not-allowed':
+            errorMessage = 'Google Sign-In is not enabled for this Firebase project. Please check your Firebase console.';
+            break;
+          case 'auth/invalid-credential':
+          case 'auth/user-disabled':
+          case 'auth/account-exists-with-different-credential':
+            errorMessage = e.message || 'An authentication error occurred.';
+            break;
+          default:
+            // For "auth/internal-error" or other generic/uncommon Firebase errors, 
+            // or "the requested action is invalid" which doesn't have a specific Firebase code but is often related to config.
+            errorMessage = `An error occurred (Code: ${e.code || 'unknown'}): ${e.message || 'Please check console for details and ensure your Firebase project is correctly configured (e.g., Authorized Domains for mobile access).'}`;
+        }
+      } else if (e.message && e.message.includes("the requested action is invalid")) {
+        // Catching the specific string if no code is present
+         errorMessage = "The sign-in action is invalid. This often means the domain you're using on mobile isn't authorized in your Firebase project settings.";
+      } else if (e.message) {
+        errorMessage = e.message;
       }
-      console.error("Google Sign-In error:", e);
+      
+      setError(errorMessage);
       return null;
     } finally {
       setLoading(false);
