@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { MenuIcon, UserCircle, LogIn, LogOut, Loader2, Bell, BarChart3, SettingsIcon } from 'lucide-react'; // Added SettingsIcon
+import { MenuIcon, UserCircle, LogIn, LogOut, Loader2, Bell, BarChart3 } from 'lucide-react'; 
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { NavLinks } from './NavLinks';
 import { useAuth } from '@/context/AuthContext';
@@ -99,15 +99,15 @@ export function AppHeader() {
               <DropdownMenuLabel>{user.displayName || user.email || 'My Account'}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/profile"> {/* This now correctly points to "My Account" page */}
-                  <SettingsIcon className="mr-2 h-4 w-4" /> {/* Changed icon */}
-                  My Account
+                <Link href="/profile"> 
+                  <UserCircle className="mr-2 h-4 w-4" /> 
+                  Profile
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={currentUserProfileLink}> {/* Points to current user's public profile */}
+              <DropdownMenuItem> 
+                <Link href="/profile"> 
                   <BarChart3 className="mr-2 h-4 w-4" />
-                  View My Public Profile
+                  My Stats & Achievements
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

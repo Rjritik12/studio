@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, HelpCircle, Swords, Users, LayoutGrid, User, BookOpen, LogIn, MessageCircle, SettingsIcon } from 'lucide-react'; // Added SettingsIcon
+import { Home, HelpCircle, Swords, Users, LayoutGrid, User, BookOpen, LogIn, MessageSquare } from 'lucide-react'; 
 import { SidebarMenuButton } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext'; 
@@ -16,9 +16,9 @@ const navItemsBase = [
   { href: '/feed', label: 'Social Feed', icon: LayoutGrid, requiresAuth: false },
 ];
 
-const messagesNavItem = { href: '/messages', label: 'Messages', icon: MessageCircle, requiresAuth: true };
-const myAccountNavItem = { href: '/profile', label: 'My Account', icon: SettingsIcon, requiresAuth: true }; // Changed
+const profileNavItem = { href: '/profile', label: 'Profile', icon: User, requiresAuth: true };
 const loginNavItem = { href: '/login', label: 'Login', icon: LogIn, requiresAuth: false };
+const messagesNavItem = { href: '/messages', label: 'Messages', icon: MessageSquare, requiresAuth: true };
 
 
 interface NavLinksProps {
@@ -36,7 +36,7 @@ export function NavLinks({ isMobile = false, onLinkClick }: NavLinksProps) {
     const items = [...navItemsBase];
     if (user) {
       items.push(messagesNavItem); 
-      items.push(myAccountNavItem); // Use new "My Account" item
+      items.push(profileNavItem); 
     } else {
       if (pathname !== '/login' && pathname !== '/signup') {
          items.push(loginNavItem);
@@ -69,10 +69,8 @@ export function NavLinks({ isMobile = false, onLinkClick }: NavLinksProps) {
           return null; 
         }
         
-        // Special active check for public profiles: /profile/[username] should not make /profile (My Account) active
         let isActive = pathname === item.href;
         if (item.href === '/profile' && pathname.startsWith('/profile/')) { 
-            // This is the My Account link. If current path is a dynamic profile, it's not active.
             isActive = pathname === '/profile'; 
         } else if (pathname.startsWith(item.href) && item.href !== '/') {
             isActive = true;
