@@ -5,20 +5,31 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { BadgePercent, Edit3, ShieldCheck, Star, Clock, AlertCircle, LogIn, Loader2, LogOut, CreditCard, Archive, Rss } from "lucide-react";
+import { BadgePercent, Edit3, ShieldCheck, Star, Clock, AlertCircle, LogIn, Loader2, LogOut, CreditCard, Archive, Rss, BarChartHorizontalShorthand } from "lucide-react";
 import Image from "next/image";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/context/AuthContext"; // Import useAuth
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 
 export default function ProfilePage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
   const [mockSubscriptionEndDate, setMockSubscriptionEndDate] = useState('');
+
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [tempDisplayName, setTempDisplayName] = useState('');
+  const [tempBio, setTempBio] = useState('');
+
 
   // Mock data (will be overridden by auth user if available)
   const mockUserStats = {
@@ -30,6 +41,15 @@ export default function ProfilePage() {
     joinDate: "January 1, 2024", 
     messagingStatus: "Free Trial Active", 
   };
+  
+  const mockActivityData = {
+    quizzesCompleted: 15,
+    averageQuizScore: 78,
+    battlesWon: 5,
+    feedPosts: 3,
+    studySessions: 8,
+  };
+
 
   useEffect(() => {
     if (!loading && !user) {
@@ -38,7 +58,34 @@ export default function ProfilePage() {
     const today = new Date();
     const trialEndDate = new Date(today.setDate(today.getDate() + (30 - (Math.floor(Math.random() * 15))))); 
     setMockSubscriptionEndDate(trialEndDate.toLocaleDateString());
+
+    if (user) {
+      setTempDisplayName(user.displayName || user.email?.split('@')[0] || "EduVerse User");
+      // tempBio can remain empty or be fetched if available in future
+    }
+
   }, [user, loading, router]);
+
+  const handleEditProfileOpen = () => {
+    if (user) {
+      setTempDisplayName(user.displayName || user.email?.split('@')[0] || "EduVerse User");
+      setTempBio(''); // Reset or load actual bio if available
+      setIsEditDialogOpen(true);
+    }
+  };
+
+  const handleSaveChanges = (e: FormEvent) => {
+    e.preventDefault();
+    // In a real app, you'd save tempDisplayName and tempBio here
+    toast({
+      title: "Profile Updated!",
+      description: "Your changes have been mocked successfully.",
+      variant: "default"
+    });
+    setIsEditDialogOpen(false);
+    // Optionally, update the user context or local state if you want the name change to reflect immediately
+    // For this mock, we'll just close the dialog.
+  };
 
 
   if (loading) {
@@ -91,18 +138,11 @@ export default function ProfilePage() {
                 <AvatarImage src={avatarUrl} alt={displayName} data-ai-hint="profile picture"/>
                 <AvatarFallback className="text-4xl">{displayName.substring(0,1).toUpperCase()}</AvatarFallback>
               </Avatar>
-              <CardTitle className="font-headline text-2xl">{displayName}</CardTitle>
+              <CardTitle className="font-headline text-2xl">{tempDisplayName || displayName}</CardTitle> {/* Show tempDisplayName if edited */}
               <CardDescription>{displayEmail}</CardDescription>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" size="sm" className="mt-3" disabled>
-                    <Edit3 className="mr-2 h-4 w-4" /> Edit Profile
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Feature coming soon!</p>
-                </TooltipContent>
-              </Tooltip>
+              <Button variant="outline" size="sm" className="mt-3" onClick={handleEditProfileOpen}>
+                <Edit3 className="mr-2 h-4 w-4" /> Edit Profile
+              </Button>
             </CardHeader>
             <CardContent className="text-sm text-foreground/80 space-y-4">
               <div>
@@ -182,18 +222,34 @@ export default function ProfilePage() {
                 </div>
               </div>
               <Separator />
-              <div className="mt-4">
-                <h3 className="font-semibold text-lg mb-3 text-foreground">Activity</h3>
-                <Image 
-                  src="https://placehold.co/600x300.png" 
-                  alt="Activity graph"
-                  width={600}
-                  height={300}
-                  className="rounded-lg object-cover aspect-[2/1]"
-                  data-ai-hint="activity chart" 
-                />
-                 <p className="text-xs text-muted-foreground text-center mt-2">Activity tracking coming soon!</p>
-              </div>
+              <Card className="bg-card shadow-sm">
+                <CardHeader className="pb-3">
+                    <CardTitle className="font-headline text-lg flex items-center"><BarChartHorizontalShorthand className="mr-2 h-5 w-5 text-accent" />Activity Snapshot</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm">
+                    <div className="flex justify-between items-center p-2 bg-foreground/5 rounded-md">
+                        <span className="text-muted-foreground">Quizzes Completed:</span>
+                        <span className="font-semibold text-foreground">{mockActivityData.quizzesCompleted}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-foreground/5 rounded-md">
+                        <span className="text-muted-foreground">Average Quiz Score:</span>
+                        <span className="font-semibold text-foreground">{mockActivityData.averageQuizScore}%</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-foreground/5 rounded-md">
+                        <span className="text-muted-foreground">Battles Won:</span>
+                        <span className="font-semibold text-foreground">{mockActivityData.battlesWon}</span>
+                    </div>
+                     <div className="flex justify-between items-center p-2 bg-foreground/5 rounded-md">
+                        <span className="text-muted-foreground">Feed Posts Created:</span>
+                        <span className="font-semibold text-foreground">{mockActivityData.feedPosts}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 bg-foreground/5 rounded-md">
+                        <span className="text-muted-foreground">AI Study Sessions:</span>
+                        <span className="font-semibold text-foreground">{mockActivityData.studySessions}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground text-center pt-2">Detailed activity history coming soon!</p>
+                </CardContent>
+              </Card>
             </CardContent>
           </Card>
         </div>
@@ -223,10 +279,52 @@ export default function ProfilePage() {
           </AlertDescription>
         </Alert>
       </div>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle className="font-headline text-xl">Edit Your Profile</DialogTitle>
+            <DialogDescription>
+              Make changes to your public profile. (Mock functionality)
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSaveChanges}>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="displayName">Display Name</Label>
+                <Input
+                  id="displayName"
+                  value={tempDisplayName}
+                  onChange={(e) => setTempDisplayName(e.target.value)}
+                  placeholder="Your display name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bio">Bio</Label>
+                <Textarea
+                  id="bio"
+                  value={tempBio}
+                  onChange={(e) => setTempBio(e.target.value)}
+                  placeholder="Tell us a little about yourself..."
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline">
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button type="submit">Save Changes (Mock)</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
     </TooltipProvider>
   );
 }
-
     
 
     
