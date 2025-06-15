@@ -112,26 +112,26 @@ export default function UserProfilePage() {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 items-start">
-        <Card className="lg:col-span-1 shadow-xl">
+        <Card className="lg:col-span-1 shadow-xl border-2 border-primary/30">
           <CardHeader className="items-center text-center p-4 md:p-6">
-            <Avatar className={cn("mb-4 border-4 border-primary shadow-md", "w-24 h-24 md:w-28 md:h-28 lg:w-32 lg:h-32")}>
+            <Avatar className={cn("mb-3 sm:mb-4 border-4 border-primary shadow-md", "w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32")}>
               <AvatarImage src={profileAvatarUrl} alt={username} data-ai-hint="profile picture user" />
-              <AvatarFallback className="text-3xl md:text-4xl">{avatarFallback}</AvatarFallback>
+              <AvatarFallback className="text-2xl sm:text-3xl md:text-4xl">{avatarFallback}</AvatarFallback>
             </Avatar>
             <CardTitle className="font-headline text-xl md:text-2xl">{username}</CardTitle>
             <CardDescription>Level {mockUserStats.level} EduVerse Explorer</CardDescription>
           </CardHeader>
           <CardContent className="text-sm text-foreground/80 p-4 md:p-6">
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-around text-center mb-4 sm:gap-2">
-              <div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-around text-center mb-3 sm:mb-4">
+              <div className="py-1">
                 <p className="font-bold text-base md:text-lg text-foreground">{mockUserStats.postsCount}</p>
                 <p className="text-xs text-muted-foreground">Posts</p>
               </div>
-              <div>
+              <div className="py-1">
                 <p className="font-bold text-base md:text-lg text-foreground">{mockUserStats.followersCount}</p>
                 <p className="text-xs text-muted-foreground">Followers</p>
               </div>
-              <div>
+              <div className="py-1">
                 <p className="font-bold text-base md:text-lg text-foreground">{mockUserStats.followingCount}</p>
                 <p className="text-xs text-muted-foreground">Following</p>
               </div>
@@ -139,12 +139,12 @@ export default function UserProfilePage() {
             <Separator className="my-3" />
             {isOwnPublicProfile ? (
                  <Button variant="outline" className="w-full" asChild>
-                    <Link href="/profile"> {/* Links to Account Settings */}
+                    <Link href="/profile"> 
                         <Edit3 className="mr-2 h-4 w-4" /> Edit Your Profile & Settings
                     </Link>
                 </Button>
             ) : authUser && !authLoading ? (
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <Button onClick={handleFollowToggle} className="flex-1">
                   {isFollowing ? <UserCheck className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
                   {isFollowing ? "Following" : "Follow"}

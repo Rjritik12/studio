@@ -70,7 +70,7 @@ export default function StudyRoomPage() {
                 width={400} 
                 height={250} 
                 className="rounded-md mt-2 object-cover aspect-video"
-                data-ai-hint="AI tutor"
+                data-ai-hint="AI tutor abstract"
               />
             </CardContent>
           </Card>

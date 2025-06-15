@@ -208,11 +208,13 @@ export default function FeedPage() {
   return (
     <TooltipProvider>
       <div className="container mx-auto py-8 px-4 relative">
-        <header className="text-center mb-6">
-          <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-3">Community Feed</h1>
-          <p className="text-base sm:text-lg text-foreground/80 max-w-xl mx-auto">
-            Share notes, ask questions, and connect with fellow learners. Posts vanish after 48 hours!
-          </p>
+        <header className="w-full py-10 md:py-12 lg:py-16 bg-gradient-to-br from-primary to-accent/80 rounded-lg shadow-xl text-center mb-8">
+          <div className="container mx-auto px-4 md:px-6">
+            <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-primary-foreground mb-3">Community Feed</h1>
+            <p className="text-base sm:text-lg text-primary-foreground/90 max-w-xl mx-auto">
+              Share notes, ask questions, and connect with fellow learners. Posts vanish after 48 hours!
+            </p>
+          </div>
         </header>
 
         <Card className="mb-6 shadow-sm">
