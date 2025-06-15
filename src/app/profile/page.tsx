@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { BadgePercent, Edit3, ShieldCheck, Star, Clock, AlertCircle, LogIn, Loader2, LogOut, CreditCard, Archive, Rss, BarChartHorizontal } from "lucide-react"; // Changed BarChartHorizontalShorthand
+import { Edit3, Clock, AlertCircle, LogIn, Loader2, LogOut, CreditCard, Archive, Rss } from "lucide-react";
 import Image from "next/image";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -33,23 +33,11 @@ export default function ProfilePage() {
 
   // Mock data (will be overridden by auth user if available)
   const mockUserStats = {
-    xp: 1250,
-    level: 8,
-    badges: ["Quiz Master", "Streak King", "Study Buddy"],
     timeCapsulesUsed: 1,
     timeCapsulesLimit: 3,
-    joinDate: "January 1, 2024", 
     messagingStatus: "Free Trial Active", 
   };
   
-  const mockActivityData = {
-    quizzesCompleted: 15,
-    averageQuizScore: 78,
-    battlesWon: 5,
-    feedPosts: 3,
-    studySessions: 8,
-  };
-
 
   useEffect(() => {
     if (!loading && !user) {
@@ -118,7 +106,7 @@ export default function ProfilePage() {
   const displayName = user.displayName || user.email?.split('@')[0] || "EduVerse User";
   const displayEmail = user.email || "No email provided";
   const avatarUrl = user.photoURL || `https://placehold.co/128x128.png?text=${displayName.substring(0,1).toUpperCase()}`;
-  const joinDate = user.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : mockUserStats.joinDate;
+  const joinDateDisplay = user.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : "N/A";
 
   return (
     <TooltipProvider>
@@ -130,9 +118,9 @@ export default function ProfilePage() {
           </p>
         </header>
 
-        <div className="grid lg:grid-cols-3 gap-8 items-start">
+        <div className="space-y-8">
           {/* Profile Card */}
-          <Card className="lg:col-span-1 shadow-xl">
+          <Card className="w-full max-w-lg mx-auto shadow-xl">
             <CardHeader className="items-center text-center">
               <Avatar className="w-32 h-32 mb-4 border-4 border-primary shadow-md">
                 <AvatarImage src={avatarUrl} alt={displayName} data-ai-hint="profile picture"/>
@@ -147,7 +135,7 @@ export default function ProfilePage() {
             <CardContent className="text-sm text-foreground/80 space-y-4">
               <div>
                 <p className="text-xs text-muted-foreground">Joined</p>
-                <p className="font-medium">{joinDate}</p>
+                <p className="font-medium">{joinDateDisplay}</p>
               </div>
               
               <div className="p-3 bg-foreground/5 rounded-md shadow-sm">
@@ -191,93 +179,31 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
-          {/* Stats and Badges Card */}
-          <Card className="lg:col-span-2 shadow-xl">
+          <Card className="w-full max-w-2xl mx-auto shadow-xl">
             <CardHeader>
-              <CardTitle className="font-headline text-xl">My Stats & Achievements</CardTitle>
+              <CardTitle className="font-headline text-xl flex items-center">
+                <Rss className="mr-2 h-5 w-5 text-primary" /> My Active Posts
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-2 gap-6 text-center">
-                <div className="p-4 bg-foreground/5 rounded-lg">
-                  <Star className="h-10 w-10 text-accent mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-foreground">{mockUserStats.xp} XP</p>
-                  <p className="text-sm text-muted-foreground">Level {mockUserStats.level}</p>
-                </div>
-                <div className="p-4 bg-foreground/5 rounded-lg">
-                  <ShieldCheck className="h-10 w-10 text-accent mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-foreground">{mockUserStats.badges.length} Badges</p>
-                  <p className="text-sm text-muted-foreground">Collected</p>
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="font-semibold text-lg mb-3 text-foreground">Badges Earned:</h3>
-                <div className="flex flex-wrap gap-3">
-                  {mockUserStats.badges.map(badge => (
-                    <span key={badge} className="px-3 py-1 text-sm rounded-full bg-primary/10 text-primary font-medium flex items-center gap-1.5">
-                      <BadgePercent className="h-4 w-4"/> {badge}
-                    </span>
-                  ))}
-                  {mockUserStats.badges.length === 0 && <p className="text-sm text-muted-foreground">No badges earned yet. Keep learning!</p>}
-                </div>
-              </div>
-              <Separator />
-              <Card className="bg-card shadow-sm">
-                <CardHeader className="pb-3">
-                    <CardTitle className="font-headline text-lg flex items-center"><BarChartHorizontal className="mr-2 h-5 w-5 text-accent" />Activity Snapshot</CardTitle> {/* Changed BarChartHorizontalShorthand */}
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                    <div className="flex justify-between items-center p-2 bg-foreground/5 rounded-md">
-                        <span className="text-muted-foreground">Quizzes Completed:</span>
-                        <span className="font-semibold text-foreground">{mockActivityData.quizzesCompleted}</span>
-                    </div>
-                    <div className="flex justify-between items-center p-2 bg-foreground/5 rounded-md">
-                        <span className="text-muted-foreground">Average Quiz Score:</span>
-                        <span className="font-semibold text-foreground">{mockActivityData.averageQuizScore}%</span>
-                    </div>
-                    <div className="flex justify-between items-center p-2 bg-foreground/5 rounded-md">
-                        <span className="text-muted-foreground">Battles Won:</span>
-                        <span className="font-semibold text-foreground">{mockActivityData.battlesWon}</span>
-                    </div>
-                     <div className="flex justify-between items-center p-2 bg-foreground/5 rounded-md">
-                        <span className="text-muted-foreground">Feed Posts Created:</span>
-                        <span className="font-semibold text-foreground">{mockActivityData.feedPosts}</span>
-                    </div>
-                    <div className="flex justify-between items-center p-2 bg-foreground/5 rounded-md">
-                        <span className="text-muted-foreground">AI Study Sessions:</span>
-                        <span className="font-semibold text-foreground">{mockActivityData.studySessions}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground text-center pt-2">Detailed activity history coming soon!</p>
-                </CardContent>
-              </Card>
+            <CardContent>
+              <Alert variant="default" className="bg-amber-50 border-amber-300 dark:bg-amber-900/30 dark:border-amber-700">
+                <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                <AlertTitle className="font-semibold text-amber-700 dark:text-amber-300">Feature in Development</AlertTitle>
+                <AlertDescription className="text-amber-700/90 dark:text-amber-300/90 mt-1">
+                  Displaying your active posts here requires backend integration for persistent post storage. This feature is planned for future updates! You can see your newly created posts on the Community Feed, and they will expire after 48 hours.
+                </AlertDescription>
+              </Alert>
             </CardContent>
           </Card>
+
+          <Alert variant="default" className="max-w-2xl mx-auto bg-primary/10 border-primary/30">
+            <AlertCircle className="h-5 w-5 text-primary" />
+            <AlertTitle className="font-headline text-primary">Profile Enhancements Coming Soon!</AlertTitle>
+            <AlertDescription className="text-foreground/80">
+              Full editing capabilities, detailed activity tracking, persistent stats, and more Time Capsule options are under development. Your current stats are for demonstration. Stay tuned!
+            </AlertDescription>
+          </Alert>
         </div>
-
-        <Card className="mt-8 shadow-xl w-full">
-          <CardHeader>
-            <CardTitle className="font-headline text-xl flex items-center">
-              <Rss className="mr-2 h-5 w-5 text-primary" /> My Active Posts
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Alert variant="default" className="bg-amber-50 border-amber-300 dark:bg-amber-900/30 dark:border-amber-700">
-              <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              <AlertTitle className="font-semibold text-amber-700 dark:text-amber-300">Feature in Development</AlertTitle>
-              <AlertDescription className="text-amber-700/90 dark:text-amber-300/90 mt-1">
-                Displaying your active posts here requires backend integration for persistent post storage. This feature is planned for future updates! You can see your newly created posts on the Community Feed, and they will expire after 48 hours.
-              </AlertDescription>
-            </Alert>
-          </CardContent>
-        </Card>
-
-        <Alert variant="default" className="mt-10 max-w-2xl mx-auto bg-primary/10 border-primary/30">
-          <AlertCircle className="h-5 w-5 text-primary" />
-          <AlertTitle className="font-headline text-primary">Profile Enhancements Coming Soon!</AlertTitle>
-          <AlertDescription className="text-foreground/80">
-            Full editing capabilities, detailed activity tracking, persistent stats, and more Time Capsule options are under development. Your current stats are for demonstration. Stay tuned!
-          </AlertDescription>
-        </Alert>
       </div>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
