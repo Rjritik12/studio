@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Sparkles, Wand2, Lightbulb, AlertCircle, Camera, Upload, Trash2, VideoOff } from 'lucide-react';
+import { Loader2, Sparkles, Wand2, Lightbulb, AlertCircle, Camera, Upload, Trash2, VideoOff, HelpCircleIcon } from 'lucide-react';
 import { handleStudySession } from '@/lib/actions';
 import type { Flashcard, StudyRoomData } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -339,7 +339,8 @@ export function StudyRoomClient() {
                     <Textarea value={studyData.flashcards} readOnly rows={8} className="bg-muted/50 text-sm mt-3 focus-visible:ring-0 focus-visible:ring-offset-0" />
                  </div>
             )}
-             {studyData.practiceQuestions && studyData.practiceQuestions.length > 0 && (
+            
+            {studyData.practiceQuestions && studyData.practiceQuestions.length > 0 && (
               <div>
                 <h3 className="font-semibold text-xl text-foreground mb-3">Practice Questions:</h3>
                 <div className="space-y-4">
@@ -347,6 +348,18 @@ export function StudyRoomClient() {
                     <PracticeQuestionCard key={index} questionItem={pq} index={index} />
                   ))}
                 </div>
+              </div>
+            )}
+            {(!studyData.practiceQuestions || studyData.practiceQuestions.length === 0) && (
+              <div>
+                <h3 className="font-semibold text-xl text-foreground mb-2">Practice Questions Status:</h3>
+                <Alert>
+                  <HelpCircleIcon className="h-5 w-5" />
+                  <AlertTitle className="font-semibold">No Practice Questions Generated</AlertTitle>
+                  <AlertDescription className="whitespace-pre-wrap mt-1">
+                    The AI determined that practice questions were not suitable for the provided material, or no material was suitable for them.
+                  </AlertDescription>
+                </Alert>
               </div>
             )}
           </CardContent>
