@@ -179,7 +179,7 @@ export default function FeedPage() {
     <TooltipProvider>
       <div className="container mx-auto py-8 px-2 md:px-4 lg:px-6 relative"> {/* Added relative for FAB positioning context */}
         <header className="text-center mb-8">
-          <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary mb-3">Community Feed</h1>
+          <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-3">Community Feed</h1>
           <p className="text-lg text-foreground/80 max-w-xl mx-auto">
             Share notes, ask questions, and connect with fellow learners. Posts vanish after 48 hours!
           </p>
@@ -191,7 +191,7 @@ export default function FeedPage() {
                 <ImageIconLucide className="h-5 w-5 mr-2 text-primary" /> Stories
             </CardTitle>
           </CardHeader>
-          <CardContent className="pb-4">
+          <CardContent className="px-2 sm:px-4 pb-4">
             <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
               {!authLoading && authUser && !currentUserHasStories && (
                 <StoryBubble 
@@ -348,3 +348,5 @@ export default function FeedPage() {
     </TooltipProvider>
   );
 }
+
+    
