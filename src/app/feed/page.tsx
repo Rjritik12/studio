@@ -110,15 +110,17 @@ export default function FeedPage() {
       setStoriesForViewer(userStoryItems);
       setStoryViewerStartIndex(0);
       setIsStoryViewerOpen(true);
-      // Determine the correct group index based on the potentially reordered uniqueUserStories list
+      
       const currentAuthUserName = authUser ? (authUser.displayName || authUser.email?.split('@')[0] || "CurrentUser") : null;
-      let orderedUniqueUserStoriesForIndex: MockStory[] = [...uniqueUserStories];
-      if (currentAuthUserName) {
-        const currentUserIndexInUnique = orderedUniqueUserStoriesForIndex.findIndex(s => s.username === currentAuthUserName);
-        if (currentUserIndexInUnique > 0) {
-            const [storyToMove] = orderedUniqueUserStoriesForIndex.splice(currentUserIndexInUnique, 1);
-            orderedUniqueUserStoriesForIndex.unshift(storyToMove);
-        }
+      let orderedUniqueUserStoriesForIndex: MockStory[] = [];
+      if (Array.isArray(uniqueUserStories)) {
+          const currentUserOwnStory = currentAuthUserName ? uniqueUserStories.find(s => s.username === currentAuthUserName) : undefined;
+          const otherUsersStories = uniqueUserStories.filter(s => s.username !== currentAuthUserName);
+          if (currentUserOwnStory) {
+              orderedUniqueUserStoriesForIndex = [currentUserOwnStory, ...otherUsersStories];
+          } else {
+              orderedUniqueUserStoriesForIndex = otherUsersStories;
+          }
       }
       const groupIndex = orderedUniqueUserStoriesForIndex.findIndex(s => s.username === username);
       setCurrentUserStoryGroupIndex(groupIndex);
@@ -135,21 +137,19 @@ export default function FeedPage() {
     let nextGroupIndex = currentUserStoryGroupIndex + (direction === 'next' ? 1 : -1);
 
     const currentAuthUserName = authUser ? (authUser.displayName || authUser.email?.split('@')[0] || "CurrentUser") : null;
-    let tempDisplayableStories: MockStory[] = [];
+    let displayableUniqueUserStories: MockStory[] = [];
 
     if (Array.isArray(uniqueUserStories)) {
         const currentUserOwnStory = currentAuthUserName ? uniqueUserStories.find(s => s.username === currentAuthUserName) : undefined;
         const otherUsersStories = uniqueUserStories.filter(s => s.username !== currentAuthUserName);
 
         if (currentUserOwnStory) {
-            tempDisplayableStories = [currentUserOwnStory, ...otherUsersStories];
+            displayableUniqueUserStories = [currentUserOwnStory, ...otherUsersStories];
         } else {
-            tempDisplayableStories = otherUsersStories;
+            displayableUniqueUserStories = otherUsersStories;
         }
     }
-    const displayableUniqueUserStories = tempDisplayableStories;
-
-
+    
     if (displayableUniqueUserStories.length === 0) {
         handleStoryViewerClose();
         return;
@@ -174,8 +174,6 @@ export default function FeedPage() {
         setStoryViewerStartIndex(0);
         setCurrentUserStoryGroupIndex(nextGroupIndex);
       } else {
-        // This case should ideally not happen if displayableUniqueUserStories is derived correctly
-        // from users who actually have stories in mockStoriesData.
         handleStoryViewerClose();
       }
     } else {
@@ -261,7 +259,7 @@ export default function FeedPage() {
         <Tooltip>
             <TooltipTrigger asChild>
                 <Button
-                    className="fixed bottom-6 right-6 md:bottom-8 md:right-8 h-14 w-14 md:h-16 md:w-16 rounded-full shadow-lg z-40 bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center"
+                    className="fixed bottom-22 right-6 md:bottom-8 md:right-8 h-14 w-14 md:h-16 md:w-16 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center"
                     size="icon"
                     onClick={() => {
                         if (authLoading) return;
