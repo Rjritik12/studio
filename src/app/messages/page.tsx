@@ -1,4 +1,3 @@
-
 "use client"; 
 
 import { useState, type FormEvent } from "react";
@@ -74,17 +73,17 @@ export default function MessagesPage() {
     <>
       <div className="container mx-auto py-8 px-4 md:px-6">
         <header className="text-center mb-10">
-          <MessageCircle className="mx-auto h-16 w-16 text-primary mb-4" />
-          <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary">Messages & Groups</h1>
-          <p className="text-xl text-foreground/80 max-w-xl mx-auto">
+          <MessageCircle className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-primary mb-4" />
+          <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold text-primary">Messages &amp; Groups</h1>
+          <p className="text-lg sm:text-xl text-foreground/80 max-w-xl mx-auto">
             Your conversations and study groups. Messages auto-delete after 48 hours.
           </p>
         </header>
 
         <Card className="max-w-2xl mx-auto shadow-xl mb-8">
           <CardHeader>
-            <CardTitle className="font-headline text-2xl flex items-center">
-              <Inbox className="mr-3 h-6 w-6 text-primary" /> Inbox (1-on-1 Chats)
+            <CardTitle className="font-headline text-xl sm:text-2xl flex items-center">
+              <Inbox className="mr-3 h-5 w-5 sm:h-6 sm:w-6 text-primary" /> Inbox (1-on-1 Chats)
             </CardTitle>
             <CardDescription>
               Select a conversation to view messages. Remember, messages vanish after 48 hours.
@@ -96,13 +95,16 @@ export default function MessagesPage() {
                 {mockConversations.map((convo) => (
                   <li key={convo.id}>
                     <Link href={`/messages/${encodeURIComponent(convo.username)}`} passHref>
-                      <Button variant="ghost" className="w-full h-auto justify-start p-3 rounded-md hover:bg-muted/50">
-                        <img src={convo.avatar} alt={convo.username} className="h-10 w-10 rounded-full mr-3" data-ai-hint="user avatar"/>
+                      <Button variant="ghost" className="w-full h-auto justify-start p-2 sm:p-3 rounded-md hover:bg-muted/50">
+                        <Avatar className="h-8 w-8 sm:h-10 sm:w-10 mr-2 sm:mr-3">
+                            <AvatarImage src={convo.avatar} alt={convo.username} data-ai-hint="user avatar"/>
+                            <AvatarFallback>{convo.username.substring(0,1)}</AvatarFallback>
+                        </Avatar>
                         <div className="flex-1 text-left">
-                          <p className={`font-semibold ${convo.unread ? 'text-primary' : 'text-foreground'}`}>{convo.username}</p>
-                          <p className={`text-sm truncate ${convo.unread ? 'text-primary/80' : 'text-muted-foreground'}`}>{convo.lastMessage}</p>
+                          <p className={`font-semibold text-sm sm:text-base ${convo.unread ? 'text-primary' : 'text-foreground'}`}>{convo.username}</p>
+                          <p className={`text-xs sm:text-sm truncate ${convo.unread ? 'text-primary/80' : 'text-muted-foreground'}`}>{convo.lastMessage}</p>
                         </div>
-                        {convo.unread && <span className="ml-2 h-3 w-3 rounded-full bg-primary"></span>}
+                        {convo.unread && <span className="ml-2 h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-primary"></span>}
                       </Button>
                     </Link>
                   </li>
@@ -122,8 +124,8 @@ export default function MessagesPage() {
         
         <Card className="max-w-2xl mx-auto shadow-xl">
           <CardHeader>
-            <CardTitle className="font-headline text-2xl flex items-center">
-                <Users className="mr-3 h-6 w-6 text-primary" /> Study Groups
+            <CardTitle className="font-headline text-xl sm:text-2xl flex items-center">
+                <Users className="mr-3 h-5 w-5 sm:h-6 sm:w-6 text-primary" /> Study Groups
             </CardTitle>
             <CardDescription>
                 Collaborate with fellow learners.
@@ -137,8 +139,8 @@ export default function MessagesPage() {
                   return;
                 }
                 setIsCreateGroupDialogOpen(true);
-              }} className="bg-accent hover:bg-accent/90 text-accent-foreground">
-                <PlusCircle className="mr-2 h-5 w-5" /> Create New Group (Mock)
+              }} className="bg-accent hover:bg-accent/90 text-accent-foreground text-sm sm:text-base px-3 py-1.5 sm:px-4 sm:py-2 h-auto">
+                <PlusCircle className="mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Create New Group (Mock)
               </Button>
             </div>
             {groups.length === 0 && !authLoading ? (
@@ -154,18 +156,18 @@ export default function MessagesPage() {
             ) : (
               <div className="space-y-3">
                 {groups.map((group) => (
-                  <Card key={group.id} className="shadow-md hover:shadow-lg transition-shadow flex flex-row items-center p-3">
-                    <Avatar className="h-10 w-10 border mr-3">
+                  <Card key={group.id} className="shadow-md hover:shadow-lg transition-shadow flex flex-col sm:flex-row items-start sm:items-center p-3 gap-2 sm:gap-3">
+                    <Avatar className="h-8 w-8 sm:h-10 sm:w-10 border shrink-0">
                       <AvatarImage src={group.avatarUrl} alt={group.name} data-ai-hint="group study logo"/>
                       <AvatarFallback>{group.name.substring(0,2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <h3 className="font-semibold text-primary text-sm">{group.name}</h3>
-                      <p className="text-xs text-muted-foreground line-clamp-1">{group.description}</p>
+                      <h3 className="font-semibold text-primary text-sm sm:text-base">{group.name}</h3>
+                      <p className="text-xs text-muted-foreground line-clamp-1 sm:line-clamp-none">{group.description}</p>
                       <p className="text-xs text-muted-foreground">{group.memberCount} members</p>
                     </div>
-                    <Link href={`/groups/${group.id}`} passHref>
-                      <Button variant="outline" size="sm">
+                    <Link href={`/groups/${group.id}`} passHref className="w-full sm:w-auto mt-2 sm:mt-0">
+                      <Button variant="outline" size="sm" className="w-full sm:w-auto">
                         View <ArrowRight className="ml-1.5 h-3 w-3" />
                       </Button>
                     </Link>
@@ -178,10 +180,10 @@ export default function MessagesPage() {
              <Alert variant="default" className="w-full bg-primary/10 border-primary/30">
                 <MessageCircle className="h-5 w-5 text-primary" />
                 <AlertTitle className="font-headline text-primary">Feature Under Development</AlertTitle>
-                <AlertDescription className="text-foreground/80 space-y-1">
+                <AlertDescription className="text-foreground/80 space-y-1 text-xs sm:text-sm">
                   <p>1-on-1 chats and Study Groups are currently prototypes. Group creation and chat listings are local to your session. Full backend functionality for persistent groups, invitations, and real-time collaboration is planned.</p>
                   <p>The initial month of 1-on-1 messaging is free. Afterwards, starting a new 1-on-1 chat with a person will cost <IndianRupee className="inline h-3 w-3" />19 for one month of access with that specific user (one-time payment by initiator enables chat for both).</p>
-                  <p className="flex items-center"><Clock className="h-4 w-4 mr-1.5 text-primary/80" /> All 1-on-1 messages will automatically delete after 48 hours.</p>
+                  <p className="flex items-center"><Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5 text-primary/80" /> All 1-on-1 messages will automatically delete after 48 hours.</p>
                 </AlertDescription>
               </Alert>
           </CardFooter>
@@ -198,7 +200,7 @@ export default function MessagesPage() {
       <Dialog open={isCreateGroupDialogOpen} onOpenChange={setIsCreateGroupDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-headline text-xl">Create New Study Group (Mock)</DialogTitle>
+            <DialogTitle className="font-headline text-lg sm:text-xl">Create New Study Group (Mock)</DialogTitle>
             <DialogDescription>
               Enter a name and optional description for your new group.
             </DialogDescription>
