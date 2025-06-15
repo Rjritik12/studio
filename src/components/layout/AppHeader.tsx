@@ -9,7 +9,7 @@ import { MenuIcon, UserCircle, LogIn, LogOut, Loader2, Bell } from 'lucide-react
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { NavLinks } from './NavLinks';
 import { useAuth } from '@/context/AuthContext';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"; // Added Tooltip imports
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function AppHeader() {
   const { isMobile } = useSidebar();
@@ -104,9 +104,9 @@ export function AppHeader() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>{user.displayName || user.email || 'My Account'}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <Link href="/profile" passHref>
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-              </Link>
+              <DropdownMenuItem asChild>
+                <Link href="/profile">Profile</Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout}>
                 <LogOut className="mr-2 h-4 w-4" />
