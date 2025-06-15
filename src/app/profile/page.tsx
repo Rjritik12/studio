@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { BadgePercent, Edit3, ShieldCheck, Star, Clock, AlertCircle, LogIn, Loader2, LogOut, CreditCard, Archive, Rss, BarChartHorizontalShorthand } from "lucide-react";
+import { BadgePercent, Edit3, ShieldCheck, Star, Clock, AlertCircle, LogIn, Loader2, LogOut, CreditCard, Archive, Rss, BarChartHorizontal } from "lucide-react"; // Changed BarChartHorizontalShorthand
 import Image from "next/image";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -224,7 +224,7 @@ export default function ProfilePage() {
               <Separator />
               <Card className="bg-card shadow-sm">
                 <CardHeader className="pb-3">
-                    <CardTitle className="font-headline text-lg flex items-center"><BarChartHorizontalShorthand className="mr-2 h-5 w-5 text-accent" />Activity Snapshot</CardTitle>
+                    <CardTitle className="font-headline text-lg flex items-center"><BarChartHorizontal className="mr-2 h-5 w-5 text-accent" />Activity Snapshot</CardTitle> {/* Changed BarChartHorizontalShorthand */}
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm">
                     <div className="flex justify-between items-center p-2 bg-foreground/5 rounded-md">
