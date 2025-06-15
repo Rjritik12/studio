@@ -4,7 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Users, Lightbulb, Brain, Clock, Archive, UserCircle, Search } from 'lucide-react';
 import Image from 'next/image';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ConceptExplorer } from './components/ConceptExplorer'; // Import the new component
+import { ConceptExplorer } from './components/ConceptExplorer';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 
 export default function StudyRoomPage() {
@@ -24,30 +25,46 @@ export default function StudyRoomPage() {
         </div>
         
         <aside className="lg:col-span-1 space-y-6">
-          <ConceptExplorer />
+          <Accordion type="single" collapsible className="w-full shadow-lg rounded-lg border bg-card text-card-foreground">
+            <AccordionItem value="concept-explorer">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <div className="flex items-center font-headline text-xl text-primary">
+                  <Search className="mr-2 h-6 w-6" /> Concept Explorer
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-0 pt-0 pb-0">
+                {/* ConceptExplorer is already a Card, so it provides its own padding and structure */}
+                <ConceptExplorer />
+              </AccordionContent>
+            </AccordionItem>
 
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="font-headline text-xl flex items-center"><Lightbulb className="mr-2 h-6 w-6 text-accent" /> Gemini Tutor Capabilities</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-foreground/80">Your AI tutor can:</p>
-              <ul className="list-disc list-inside space-y-1 text-sm text-foreground/70">
-                <li>Answer your specific doubts</li>
-                <li>Convert notes to flashcards (if helpful)</li>
-                <li>Generate practice questions from notes</li>
-                <li>Provide reasoning for its actions</li>
-              </ul>
-               <Image 
-                src="https://placehold.co/400x250.png" 
-                alt="AI Tutor" 
-                width={400} 
-                height={250} 
-                className="rounded-md mt-2 object-cover aspect-video"
-                data-ai-hint="AI tutor abstract"
-              />
-            </CardContent>
-          </Card>
+            <AccordionItem value="tutor-capabilities" className="border-t">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <div className="flex items-center font-headline text-xl text-accent">
+                  <Lightbulb className="mr-2 h-6 w-6" /> Gemini Tutor Capabilities
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-6">
+                <div className="space-y-3">
+                  <p className="text-foreground/80">Your AI tutor can:</p>
+                  <ul className="list-disc list-inside space-y-1 text-sm text-foreground/70">
+                    <li>Answer your specific doubts</li>
+                    <li>Convert notes to flashcards (if helpful)</li>
+                    <li>Generate practice questions from notes</li>
+                    <li>Provide reasoning for its actions</li>
+                  </ul>
+                  <Image 
+                    src="https://placehold.co/400x250.png" 
+                    alt="AI Tutor" 
+                    width={400} 
+                    height={250} 
+                    className="rounded-md mt-2 object-cover aspect-video w-full"
+                    data-ai-hint="AI tutor abstract"
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
           
           <Alert variant="default" className="bg-blue-50 border-blue-300 dark:bg-blue-900/30 dark:border-blue-700">
             <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
