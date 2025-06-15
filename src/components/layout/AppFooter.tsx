@@ -22,10 +22,9 @@ export function AppFooter() {
     return [
       ...navItemsBase,
       { href: '/messages', label: 'Messages', icon: MessageSquare },
-      { href: publicProfileLink, label: 'Profile', icon: UserCircle }, 
+      { href: publicProfileLink, label: 'Profile', icon: UserCircle }, // "Profile" for public view
     ];
   };
-
 
   const loggedOutItems = [
     ...navItemsBase,
@@ -48,7 +47,6 @@ export function AppFooter() {
   }
 
   const currentNavItems = user ? getLoggedInItems() : loggedOutItems;
-  // Ensure we always show 5 items, or fewer if not enough are defined
   const displayItems = currentNavItems.slice(0, 5); 
 
 
@@ -64,7 +62,6 @@ export function AppFooter() {
           } else if (item.label !== 'Home' && pathname.startsWith(item.href) && item.href !== '/') {
              isActive = true;
           }
-
 
           return (
             <Link

@@ -1,3 +1,4 @@
+
 "use client"; 
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -44,10 +45,10 @@ export default function MyAccountPage() {
 
     if (user) {
       setTempDisplayName(user.displayName || user.email?.split('@')[0] || "EduVerse User");
-      setTempBio(''); // Initialize or fetch bio if stored
+      // For a real app, you'd fetch and set the user's bio from your backend here
+      setTempBio(localStorage.getItem(`userBio_${user.uid}`) || 'I am an avid learner exploring EduVerse!'); 
       setMockAccountStats(prev => ({
         ...prev,
-        // Add any other account-specific stats if needed
       }));
     }
 
@@ -56,27 +57,34 @@ export default function MyAccountPage() {
   const handleEditProfileOpen = () => {
     if (user) {
       setTempDisplayName(user.displayName || user.email?.split('@')[0] || "EduVerse User");
-      setTempBio(''); // Reset or fetch actual bio
+      setTempBio(localStorage.getItem(`userBio_${user.uid}`) || 'I am an avid learner exploring EduVerse!');
       setIsEditDialogOpen(true);
     }
   };
 
   const handleSaveChanges = (e: FormEvent) => {
     e.preventDefault();
-    // Mock save action
-    // In a real app: call an updateProfile function from AuthContext or an API
-    toast({
-      title: "Profile Updated!",
-      description: "Your changes have been mocked successfully.",
-      variant: "default"
-    });
-    // Optionally, update the user object in AuthContext if displayName changed
-    // and it's managed client-side for immediate reflection
-    if (user && user.displayName !== tempDisplayName) {
-        // This is a mock update; Firebase updateProfile would be needed for persistence
-        // For now, we could update a local display name if needed, but the dialog closes.
-        // The AuthContext's user object will refresh on next auth state change or page load
-        // if Firebase profile was truly updated.
+    if(user) {
+      // Mock save action: In a real app, call an updateProfile function from AuthContext or an API.
+      // For now, we can update a local display name if needed.
+      // For the bio, we'll use localStorage for this mock.
+      localStorage.setItem(`userBio_${user.uid}`, tempBio);
+      
+      // To update display name in Firebase, you'd use updateProfile(auth.currentUser, { displayName: tempDisplayName })
+      // This requires re-authentication for recent logins sometimes.
+      // For this mock, we'll just update the state to reflect immediately in UI.
+      if (user && user.displayName !== tempDisplayName) {
+          // This is a visual mock update for the current session.
+          // A real Firebase updateProfile would be needed.
+          // The AuthContext's user object might not reflect this immediately without a new auth state change.
+          const updatedUser = { ...user, displayName: tempDisplayName };
+          // If you have a setUser in AuthContext exposed, you might call it. Otherwise, this is local.
+      }
+       toast({
+        title: "Profile Updated!",
+        description: "Your changes have been mocked successfully. Display name updates require re-login or full Firebase integration to persist across sessions.",
+        variant: "default"
+      });
     }
     setIsEditDialogOpen(false);
   };
@@ -91,7 +99,6 @@ export default function MyAccountPage() {
   }
 
   if (!user) {
-    // This check is partly redundant due to useEffect redirect, but good for safety
     return (
       <div className="container mx-auto py-8 px-4 md:px-6 text-center">
         <Alert variant="destructive" className="max-w-lg mx-auto">
@@ -110,10 +117,12 @@ export default function MyAccountPage() {
     );
   }
   
-  const displayName = user.displayName || user.email?.split('@')[0] || "EduVerse User";
+  const currentDisplayName = tempDisplayName || user.displayName || user.email?.split('@')[0] || "EduVerse User";
   const displayEmail = user.email || "No email provided";
-  const avatarUrl = user.photoURL || `https://placehold.co/128x128.png?text=${displayName.substring(0,1).toUpperCase()}`;
+  const avatarUrl = user.photoURL || `https://placehold.co/128x128.png?text=${currentDisplayName.substring(0,1).toUpperCase()}`;
   const joinDateDisplay = user.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : "N/A";
+  const currentBio = tempBio || localStorage.getItem(`userBio_${user.uid}`) || 'I am an avid learner exploring EduVerse!';
+
 
   return (
     <TooltipProvider>
@@ -130,10 +139,10 @@ export default function MyAccountPage() {
           <Card className="shadow-xl">
             <CardHeader className="items-center text-center">
               <Avatar className="w-32 h-32 mb-4 border-4 border-primary shadow-md">
-                <AvatarImage src={avatarUrl} alt={tempDisplayName || displayName} data-ai-hint="profile picture"/>
-                <AvatarFallback className="text-4xl">{(tempDisplayName || displayName).substring(0,1).toUpperCase()}</AvatarFallback>
+                <AvatarImage src={avatarUrl} alt={currentDisplayName} data-ai-hint="profile picture"/>
+                <AvatarFallback className="text-4xl">{currentDisplayName.substring(0,1).toUpperCase()}</AvatarFallback>
               </Avatar>
-              <CardTitle className="font-headline text-2xl">{tempDisplayName || displayName}</CardTitle>
+              <CardTitle className="font-headline text-2xl">{currentDisplayName}</CardTitle>
               <CardDescription>{displayEmail}</CardDescription>
               <Button variant="outline" size="sm" className="mt-3" onClick={handleEditProfileOpen}>
                 <Edit3 className="mr-2 h-4 w-4" /> Edit Profile Details
@@ -143,6 +152,11 @@ export default function MyAccountPage() {
               <div>
                 <p className="text-xs text-muted-foreground">Joined</p>
                 <p className="font-medium">{joinDateDisplay}</p>
+              </div>
+              <Separator/>
+              <div>
+                <p className="text-xs text-muted-foreground">Bio</p>
+                <p className="font-medium whitespace-pre-wrap">{currentBio || "No bio set."}</p>
               </div>
                <Separator />
               <div className="p-3 bg-foreground/5 rounded-md shadow-sm">
@@ -198,7 +212,7 @@ export default function MyAccountPage() {
           <DialogHeader>
             <DialogTitle className="font-headline text-xl">Edit Your Profile Details</DialogTitle>
             <DialogDescription>
-              Update your display name and bio. (Mock functionality)
+              Update your display name and bio. (Bio changes are mock-saved locally)
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSaveChanges}>
@@ -211,6 +225,7 @@ export default function MyAccountPage() {
                   onChange={(e) => setTempDisplayName(e.target.value)}
                   placeholder="Your display name"
                 />
+                <p className="text-xs text-muted-foreground">Note: Full persistence of display name requires Firebase backend update.</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="bio">Bio</Label>
@@ -238,4 +253,3 @@ export default function MyAccountPage() {
     </TooltipProvider>
   );
 }
-    

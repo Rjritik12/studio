@@ -25,7 +25,7 @@ export function AppHeader() {
     return <UserCircle className="h-6 w-6" />;
   };
   
-  const currentUserPublicProfileLink = user ? `/profile/${encodeURIComponent(user.displayName || user.email?.split('@')[0] || 'me')}` : '/login'; // Fallback to login if user not loaded
+  const currentUserPublicProfileLink = user ? `/profile/${encodeURIComponent(user.displayName || user.email?.split('@')[0] || 'me')}` : '/login';
   const accountSettingsLink = '/profile';
 
 
@@ -55,7 +55,6 @@ export function AppHeader() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="relative rounded-full">
                     <Bell className="h-5 w-5" />
-                    {/* Mock notification dot */}
                     <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
@@ -109,7 +108,7 @@ export function AppHeader() {
               <DropdownMenuItem asChild>
                 <Link href={accountSettingsLink}> 
                   <ProfileSettingsIcon className="mr-2 h-4 w-4" /> 
-                  Account Settings
+                  Edit Profile & Settings
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

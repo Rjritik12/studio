@@ -4,7 +4,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BadgePercent, Star, ShieldCheck, UserCheck, BarChartHorizontal, UserPlus, MessageSquare, Rss, AlertCircle, Edit3 } from "lucide-react"; 
+import { BadgePercent, Star, ShieldCheck, UserCheck, MessageSquare, UserPlus, Rss, Edit3, BarChartHorizontal } from "lucide-react"; 
 import Image from "next/image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useParams, useRouter } from 'next/navigation';
@@ -15,6 +15,8 @@ import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import { PostCard } from "@/app/feed/components/PostCard";
 import type { Post } from "@/lib/types";
+import { cn } from "@/lib/utils";
+
 
 export default function UserProfilePage() {
   const params = useParams();
@@ -35,8 +37,7 @@ export default function UserProfilePage() {
   const [mockUserPosts, setMockUserPosts] = useState<Post[]>([]);
 
   const avatarFallback = username.substring(0, 1).toUpperCase();
-  // Use authUser's photoURL if viewing own profile and it exists, otherwise placeholder
-  const profileAvatarUrl = authUser?.photoURL && (authUser.displayName === username || authUser.email?.split('@')[0] === username) 
+  const profileAvatarUrl = (authUser?.photoURL && (authUser.displayName === username || authUser.email?.split('@')[0] === username))
                            ? authUser.photoURL 
                            : `https://placehold.co/128x128.png?text=${avatarFallback}`;
   
@@ -47,7 +48,7 @@ export default function UserProfilePage() {
       {
         id: `post1-public-profile-${username}`,
         userName: username,
-        userAvatar: profileAvatarUrl, // Use the determined profileAvatarUrl
+        userAvatar: profileAvatarUrl,
         content: `This is a mock post from ${username}'s public profile! Exploring new study techniques.`,
         type: 'note',
         likes: Math.floor(Math.random() * 70) + 5,
@@ -58,7 +59,7 @@ export default function UserProfilePage() {
       {
         id: `post2-public-profile-${username}`,
         userName: username,
-        userAvatar: profileAvatarUrl, // Use the determined profileAvatarUrl
+        userAvatar: profileAvatarUrl,
         content: `Sharing a cool link I found about space exploration, viewed from ${username}'s profile.`,
         type: 'link',
         linkUrl: 'https://example.com/space-exploration-profile',
@@ -81,8 +82,7 @@ export default function UserProfilePage() {
     });
     setIsFollowing(Math.random() < 0.3); 
 
-  }, [username, profileAvatarUrl]); // profileAvatarUrl dependency is enough as it derives from authUser
-
+  }, [username, profileAvatarUrl]);
 
   const handleFollowToggle = () => {
      if (authLoading) return;
@@ -91,13 +91,16 @@ export default function UserProfilePage() {
       return;
     }
     setIsFollowing(!isFollowing);
+    setMockUserStats(prev => ({
+      ...prev,
+      followersCount: isFollowing ? prev.followersCount -1 : prev.followersCount + 1
+    }));
     toast({
       title: !isFollowing ? `Followed ${username}` : `Unfollowed ${username}`,
       description: !isFollowing ? `You are now following ${username}. (Prototype)` : `You are no longer following ${username}. (Prototype)`,
     });
   };
   
-
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
       <header className="text-center mb-6 md:mb-10">
@@ -111,7 +114,7 @@ export default function UserProfilePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 items-start">
         <Card className="lg:col-span-1 shadow-xl">
           <CardHeader className="items-center text-center p-4 md:p-6">
-            <Avatar className="w-24 h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 mb-4 border-4 border-primary shadow-md">
+            <Avatar className={cn("mb-4 border-4 border-primary shadow-md", "w-24 h-24 md:w-28 md:h-28 lg:w-32 lg:h-32")}>
               <AvatarImage src={profileAvatarUrl} alt={username} data-ai-hint="profile picture user" />
               <AvatarFallback className="text-3xl md:text-4xl">{avatarFallback}</AvatarFallback>
             </Avatar>
@@ -125,7 +128,7 @@ export default function UserProfilePage() {
                 <p className="text-xs text-muted-foreground">Posts</p>
               </div>
               <div>
-                <p className="font-bold text-base md:text-lg text-foreground">{mockUserStats.followersCount + (isFollowing && !isOwnPublicProfile ? 1 : 0)}</p>
+                <p className="font-bold text-base md:text-lg text-foreground">{mockUserStats.followersCount}</p>
                 <p className="text-xs text-muted-foreground">Followers</p>
               </div>
               <div>
@@ -207,13 +210,6 @@ export default function UserProfilePage() {
                 ) : (
                   <p className="text-sm text-muted-foreground text-center py-4">No recent active posts to display for {username} in this mock view.</p>
                 )}
-                <Alert variant="default" className="bg-amber-50 border-amber-300 dark:bg-amber-900/30 dark:border-amber-700 mt-4">
-                  <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                  <AlertTitle className="font-semibold text-amber-700 dark:text-amber-300">Mock Posts Displayed</AlertTitle>
-                  <AlertDescription className="text-amber-700/90 dark:text-amber-300/90 mt-1">
-                    The posts above are for demonstration purposes. Displaying {username}'s actual recent posts requires backend integration for persistent post storage. This feature is planned for future updates!
-                  </AlertDescription>
-                </Alert>
               </CardContent>
             </Card>
         </div>
@@ -223,10 +219,9 @@ export default function UserProfilePage() {
         <UserCheck className="h-5 w-5 text-primary" /> 
         <AlertTitle className="font-headline text-primary">Public Profile View</AlertTitle>
         <AlertDescription className="text-foreground/80">
-          This is {username}'s public profile. More interactive features and user-specific content are planned for future updates.
+          This is {username}'s public profile. Social features like following and messaging are prototyped. Post data is mock.
         </AlertDescription>
       </Alert>
     </div>
   );
 }
-

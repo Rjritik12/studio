@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, HelpCircle, Swords, Users, LayoutGrid, UserCircle, BookOpen, LogIn, MessageSquare, SettingsIcon as ProfileSettingsIcon } from 'lucide-react'; 
+import { Home, HelpCircle, Swords, Users, LayoutGrid, UserCircle, LogIn, MessageSquare, SettingsIcon as ProfileSettingsIcon } from 'lucide-react'; 
 import { SidebarMenuButton } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext'; 
@@ -18,12 +18,10 @@ const navItemsBase = [
 
 const publicProfileNavItem = (username: string) => ({ 
   href: `/profile/${encodeURIComponent(username)}`, 
-  label: 'Profile', // Changed from "My Profile" for conciseness
+  label: 'My Profile', // For sidebar clarity, can be more verbose
   icon: UserCircle, 
   requiresAuth: true 
 });
-
-// Removed accountSettingsNavItem as it's now primarily in AppHeader dropdown
 
 const loginNavItem = { href: '/login', label: 'Login', icon: LogIn, requiresAuth: false };
 const messagesNavItem = { href: '/messages', label: 'Messages', icon: MessageSquare, requiresAuth: true };
@@ -46,7 +44,6 @@ export function NavLinks({ isMobile = false, onLinkClick }: NavLinksProps) {
       items.push(messagesNavItem); 
       const userProfileName = user.displayName || user.email?.split('@')[0] || 'me';
       items.push(publicProfileNavItem(userProfileName));
-      // The "Account Settings" link is now primarily in the AppHeader dropdown
     } else {
       if (pathname !== '/login' && pathname !== '/signup') {
          items.push(loginNavItem);
@@ -60,7 +57,7 @@ export function NavLinks({ isMobile = false, onLinkClick }: NavLinksProps) {
   if (loading && !isMobile) { 
     return (
       <div className={cn("flex flex-col gap-2", isMobile ? "mt-6" : "")}>
-        {[...Array(6)].map((_, i) => ( // Adjusted for potentially fewer items
+        {[...Array(currentNavItems.length || 6)].map((_, i) => (
           <SidebarMenuButton key={i} asChild={false} disabled className={cn("justify-start", isMobile && "text-lg py-3")}>
              <div className="mr-2 h-5 w-5 bg-muted rounded animate-pulse" />
              <span className="h-4 w-24 bg-muted rounded animate-pulse" />
@@ -80,11 +77,9 @@ export function NavLinks({ isMobile = false, onLinkClick }: NavLinksProps) {
         }
         
         let isActive = pathname === item.href;
-        // Special handling for dynamic /profile/[username] routes for "Profile"
-        if (item.label === 'Profile' && pathname.startsWith('/profile/') && item.href.startsWith('/profile/')) {
+        if (item.label === 'My Profile' && pathname.startsWith('/profile/') && item.href.startsWith('/profile/')) {
             isActive = pathname === item.href;
         } else if (item.label !== 'Dashboard' && pathname.startsWith(item.href) && item.href !== '/') {
-             // For other non-dynamic routes like /feed, /quiz etc. make sure it's not dashboard
             isActive = true;
         }
 
