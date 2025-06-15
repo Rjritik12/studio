@@ -19,11 +19,12 @@ import { Separator } from '@/components/ui/separator';
 
 
 export function StudyRoomClient() {
+  const [notesText, setNotesText] = useState("");
+  const [doubtText, setDoubtText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [studyData, setStudyData] = useState<StudyRoomData | null>(null);
 
-  // States for image handling
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isWebcamOpen, setIsWebcamOpen] = useState(false);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
@@ -51,6 +52,12 @@ export function StudyRoomClient() {
     };
   }, []);
 
+  const clearImagePreviewAndData = () => {
+    setImagePreview(null);
+    setImageDataUriForAI(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -62,18 +69,25 @@ export function StudyRoomClient() {
         toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please select a JPG, PNG, or WEBP image.' });
         return;
       }
+      if (isWebcamOpen) { // If webcam was open, close it
+          closeWebcam();
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         const dataUri = reader.result as string;
         setImagePreview(dataUri);
         setImageDataUriForAI(dataUri);
-        if (isWebcamOpen) closeWebcam();
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const triggerFileUpload = () => fileInputRef.current?.click();
+  const triggerFileUpload = () => {
+    if (isWebcamOpen) {
+        closeWebcam();
+    }
+    fileInputRef.current?.click()
+  };
 
   const requestCameraPermission = async () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -97,10 +111,10 @@ export function StudyRoomClient() {
   };
 
   const openWebcam = async () => {
-    clearImagePreview(); // Clear uploaded image
+    clearImagePreviewAndData(); 
     const stream = await requestCameraPermission();
     if (stream) setIsWebcamOpen(true);
-    else setIsWebcamOpen(false); // Explicitly set to false if stream failed
+    else setIsWebcamOpen(false); 
   };
 
   const closeWebcam = () => {
@@ -124,41 +138,42 @@ export function StudyRoomClient() {
       closeWebcam();
     }
   };
-
-  const clearImagePreview = () => {
-    setImagePreview(null);
-    setImageDataUriForAI(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
   
   const handleClearImageAndWebcam = () => {
-    clearImagePreview();
-    if (isWebcamOpen) closeWebcam();
+    clearImagePreviewAndData();
+    if (isWebcamOpen) {
+      closeWebcam();
+    }
   }
+
+  const isSubmitDisabled = () => {
+    if (isLoading) return true;
+    if (!doubtText.trim()) return true;
+    if (!notesText.trim() && !imageDataUriForAI) return true;
+    return false;
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
     setStudyData(null);
 
-    const form = event.currentTarget;
-    const notesValue = (form.elements.namedItem('notes') as HTMLTextAreaElement).value;
-    const doubtValue = (form.elements.namedItem('doubt') as HTMLTextAreaElement).value;
-
-    if (!doubtValue.trim()){
+    if (!doubtText.trim()){
         setError("Your Doubt/Question field cannot be empty.");
+        toast({ variant: "destructive", title: "Input Error", description: "Your Doubt/Question field cannot be empty." });
         return;
     }
-    if (!notesValue.trim() && !imageDataUriForAI) {
-       setError("Please provide either notes or an image along with your doubt.");
+    if (!notesText.trim() && !imageDataUriForAI) {
+       setError("Please provide either notes or an image (or both) to give context to your doubt.");
+       toast({ variant: "destructive", title: "Input Error", description: "Please provide notes and/or an image for your doubt." });
        return;
     }
 
-    setIsLoading(true); // Set loading state only after validation passes
+    setIsLoading(true); 
 
     const formData = new FormData();
-    formData.append('notes', notesValue);
-    formData.append('doubt', doubtValue);
+    formData.append('notes', notesText);
+    formData.append('doubt', doubtText);
     if (imageDataUriForAI) {
       formData.append('imageDataUri', imageDataUriForAI);
     }
@@ -174,7 +189,7 @@ export function StudyRoomClient() {
       console.error("Client error calling handleStudySession:", clientError);
       setError("An unexpected client-side error occurred. Please check your connection and try again.");
     } finally {
-      setIsLoading(false); // Ensure loading is set to false in all cases
+      setIsLoading(false); 
     }
   };
 
@@ -192,6 +207,8 @@ export function StudyRoomClient() {
               <Textarea
                 id="notes"
                 name="notes"
+                value={notesText}
+                onChange={(e) => setNotesText(e.target.value)}
                 placeholder="Paste your study notes here, or describe the image if you upload one..."
                 rows={6}
                 className="border-input focus:border-primary transition-colors"
@@ -245,10 +262,19 @@ export function StudyRoomClient() {
                         <div className="relative w-full max-w-md border rounded-md overflow-hidden shadow-md bg-muted">
                             <Image src={imagePreview} alt="Notes/Problem preview" width={600} height={400} className="object-contain aspect-video w-full" data-ai-hint="study image preview"/>
                         </div>
-                        <Button type="button" variant="outline" size="sm" onClick={handleClearImageAndWebcam} disabled={isLoading}>
-                            <Trash2 className="mr-2 h-4 w-4" /> Clear Image
-                        </Button>
                     </div>
+                )}
+                {(imagePreview || isWebcamOpen) && (
+                     <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleClearImageAndWebcam} 
+                        disabled={isLoading}
+                        className="w-full max-w-md mx-auto mt-3 block"
+                    >
+                        <Trash2 className="mr-2 h-4 w-4" /> Clear Image / Close Webcam
+                    </Button>
                 )}
             </div>
 
@@ -259,6 +285,8 @@ export function StudyRoomClient() {
               <Textarea
                 id="doubt"
                 name="doubt"
+                value={doubtText}
+                onChange={(e) => setDoubtText(e.target.value)}
                 placeholder="What are you stuck on? Ask Gemini..."
                 rows={3}
                 className="border-input focus:border-primary transition-colors"
@@ -270,7 +298,7 @@ export function StudyRoomClient() {
             {error && <p className="text-sm text-destructive mt-4">{error}</p>}
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 text-lg" disabled={isLoading}>
+            <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 text-lg" disabled={isSubmitDisabled()}>
               {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Get AI Help"}
             </Button>
           </CardFooter>
