@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { MessageCircle, Heart, Share2, LinkIcon as LinkIconLucide, Image as ImageIconLucide, StickyNote, HelpCircle, Smile, Send, MessageSquare } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, memo } from 'react'; // Added memo
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from '@/hooks/use-toast';
@@ -65,7 +65,8 @@ const typeIcons = {
   image: ImageIconLucide,
 };
 
-export function PostCard({ post }: PostCardProps) {
+// Wrapped PostCard with memo
+export const PostCard = memo(function PostCard({ post }: PostCardProps) {
   const [timeAgo, setTimeAgo] = useState(formatTimeAgo(post.createdAt));
   const [timeLeft, setTimeLeft] = useState(formatTimeLeft(post.expiresAt));
   const { toast } = useToast();
@@ -75,7 +76,7 @@ export function PostCard({ post }: PostCardProps) {
   const [animateLike, setAnimateLike] = useState(false);
   
   const [topLevelCommentText, setTopLevelCommentText] = useState('');
-  const [replyText, setReplyText] = useState<Record<string, string>>({}); // Stores reply input text for each commentId
+  const [replyText, setReplyText] = useState<Record<string, string>>({}); 
   const [newComments, setNewComments] = useState<LocalComment[]>([]); 
   
   const calculateTotalComments = (comments: LocalComment[]): number => {
@@ -105,7 +106,7 @@ export function PostCard({ post }: PostCardProps) {
     setIsPostLiked(!isPostLiked);
     setLocalPostLikes(prevLikes => isPostLiked ? prevLikes - 1 : prevLikes + 1);
     setAnimateLike(true);
-    setTimeout(() => setAnimateLike(false), 300); // Duration of the animation
+    setTimeout(() => setAnimateLike(false), 300); 
   };
 
   const handlePostTopLevelComment = () => {
@@ -124,7 +125,7 @@ export function PostCard({ post }: PostCardProps) {
       showReplyInput: false,
       createdAt: Date.now(),
     };
-    setNewComments(prev => [newComment, ...prev]); // Add new comments at the beginning
+    setNewComments(prev => [newComment, ...prev]); 
     toast({ title: "Comment posted!", variant: "default" });
     setTopLevelCommentText('');
   };
@@ -156,18 +157,18 @@ export function PostCard({ post }: PostCardProps) {
       avatar: "https://placehold.co/28x28.png?text=U",
       likes: 0,
       isLikedByCurrentUser: false,
-      replies: [], // Replies don't have replies in this version
+      replies: [], 
       showReplyInput: false,
       createdAt: Date.now(),
     };
     setNewComments(prevComments => 
       prevComments.map(comment => 
         comment.id === parentCommentId 
-        ? { ...comment, replies: [newReply, ...comment.replies], showReplyInput: false } // Add new replies at the beginning
+        ? { ...comment, replies: [newReply, ...comment.replies], showReplyInput: false } 
         : comment
       )
     );
-    setReplyText(prev => ({ ...prev, [parentCommentId]: '' })); // Clear reply input
+    setReplyText(prev => ({ ...prev, [parentCommentId]: '' })); 
     toast({ title: "Reply posted!", variant: "default" });
   };
 
@@ -412,4 +413,6 @@ export function PostCard({ post }: PostCardProps) {
       </Card>
     </TooltipProvider>
   );
-}
+});
+PostCard.displayName = 'PostCard';
+

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react'; // Added useMemo
 import { CreatePostForm } from './components/CreatePostForm';
 import { PostCard } from './components/PostCard';
 import type { Post } from '@/lib/types';
@@ -47,7 +47,6 @@ export default function FeedPage() {
   const { user: authUser, loading: authLoading } = useAuth();
 
   const [mockStoriesData, setMockStoriesData] = useState<MockStory[]>(initialMockStoriesData);
-  const [uniqueUserStories, setUniqueUserStories] = useState<MockStory[]>([]);
   
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
   const [storiesForViewer, setStoriesForViewer] = useState<StoryItem[]>([]);
@@ -58,15 +57,15 @@ export default function FeedPage() {
   const [isCreatePostDialogOpen, setIsCreatePostDialogOpen] = useState(false);
 
 
-  useEffect(() => {
-    const usersWithStories = mockStoriesData.reduce((acc, story) => {
+  // Replaced useEffect with useMemo for uniqueUserStories
+  const uniqueUserStories = useMemo(() => {
+    return mockStoriesData.reduce((acc, story) => {
       if (!acc.find(s => s.username === story.username)) {
         const hasAnyUnread = mockStoriesData.some(s => s.username === story.username && s.hasUnread);
         acc.push({...story, hasUnread: hasAnyUnread});
       }
       return acc;
     }, [] as MockStory[]);
-    setUniqueUserStories(usersWithStories);
   }, [mockStoriesData]);
 
   const handlePostCreate = (newPostData: Omit<Post, 'id' | 'likes' | 'commentsCount' | 'createdAt' | 'expiresAt' | 'userAvatar' | 'userName'>) => {
@@ -382,3 +381,4 @@ export default function FeedPage() {
     
 
     
+
