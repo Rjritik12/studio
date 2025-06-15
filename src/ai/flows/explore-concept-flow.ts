@@ -3,20 +3,22 @@
 /**
  * @fileOverview An AI agent for exploring and explaining concepts.
  *
- * - exploreConcept - A function that provides an explanation, related terms, and an analogy for a given concept.
- * - ExploreConceptInputSchema - The input type for the exploreConcept function.
- * - ExploreConceptOutputSchema - The return type for the exploreConcept function.
+ * Exports:
+ * - exploreConcept: An async function that takes an ExploreConceptInput and returns an ExploreConceptOutput.
+ *   It provides an explanation, related terms, and an analogy for a given concept.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import type { ExploreConceptInput, ExploreConceptOutput } from '@/lib/types';
 
-export const ExploreConceptInputSchema = z.object({
+// Internal schema, not exported
+const ExploreConceptInputSchema = z.object({
   concept: z.string().min(1, { message: "Concept cannot be empty." }).describe('The concept or keyword to be explained.'),
 });
 
-export const ExploreConceptOutputSchema = z.object({
+// Internal schema, not exported
+const ExploreConceptOutputSchema = z.object({
   explanation: z.string().describe('A concise explanation of the concept.'),
   relatedTerms: z.array(z.string()).describe('A list of 3-5 key terms related to the concept.'),
   analogy: z.string().optional().describe('A simple analogy or example to help understand the concept, if applicable.'),

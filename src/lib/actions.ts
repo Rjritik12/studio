@@ -2,10 +2,10 @@
 "use server";
 
 import { generateQuizQuestions, GenerateQuizQuestionsInput, GenerateQuizQuestionsOutput } from "@/ai/flows/generate-quiz-questions";
-import { tutorStudySession, TutorStudySessionInput, TutorStudySessionOutput } from "@/ai/flows/tutor-study-session";
+import { tutorStudySession, TutorStudySessionInput, TutorStudySessionOutput } from "@/ai/flows/tutor-study-session"; 
 import { getQuizQuestionHint, GetQuizQuestionHintInput, GetQuizQuestionHintOutput } from "@/ai/flows/get-quiz-question-hint";
 import { generateSingleQuizQuestion, GenerateSingleQuizQuestionInput, GenerateSingleQuizQuestionOutput } from "@/ai/flows/generate-single-quiz-question";
-import { exploreConcept, ExploreConceptInputSchema as GenkitExploreConceptInputSchema } from "@/ai/flows/explore-concept-flow"; // Renamed import
+import { exploreConcept } from "@/ai/flows/explore-concept-flow";
 import type { ExploreConceptInput, ExploreConceptOutput } from "@/lib/types";
 
 
