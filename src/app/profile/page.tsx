@@ -5,12 +5,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Edit3, Clock, AlertCircle, LogIn, Loader2, LogOut, CreditCard, Archive, SettingsIcon as ProfileSettingsIcon } from "lucide-react"; 
+import { Edit3, Clock, AlertCircle, LogIn, Loader2, LogOut, CreditCard, Archive, ProfileSettingsIcon, CameraIcon } from "lucide-react"; 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/context/AuthContext"; 
 import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent, type ChangeEvent, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -35,21 +35,30 @@ export default function MyAccountPage() {
     messagingStatus: "Free Trial Active", 
   });
 
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [localAvatarUrl, setLocalAvatarUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+
   useEffect(() => {
     if (!loading && !user) {
        router.push('/login?redirect=/profile'); 
+       return;
     }
-    const today = new Date();
-    const trialEndDate = new Date(today.setDate(today.getDate() + (30 - (Math.floor(Math.random() * 15))))); 
-    setMockSubscriptionEndDate(trialEndDate.toLocaleDateString());
-
     if (user) {
+      const storedAvatar = localStorage.getItem(`userAvatar_${user.uid}`);
+      if (storedAvatar) {
+        setLocalAvatarUrl(storedAvatar);
+      }
       setTempDisplayName(user.displayName || user.email?.split('@')[0] || "EduVerse User");
-      // For a real app, you'd fetch and set the user's bio from your backend here
       setTempBio(localStorage.getItem(`userBio_${user.uid}`) || 'I am an avid learner exploring EduVerse!'); 
-      setMockAccountStats(prev => ({
-        ...prev,
-      }));
+      
+      const today = new Date();
+      const trialEndDate = new Date(today.setDate(today.getDate() + (30 - (Math.floor(Math.random() * 15))))); 
+      setMockSubscriptionEndDate(trialEndDate.toLocaleDateString());
+      setMockAccountStats(prev => ({ ...prev }));
     }
 
   }, [user, loading, router]);
@@ -65,28 +74,63 @@ export default function MyAccountPage() {
   const handleSaveChanges = (e: FormEvent) => {
     e.preventDefault();
     if(user) {
-      // Mock save action: In a real app, call an updateProfile function from AuthContext or an API.
-      // For now, we can update a local display name if needed.
-      // For the bio, we'll use localStorage for this mock.
       localStorage.setItem(`userBio_${user.uid}`, tempBio);
-      
-      // To update display name in Firebase, you'd use updateProfile(auth.currentUser, { displayName: tempDisplayName })
-      // This requires re-authentication for recent logins sometimes.
-      // For this mock, we'll just update the state to reflect immediately in UI.
-      if (user && user.displayName !== tempDisplayName) {
-          // This is a visual mock update for the current session.
-          // A real Firebase updateProfile would be needed.
-          // The AuthContext's user object might not reflect this immediately without a new auth state change.
-          const updatedUser = { ...user, displayName: tempDisplayName };
-          // If you have a setUser in AuthContext exposed, you might call it. Otherwise, this is local.
-      }
+      // Visual update for display name for this session; actual Firebase updateProfile needed for persistence
+      // Potentially update user in AuthContext if a setter is exposed for displayName.
        toast({
-        title: "Profile Updated!",
-        description: "Your changes have been mocked successfully. Display name updates require re-login or full Firebase integration to persist across sessions.",
+        title: "Profile Details Updated!",
+        description: "Bio has been saved locally. Display name update is visual for this session; full persistence requires backend integration.",
         variant: "default"
       });
     }
     setIsEditDialogOpen(false);
+  };
+
+  const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) { // 2MB limit for profile pics
+        toast({ title: "Image Too Large", description: "Please select an image under 2MB.", variant: "destructive" });
+        return;
+      }
+      if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
+        toast({ title: "Invalid File Type", description: "Please use JPG, PNG, GIF, or WEBP.", variant: "destructive" });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreviewUrl(reader.result as string);
+        setSelectedImageFile(file);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFileSelect = () => fileInputRef.current?.click();
+
+  const handleCancelImageChange = () => {
+    setImagePreviewUrl(null);
+    setSelectedImageFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; 
+    }
+  };
+
+  const handleSaveImage = async () => {
+    if (!selectedImageFile || !imagePreviewUrl) return;
+    setIsUploading(true);
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Mock upload
+    if (user) {
+      localStorage.setItem(`userAvatar_${user.uid}`, imagePreviewUrl);
+      setLocalAvatarUrl(imagePreviewUrl);
+    }
+    setIsUploading(false);
+    setImagePreviewUrl(null);
+    setSelectedImageFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    toast({ title: "Profile Picture Updated!", description: "Your new avatar has been (mock) saved.", variant: "default" });
   };
 
 
@@ -99,29 +143,26 @@ export default function MyAccountPage() {
   }
 
   if (!user) {
+    // This case is handled by useEffect redirect, but good for safety
     return (
       <div className="container mx-auto py-8 px-4 md:px-6 text-center">
         <Alert variant="destructive" className="max-w-lg mx-auto">
           <AlertCircle className="h-5 w-5" />
           <AlertTitle className="font-headline">Access Denied</AlertTitle>
           <AlertDescription>
-            You need to be logged in to manage your account.
+            You need to be logged in to manage your account. Redirecting to login...
           </AlertDescription>
         </Alert>
-        <Button asChild className="mt-6">
-          <Link href="/login">
-            <LogIn className="mr-2 h-5 w-5" /> Log In
-          </Link>
-        </Button>
       </div>
     );
   }
   
-  const currentDisplayName = tempDisplayName || user.displayName || user.email?.split('@')[0] || "EduVerse User";
+  // Display name and avatar logic now relies on user definitely existing due to checks above
+  const currentDisplayNameToShow = tempDisplayName || user.displayName || user.email?.split('@')[0] || "EduVerse User";
   const displayEmail = user.email || "No email provided";
-  const avatarUrl = user.photoURL || `https://placehold.co/128x128.png?text=${currentDisplayName.substring(0,1).toUpperCase()}`;
+  const displayAvatarUrl = imagePreviewUrl || localAvatarUrl || user.photoURL || `https://placehold.co/128x128.png?text=${currentDisplayNameToShow.substring(0,1).toUpperCase()}`;
   const joinDateDisplay = user.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : "N/A";
-  const currentBio = tempBio || localStorage.getItem(`userBio_${user.uid}`) || 'I am an avid learner exploring EduVerse!';
+  const currentBioToShow = tempBio || localStorage.getItem(`userBio_${user.uid}`) || 'I am an avid learner exploring EduVerse!';
 
 
   return (
@@ -138,11 +179,38 @@ export default function MyAccountPage() {
         <div className="max-w-2xl mx-auto space-y-8">
           <Card className="shadow-xl">
             <CardHeader className="items-center text-center">
-              <Avatar className="w-32 h-32 mb-4 border-4 border-primary shadow-md">
-                <AvatarImage src={avatarUrl} alt={currentDisplayName} data-ai-hint="profile picture"/>
-                <AvatarFallback className="text-4xl">{currentDisplayName.substring(0,1).toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <CardTitle className="font-headline text-2xl">{currentDisplayName}</CardTitle>
+              <div className="flex flex-col items-center gap-3 mb-3">
+                <Avatar className="w-32 h-32 border-4 border-primary shadow-md">
+                  <AvatarImage src={displayAvatarUrl} alt={currentDisplayNameToShow} data-ai-hint="profile picture"/>
+                  <AvatarFallback className="text-4xl">{currentDisplayNameToShow.substring(0,1).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <Input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/png, image/jpeg, image/gif, image/webp"
+                  onChange={handleFileSelect}
+                  disabled={isUploading}
+                />
+                {!imagePreviewUrl && !isUploading && (
+                  <Button variant="outline" size="sm" onClick={triggerFileSelect} className="w-auto">
+                    <CameraIcon className="mr-2 h-4 w-4" /> Change Picture
+                  </Button>
+                )}
+                {imagePreviewUrl && !isUploading && (
+                  <div className="flex gap-2 items-center">
+                    <Button variant="default" size="sm" onClick={handleSaveImage}>
+                      Save Picture
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={handleCancelImageChange}>
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+                 {isUploading && <Loader2 className="h-6 w-6 animate-spin text-primary" />}
+              </div>
+              
+              <CardTitle className="font-headline text-2xl">{currentDisplayNameToShow}</CardTitle>
               <CardDescription>{displayEmail}</CardDescription>
               <Button variant="outline" size="sm" className="mt-3" onClick={handleEditProfileOpen}>
                 <Edit3 className="mr-2 h-4 w-4" /> Edit Profile Details
@@ -156,7 +224,7 @@ export default function MyAccountPage() {
               <Separator/>
               <div>
                 <p className="text-xs text-muted-foreground">Bio</p>
-                <p className="font-medium whitespace-pre-wrap">{currentBio || "No bio set."}</p>
+                <p className="font-medium whitespace-pre-wrap">{currentBioToShow || "No bio set."}</p>
               </div>
                <Separator />
               <div className="p-3 bg-foreground/5 rounded-md shadow-sm">
@@ -212,7 +280,7 @@ export default function MyAccountPage() {
           <DialogHeader>
             <DialogTitle className="font-headline text-xl">Edit Your Profile Details</DialogTitle>
             <DialogDescription>
-              Update your display name and bio. (Bio changes are mock-saved locally)
+              Update your display name and bio.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSaveChanges}>
@@ -225,7 +293,6 @@ export default function MyAccountPage() {
                   onChange={(e) => setTempDisplayName(e.target.value)}
                   placeholder="Your display name"
                 />
-                <p className="text-xs text-muted-foreground">Note: Full persistence of display name requires Firebase backend update.</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="bio">Bio</Label>
@@ -244,7 +311,7 @@ export default function MyAccountPage() {
                   Cancel
                 </Button>
               </DialogClose>
-              <Button type="submit">Save Changes (Mock)</Button>
+              <Button type="submit">Save Changes</Button>
             </DialogFooter>
           </form>
         </DialogContent>
