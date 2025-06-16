@@ -26,6 +26,7 @@ export default function MyAccountPage() {
   const [mockSubscriptionEndDate, setMockSubscriptionEndDate] = useState('');
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  // tempDisplayName and tempBio will hold the current values for display and editing
   const [tempDisplayName, setTempDisplayName] = useState('');
   const [tempBio, setTempBio] = useState('');
   
@@ -48,10 +49,15 @@ export default function MyAccountPage() {
        return;
     }
     if (user) {
+      // Initialize states based on user data and localStorage
+      // These will be the source of truth unless actively edited in the dialog
       const storedAvatar = localStorage.getItem(`userAvatar_${user.uid}`);
       if (storedAvatar) {
         setLocalAvatarUrl(storedAvatar);
+      } else if (user.photoURL) {
+        setLocalAvatarUrl(user.photoURL);
       }
+
       setTempDisplayName(user.displayName || user.email?.split('@')[0] || "EduVerse User");
       setTempBio(localStorage.getItem(`userBio_${user.uid}`) || 'I am an avid learner exploring EduVerse!'); 
       
@@ -60,11 +66,14 @@ export default function MyAccountPage() {
       setMockSubscriptionEndDate(trialEndDate.toLocaleDateString());
       setMockAccountStats(prev => ({ ...prev }));
     }
-
+  // useEffect will run when user, loading, or router changes.
+  // It sets the base values for tempDisplayName and tempBio.
+  // The dialog will then independently manage edits to these states.
   }, [user, loading, router]);
 
   const handleEditProfileOpen = () => {
     if (user) {
+      // When dialog opens, ensure it's populated with the latest authoritative data
       setTempDisplayName(user.displayName || user.email?.split('@')[0] || "EduVerse User");
       setTempBio(localStorage.getItem(`userBio_${user.uid}`) || 'I am an avid learner exploring EduVerse!');
       setIsEditDialogOpen(true);
@@ -74,12 +83,15 @@ export default function MyAccountPage() {
   const handleSaveChanges = (e: FormEvent) => {
     e.preventDefault();
     if(user) {
+      // tempDisplayName state is already updated by the dialog input's onChange.
+      // tempBio state is also updated by its input's onChange.
       localStorage.setItem(`userBio_${user.uid}`, tempBio);
-      // Visual update for display name for this session; actual Firebase updateProfile needed for persistence
-      // Potentially update user in AuthContext if a setter is exposed for displayName.
+      
+      // The page will now display the updated tempDisplayName and tempBio
+      // because currentDisplayNameToShow and currentBioToShow derive from them.
        toast({
         title: "Profile Details Updated!",
-        description: "Bio has been saved locally. Display name update is visual for this session; full persistence requires backend integration.",
+        description: "Bio has been saved locally. Display name update is visual for this session.",
         variant: "default"
       });
     }
@@ -122,10 +134,10 @@ export default function MyAccountPage() {
     await new Promise(resolve => setTimeout(resolve, 1500)); // Mock upload
     if (user) {
       localStorage.setItem(`userAvatar_${user.uid}`, imagePreviewUrl);
-      setLocalAvatarUrl(imagePreviewUrl);
+      setLocalAvatarUrl(imagePreviewUrl); // Update the displayed avatar
     }
     setIsUploading(false);
-    setImagePreviewUrl(null);
+    setImagePreviewUrl(null); // Clear preview
     setSelectedImageFile(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -143,7 +155,6 @@ export default function MyAccountPage() {
   }
 
   if (!user) {
-    // This case is handled by useEffect redirect, but good for safety
     return (
       <div className="container mx-auto py-8 px-4 md:px-6 text-center">
         <Alert variant="destructive" className="max-w-lg mx-auto">
@@ -157,12 +168,11 @@ export default function MyAccountPage() {
     );
   }
   
-  // Display name and avatar logic now relies on user definitely existing due to checks above
-  const currentDisplayNameToShow = tempDisplayName || user.displayName || user.email?.split('@')[0] || "EduVerse User";
+  const currentDisplayNameToShow = tempDisplayName || "EduVerse User";
   const displayEmail = user.email || "No email provided";
-  const displayAvatarUrl = imagePreviewUrl || localAvatarUrl || user.photoURL || `https://placehold.co/128x128.png?text=${currentDisplayNameToShow.substring(0,1).toUpperCase()}`;
+  const displayAvatarUrl = imagePreviewUrl || localAvatarUrl || `https://placehold.co/128x128.png?text=${currentDisplayNameToShow.substring(0,1).toUpperCase()}`;
   const joinDateDisplay = user.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : "N/A";
-  const currentBioToShow = tempBio || localStorage.getItem(`userBio_${user.uid}`) || 'I am an avid learner exploring EduVerse!';
+  const currentBioToShow = tempBio || 'I am an avid learner exploring EduVerse!';
 
 
   return (
@@ -320,3 +330,4 @@ export default function MyAccountPage() {
     </TooltipProvider>
   );
 }
+
