@@ -122,7 +122,7 @@ export default function UserProfilePage() {
             <CardDescription>Level {mockUserStats.level} EduVerse Explorer</CardDescription>
           </CardHeader>
           <CardContent className="text-sm text-foreground/80 p-4 md:p-6">
-            <div className="flex flex-col gap-2 sm:flex-row sm:justify-around text-center mb-3 sm:mb-4">
+            <div className="flex flex-row justify-around items-center text-center mb-4">
               <div className="py-1">
                 <p className="font-bold text-base md:text-lg text-foreground">{mockUserStats.postsCount}</p>
                 <p className="text-xs text-muted-foreground">Posts</p>
