@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'; // Added SheetHeader, SheetTitle
 import { MenuIcon, UserCircle, LogIn, LogOut, Loader2, Bell, BarChart3, SettingsIcon as ProfileSettingsIcon } from 'lucide-react'; 
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { NavLinks } from './NavLinks';
@@ -39,8 +39,13 @@ export function AppHeader() {
               <span className="sr-only">Toggle navigation menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="flex flex-col bg-sidebar text-sidebar-foreground">
-             <NavLinks isMobile={true} />
+          <SheetContent side="left" className="flex flex-col bg-sidebar text-sidebar-foreground p-0"> {/* Removed default padding */}
+            <SheetHeader className="p-4 border-b border-sidebar-border"> {/* Header with its own padding and border */}
+              <SheetTitle className="text-xl font-headline text-sidebar-primary">Menu</SheetTitle>
+            </SheetHeader>
+            <div className="flex-1 overflow-y-auto"> {/* Scrollable content area for NavLinks */}
+              <NavLinks isMobile={true} /> {/* NavLinks already has mt-6 in mobile mode */}
+            </div>
           </SheetContent>
         </Sheet>
       ) : (
