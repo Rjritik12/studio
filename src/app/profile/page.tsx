@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Edit3, Clock, AlertCircle, LogIn, Loader2, LogOut, CreditCard, Archive, ProfileSettingsIcon, CameraIcon } from "lucide-react"; 
+import { Edit3, Clock, AlertCircle, LogIn, Loader2, LogOut, CreditCard, Archive, Settings2Icon, CameraIcon } from "lucide-react"; 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/context/AuthContext"; 
@@ -169,7 +169,7 @@ export default function MyAccountPage() {
     <TooltipProvider>
       <div className="container mx-auto py-8 px-4 md:px-6">
         <header className="text-center mb-12">
-          <ProfileSettingsIcon className="mx-auto h-16 w-16 text-primary mb-4" />
+          <Settings2Icon className="mx-auto h-16 w-16 text-primary mb-4" />
           <h1 className="font-headline text-4xl md:text-5xl font-bold text-primary mb-4">My Account & Settings</h1>
           <p className="text-xl text-foreground/80 max-w-2xl mx-auto">
             Manage your profile information and account settings.
@@ -266,7 +266,7 @@ export default function MyAccountPage() {
           </Card>
         
             <Alert variant="default" className="bg-primary/10 border-primary/30">
-                <ProfileSettingsIcon className="h-5 w-5 text-primary" />
+                <Settings2Icon className="h-5 w-5 text-primary" />
                 <AlertTitle className="font-headline text-primary">Account Management</AlertTitle>
                 <AlertDescription className="text-foreground/80">
                     This page is for managing your account details and settings. For your public profile, achievements, and posts, please visit your public profile page.

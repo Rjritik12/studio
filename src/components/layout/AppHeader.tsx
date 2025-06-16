@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'; // Added SheetHeader, SheetTitle
-import { MenuIcon, UserCircle, LogIn, LogOut, Loader2, Bell, BarChart3, SettingsIcon as ProfileSettingsIcon } from 'lucide-react'; 
+import { MenuIcon, UserCircle, LogIn, LogOut, Loader2, Bell, BarChart3, Settings2Icon } from 'lucide-react'; 
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { NavLinks } from './NavLinks';
 import { useAuth } from '@/context/AuthContext';
@@ -112,7 +112,7 @@ export function AppHeader() {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={accountSettingsLink}> 
-                  <ProfileSettingsIcon className="mr-2 h-4 w-4" /> 
+                  <Settings2Icon className="mr-2 h-4 w-4" /> 
                   Edit Profile & Settings
                 </Link>
               </DropdownMenuItem>

@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, HelpCircle, Swords, Users, LayoutGrid, UserCircle, LogIn, MessageSquare, SettingsIcon as ProfileSettingsIcon } from 'lucide-react';
+import { Home, HelpCircle, Swords, Users, LayoutGrid, UserCircle, LogIn, MessageSquare, Settings2Icon } from 'lucide-react';
 import { SidebarMenuButton } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
