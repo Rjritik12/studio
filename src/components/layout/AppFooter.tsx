@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, LayoutGrid, HelpCircle, UserCircle, LogIn, MessageSquare, SettingsIcon as ProfileSettingsIcon } from 'lucide-react'; // Removed Users
+import { Home, LayoutGrid, HelpCircle, UserCircle, LogIn, MessageSquare, Users } from 'lucide-react'; // Added Users icon
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 
@@ -23,8 +23,7 @@ export function AppFooter() {
     const publicProfileLink = user ? `/profile/${encodeURIComponent(user.displayName || user.email?.split('@')[0] || 'me')}` : '/login';
     return [
       ...navItemsBase,
-      // { href: '/groups', label: 'Groups', icon: Users }, // Removed Groups
-      { href: '/messages', label: 'Messages', icon: MessageSquare }, // Label can be "Messages" or "Messages & Groups"
+      { href: '/study-room', label: 'AI Study', icon: Users }, // Changed from Messages to AI Study Room
       { href: publicProfileLink, label: 'Profile', icon: UserCircle },
     ];
   };
@@ -53,12 +52,9 @@ export function AppFooter() {
 
   const currentNavItems = user ? getLoggedInItems() : loggedOutItems;
   // Ensure we display a consistent number of items, typically 5 for a footer like this.
-  // If fewer items are relevant, consider placeholders or adjusting the layout.
-  // Ensure the 5th item makes sense. If only 4 relevant items, the 5th spot might be empty or a generic icon.
-  const displayItems = [...currentNavItems].slice(0,5); // Pad or slice to ensure 5 items
+  const displayItems = [...currentNavItems].slice(0,5); 
    if (displayItems.length < 5 && !user) {
     // Example: Add a generic link or an empty placeholder if needed for layout consistency for logged-out users
-    // For now, we'll let it be fewer than 5 if that's the case.
    }
 
 
