@@ -39,24 +39,20 @@ export default function UserProfilePage() {
   const avatarFallback = username.substring(0, 1).toUpperCase();
   const profileAvatarUrl = (authUser?.photoURL && (authUser.displayName === username || authUser.email?.split('@')[0] === username))
                            ? authUser.photoURL 
-                           : `https://placehold.co/96x96.png?text=${avatarFallback}`; // Adjusted placeholder size
+                           : `https://placehold.co/96x96.png?text=${avatarFallback}`; 
   
   const currentDisplayName = (authUser && (authUser.displayName === username || authUser.email?.split('@')[0] === username))
                            ? authUser.displayName || username
-                           : username.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()); // Mock display name from username
+                           : username.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()); 
 
   const isOwnPublicProfile = authUser && (authUser.displayName === username || authUser.email?.split('@')[0] === username);
   
-  // Mock Bio - in a real app this would come from user data
-  const currentBio = `Learning enthusiast exploring ${username}. Sharing notes and insights on various topics. Currently focusing on EduVerse! 📚✨\nDM for collabs or study groups! 👇`;
-
-
   useEffect(() => {
     const generatedPosts: Post[] = [
       {
         id: `post1-public-profile-${username}`,
         userName: username,
-        userAvatar: profileAvatarUrl, // Use the consistent profileAvatarUrl
+        userAvatar: profileAvatarUrl, 
         content: `This is a mock post from ${username}'s public profile! Exploring new study techniques.`,
         type: 'note',
         likes: Math.floor(Math.random() * 70) + 5,
@@ -67,7 +63,7 @@ export default function UserProfilePage() {
       {
         id: `post2-public-profile-${username}`,
         userName: username,
-        userAvatar: profileAvatarUrl, // Use the consistent profileAvatarUrl
+        userAvatar: profileAvatarUrl, 
         content: `Sharing a cool link I found about space exploration, viewed from ${username}'s profile.`,
         type: 'link',
         linkUrl: 'https://example.com/space-exploration-profile',
@@ -84,9 +80,9 @@ export default function UserProfilePage() {
       xp: Math.floor(Math.random() * 2500) + 800,
       level: Math.floor(Math.random() * 12) + 5,
       badges: ["Quiz Master", "Avid Learner", "Top Contributor"].sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 2) + 1),
-      postsCount: Math.floor(Math.random() * 200) + 10, // Updated to match Instagram numbers
-      followersCount: Math.floor(Math.random() * 3000) + 500, // Updated
-      followingCount: Math.floor(Math.random() * 1000) + 100, // Updated
+      postsCount: Math.floor(Math.random() * 200) + 10, 
+      followersCount: Math.floor(Math.random() * 3000) + 500, 
+      followingCount: Math.floor(Math.random() * 1000) + 100, 
     });
     setIsFollowing(Math.random() < 0.3); 
 
@@ -110,25 +106,23 @@ export default function UserProfilePage() {
   };
   
   return (
-    <div className="container mx-auto py-4 px-2 sm:px-4 md:px-6"> {/* Reduced top padding */}
-      {/* New Page Header Bar */}
+    <div className="container mx-auto py-4 px-2 sm:px-4 md:px-6">
       <div className="flex items-center justify-between mb-4">
         <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Go back">
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h2 className="font-headline text-base sm:text-lg font-semibold text-foreground text-center truncate px-2">
-          {username} {/* This is the handle like 'steve_smith49' */}
+          {username}
         </h2>
-        <Button variant="ghost" size="icon" aria-label="Options" disabled> {/* Placeholder for options menu */}
+        <Button variant="ghost" size="icon" aria-label="Options" disabled>
           <MoreHorizontal className="h-5 w-5" />
         </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 items-start">
         <Card className="lg:col-span-1 shadow-lg">
-          <CardContent className="p-3 sm:p-4"> {/* Reduced padding */}
-            {/* Top section: Avatar + Stats */}
-            <div className="flex flex-row items-center gap-3 sm:gap-4 mb-3">
+          <CardContent className="p-3 sm:p-4 space-y-3">
+            <div className="flex flex-row items-center gap-3 sm:gap-4">
               <Avatar className="w-16 h-16 sm:w-20 sm:h-20 border-2 border-muted shadow-sm">
                 <AvatarImage src={profileAvatarUrl} alt={username} data-ai-hint="user profile avatar"/>
                 <AvatarFallback className="text-2xl sm:text-3xl">{avatarFallback}</AvatarFallback>
@@ -149,16 +143,40 @@ export default function UserProfilePage() {
               </div>
             </div>
 
-            {/* Name and Bio Section */}
-            <div className="space-y-0.5 sm:space-y-1"> {/* Reduced space */}
+            <div>
               <p className="font-semibold text-sm text-foreground">{currentDisplayName}</p>
-              <p className="text-xs text-muted-foreground">EduVerse Learner ✨</p>
-              <p className="text-xs text-foreground/90 whitespace-pre-wrap break-words">
-                {currentBio}
-              </p>
             </div>
 
-            {/* Action Buttons */}
+            <Separator />
+
+            <div className="space-y-3">
+              <h3 className="font-headline text-md font-semibold text-primary">EduVerse Stats</h3>
+              <div className="grid grid-cols-2 gap-3 text-center">
+                <div className="p-2 bg-foreground/5 rounded-lg">
+                  <Star className="h-6 w-6 text-accent mx-auto mb-1" />
+                  <p className="text-lg font-bold text-foreground">{mockUserStats.xp} XP</p>
+                  <p className="text-xs text-muted-foreground">Level {mockUserStats.level}</p>
+                </div>
+                <div className="p-2 bg-foreground/5 rounded-lg">
+                  <ShieldCheck className="h-6 w-6 text-accent mx-auto mb-1" />
+                  <p className="text-lg font-bold text-foreground">{mockUserStats.badges.length} Badges</p>
+                  <p className="text-xs text-muted-foreground">Collected</p>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold text-xs text-muted-foreground mb-1.5">Badges Earned:</h4>
+                <div className="flex flex-wrap gap-1.5">
+                  {mockUserStats.badges.map(badge => (
+                    <span key={badge} className="px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary font-medium flex items-center gap-1">
+                      <BadgePercent className="h-3 w-3"/> {badge}
+                    </span>
+                  ))}
+                  {mockUserStats.badges.length === 0 && <p className="text-xs text-muted-foreground">No badges yet.</p>}
+                </div>
+              </div>
+            </div>
+            
             <div className="mt-3 flex flex-row gap-2">
               {isOwnPublicProfile ? (
                  <Button variant="outline" className="flex-1 text-xs h-8" asChild>
@@ -178,11 +196,6 @@ export default function UserProfilePage() {
                   <Button variant="outline" asChild className="flex-1 text-xs h-8">
                     <Link href={`/messages/${encodeURIComponent(username)}`}>Message</Link>
                   </Button>
-                  {/* Optional: Add Person Icon Button - Mock
-                  <Button variant="outline" size="icon" className="h-8 w-8">
-                     <UserPlus className="h-3.5 w-3.5" />
-                  </Button> 
-                  */}
                 </>
               ) : !authLoading && !authUser ? (
                  <p className="text-xs text-center text-muted-foreground w-full py-2">
@@ -194,38 +207,6 @@ export default function UserProfilePage() {
         </Card>
 
         <div className="lg:col-span-2 space-y-6 md:space-y-8">
-            <Card className="shadow-xl">
-              <CardHeader>
-                <CardTitle className="font-headline text-lg md:text-xl flex items-center"><BarChartHorizontal className="mr-2 h-5 w-5 text-primary" /> EduVerse Stats</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 md:space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
-                  <div className="p-3 md:p-4 bg-foreground/5 rounded-lg">
-                    <Star className="h-8 w-8 md:h-10 md:w-10 text-accent mx-auto mb-1" />
-                    <p className="text-xl md:text-2xl font-bold text-foreground">{mockUserStats.xp} XP</p>
-                    <p className="text-xs md:text-sm text-muted-foreground">Level {mockUserStats.level}</p>
-                  </div>
-                  <div className="p-3 md:p-4 bg-foreground/5 rounded-lg">
-                    <ShieldCheck className="h-8 w-8 md:h-10 md:w-10 text-accent mx-auto mb-1" />
-                    <p className="text-xl md:text-2xl font-bold text-foreground">{mockUserStats.badges.length} Badges</p>
-                    <p className="text-xs md:text-sm text-muted-foreground">Collected</p>
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="font-semibold text-base md:text-lg mb-2 text-foreground">Badges Earned:</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {mockUserStats.badges.map(badge => (
-                      <span key={badge} className="px-2.5 py-1 text-xs md:text-sm rounded-full bg-primary/10 text-primary font-medium flex items-center gap-1">
-                        <BadgePercent className="h-3.5 w-3.5"/> {badge}
-                      </span>
-                    ))}
-                    {mockUserStats.badges.length === 0 && <p className="text-xs md:text-sm text-muted-foreground">No badges earned yet.</p>}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             <Card className="shadow-xl w-full"> 
               <CardHeader>
                 <CardTitle className="font-headline text-lg md:text-xl flex items-center">
@@ -255,5 +236,4 @@ export default function UserProfilePage() {
     </div>
   );
 }
-
     
