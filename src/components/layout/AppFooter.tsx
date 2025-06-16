@@ -21,11 +21,15 @@ export function AppFooter() {
   // Items specifically for logged-in users
   const getLoggedInItems = () => {
     const publicProfileLink = user ? `/profile/${encodeURIComponent(user.displayName || user.email?.split('@')[0] || 'me')}` : '/login';
+    
+    // Manually construct the order: Home, AI Study, Quiz, Feed, Profile
     return [
-      ...navItemsBase,
-      { href: '/study-room', label: 'AI Study', icon: Users }, // Changed from Messages to AI Study Room
-      { href: publicProfileLink, label: 'Profile', icon: UserCircle },
-    ];
+      navItemsBase.find(item => item.label === 'Home')!, // Home
+      { href: '/study-room', label: 'AI Study', icon: Users }, // AI Study Room
+      navItemsBase.find(item => item.label === 'Quiz')!, // Quiz
+      navItemsBase.find(item => item.label === 'Feed')!, // Feed
+      { href: publicProfileLink, label: 'Profile', icon: UserCircle }, // Profile
+    ].filter(Boolean); // Filter out any undefined items if labels change in navItemsBase
   };
 
   // Items for logged-out users
