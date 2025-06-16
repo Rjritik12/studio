@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from "@/lib/utils";
 import { Separator } from '@/components/ui/separator';
+import { FlashcardDisplay } from './FlashcardDisplay'; // Import the new component
 
 
 export function StudyRoomClient() {
@@ -123,7 +124,7 @@ export function StudyRoomClient() {
   };
 
   const captureImage = () => {
-    if (videoRef.current && canvasRef.current && streamRef.current) {
+    if (videoRef.current && canvasRef.current && streamRef.current && videoRef.current.readyState >= videoRef.current.HAVE_METADATA) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
       canvas.width = video.videoWidth;
@@ -136,6 +137,12 @@ export function StudyRoomClient() {
         setImageDataUriForAI(dataUrl);
       }
       closeWebcam();
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Webcam Error",
+            description: "Could not capture image. Webcam might not be ready."
+        });
     }
   };
   
@@ -237,20 +244,20 @@ export function StudyRoomClient() {
                 <div className="flex flex-col items-center w-full max-w-md mx-auto">
                     <video
                         ref={videoRef}
-                        className={cn("w-full aspect-video rounded-md border bg-muted", isWebcamOpen && hasCameraPermission ? "block" : "hidden")}
+                        className={cn("w-full aspect-video rounded-md border bg-muted", isWebcamOpen && hasCameraPermission === true ? "block" : "hidden")}
                         autoPlay muted playsInline
                     />
-                    {isWebcamOpen && hasCameraPermission && (
+                    {isWebcamOpen && hasCameraPermission === true && (
                         <Button type="button" onClick={captureImage} className="mt-3 bg-green-600 hover:bg-green-700 text-white" disabled={isLoading}>
                             <Camera className="mr-2 h-5 w-5" /> Capture Photo
                         </Button>
                     )}
-                    {isWebcamOpen && hasCameraPermission === false && (
+                    {hasCameraPermission === false && ( // Show if permission was explicitly denied
                         <Alert variant="destructive" className="w-full mt-2">
                             <AlertCircle className="h-4 w-4" />
                             <AlertTitle>Camera Access Denied</AlertTitle>
                             <AlertDescription>
-                                Please enable camera permissions in your browser settings and try again.
+                                To capture an image, EduVerse needs camera access. Please enable camera permissions in your browser settings and try again. You can still upload an image.
                             </AlertDescription>
                         </Alert>
                     )}
@@ -264,16 +271,17 @@ export function StudyRoomClient() {
                         </div>
                     </div>
                 )}
-                {(imagePreview || isWebcamOpen) && (
+                {(imagePreview || (isWebcamOpen && hasCameraPermission)) && (
                      <Button 
                         type="button" 
                         variant="outline" 
                         size="sm" 
                         onClick={handleClearImageAndWebcam} 
                         disabled={isLoading}
-                        className="w-full max-w-md mx-auto mt-3 block"
+                        className="w-full max-w-xs mx-auto mt-3 block" // Changed max-w-md to max-w-xs and added block for centering
                     >
-                        <Trash2 className="mr-2 h-4 w-4" /> Clear Image / Close Webcam
+                        <Trash2 className="mr-2 h-4 w-4" /> 
+                        {isWebcamOpen && hasCameraPermission ? "Close Webcam & Clear" : "Clear Image"}
                     </Button>
                 )}
             </div>
@@ -336,19 +344,12 @@ export function StudyRoomClient() {
                 </Alert>
             </div>
             
-            {studyData.flashcards && studyData.flashcards.length > 0 && (
+            {studyData.flashcards && Array.isArray(studyData.flashcards) && studyData.flashcards.length > 0 && (
               <div>
                 <h3 className="font-semibold text-xl text-foreground mb-3">Generated Flashcards:</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   {studyData.flashcards.map((flashcard: Flashcard, index: number) => (
-                    <Card key={index} className="bg-card shadow-md hover:shadow-lg transition-shadow">
-                      <CardHeader className="pb-2 pt-4">
-                        <CardTitle className="text-base font-semibold text-primary">Q: {flashcard.question}</CardTitle>
-                      </CardHeader>
-                      <CardContent className="pb-4">
-                        <p className="text-sm text-foreground/80">A: {flashcard.answer}</p>
-                      </CardContent>
-                    </Card>
+                    <FlashcardDisplay key={index} flashcard={flashcard} />
                   ))}
                 </div>
               </div>
