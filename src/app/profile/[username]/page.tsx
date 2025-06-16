@@ -4,7 +4,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BadgePercent, Star, ShieldCheck, UserCheck, MessageSquare, UserPlus, Rss, Edit3, BarChartHorizontal, ArrowLeft, MoreHorizontal } from "lucide-react"; 
+import { BadgePercent, Star, ShieldCheck, UserCheck, MessageSquare, UserPlus, Rss, Edit3, MoreHorizontal, ArrowLeft } from "lucide-react"; 
 import Image from "next/image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useParams, useRouter } from 'next/navigation';
