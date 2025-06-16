@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from "@/lib/utils";
 import { Separator } from '@/components/ui/separator';
-import { FlashcardDisplay } from './FlashcardDisplay'; // Import the new component
+import { FlashcardDisplay } from './FlashcardDisplay'; 
 
 
 export function StudyRoomClient() {
@@ -204,13 +204,13 @@ export function StudyRoomClient() {
     <div className="space-y-8">
       <Card className="shadow-xl">
         <CardHeader>
-          <CardTitle className="font-headline text-2xl flex items-center"><Wand2 className="mr-2 h-7 w-7 text-primary" /> Ask Your AI Tutor</CardTitle>
-          <CardDescription>Enter your notes, your specific doubt, and optionally upload an image for context. Gemini will help you out!</CardDescription>
+          <CardTitle className="font-headline text-xl sm:text-2xl flex items-center"><Wand2 className="mr-2 h-6 sm:h-7 w-6 sm:w-7 text-primary" /> Ask Your AI Tutor</CardTitle>
+          <CardDescription className="text-sm sm:text-base">Enter your notes, your specific doubt, and optionally upload an image for context. Gemini will help you out!</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="notes" className="text-foreground/90 text-lg">Your Notes (Text and/or Image)</Label>
+              <Label htmlFor="notes" className="text-foreground/90 text-md sm:text-lg">Your Notes (Text and/or Image)</Label>
               <Textarea
                 id="notes"
                 name="notes"
@@ -224,19 +224,19 @@ export function StudyRoomClient() {
             </div>
             
             <div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <Button type="button" variant="outline" onClick={triggerFileUpload} disabled={isWebcamOpen || isLoading}>
-                        <Upload className="mr-2 h-5 w-5" /> Upload Image
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <Button type="button" variant="outline" onClick={triggerFileUpload} disabled={isWebcamOpen || isLoading} className="text-xs sm:text-sm">
+                        <Upload className="mr-2 h-4 sm:h-5 w-4 sm:w-5" /> Upload Image
                     </Button>
                     <Input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/png, image/jpeg, image/webp" className="hidden" />
                     
                     {isWebcamOpen && hasCameraPermission ? (
-                        <Button type="button" variant="destructive" onClick={closeWebcam} disabled={isLoading}>
-                            <VideoOff className="mr-2 h-5 w-5" /> Close Webcam
+                        <Button type="button" variant="destructive" onClick={closeWebcam} disabled={isLoading} className="text-xs sm:text-sm">
+                            <VideoOff className="mr-2 h-4 sm:h-5 w-4 sm:w-5" /> Close Webcam
                         </Button>
                     ) : (
-                        <Button type="button" variant="outline" onClick={openWebcam} disabled={isLoading}>
-                            <Camera className="mr-2 h-5 w-5" /> Open Webcam
+                        <Button type="button" variant="outline" onClick={openWebcam} disabled={isLoading} className="text-xs sm:text-sm">
+                            <Camera className="mr-2 h-4 sm:h-5 w-4 sm:w-5" /> Open Webcam
                         </Button>
                     )}
                 </div>
@@ -248,15 +248,15 @@ export function StudyRoomClient() {
                         autoPlay muted playsInline
                     />
                     {isWebcamOpen && hasCameraPermission === true && (
-                        <Button type="button" onClick={captureImage} className="mt-3 bg-green-600 hover:bg-green-700 text-white" disabled={isLoading}>
-                            <Camera className="mr-2 h-5 w-5" /> Capture Photo
+                        <Button type="button" onClick={captureImage} className="mt-3 bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm" disabled={isLoading}>
+                            <Camera className="mr-2 h-4 sm:h-5 w-4 sm:w-5" /> Capture Photo
                         </Button>
                     )}
-                    {hasCameraPermission === false && ( // Show if permission was explicitly denied
+                    {hasCameraPermission === false && ( 
                         <Alert variant="destructive" className="w-full mt-2">
                             <AlertCircle className="h-4 w-4" />
-                            <AlertTitle>Camera Access Denied</AlertTitle>
-                            <AlertDescription>
+                            <AlertTitle className="text-sm sm:text-base">Camera Access Denied</AlertTitle>
+                            <AlertDescription className="text-xs sm:text-sm">
                                 To capture an image, EduVerse needs camera access. Please enable camera permissions in your browser settings and try again. You can still upload an image.
                             </AlertDescription>
                         </Alert>
@@ -278,9 +278,9 @@ export function StudyRoomClient() {
                         size="sm" 
                         onClick={handleClearImageAndWebcam} 
                         disabled={isLoading}
-                        className="w-full max-w-xs mx-auto mt-3 block" // Changed max-w-md to max-w-xs and added block for centering
+                        className="w-full max-w-xs mx-auto mt-3 block text-xs sm:text-sm"
                     >
-                        <Trash2 className="mr-2 h-4 w-4" /> 
+                        <Trash2 className="mr-2 h-3 sm:h-4 w-3 sm:w-4" /> 
                         {isWebcamOpen && hasCameraPermission ? "Close Webcam & Clear" : "Clear Image"}
                     </Button>
                 )}
@@ -289,7 +289,7 @@ export function StudyRoomClient() {
             <Separator className="my-6" />
 
             <div className="space-y-2">
-              <Label htmlFor="doubt" className="text-foreground/90 text-lg">Your Doubt/Question (Required)</Label>
+              <Label htmlFor="doubt" className="text-foreground/90 text-md sm:text-lg">Your Doubt/Question (Required)</Label>
               <Textarea
                 id="doubt"
                 name="doubt"
@@ -306,8 +306,8 @@ export function StudyRoomClient() {
             {error && <p className="text-sm text-destructive mt-4">{error}</p>}
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 text-lg" disabled={isSubmitDisabled()}>
-              {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Get AI Help"}
+            <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-2.5 sm:py-3 text-base sm:text-lg" disabled={isSubmitDisabled()}>
+              {isLoading ? <Loader2 className="mr-2 h-4 sm:h-5 w-4 sm:w-5 animate-spin" /> : "Get AI Help"}
             </Button>
           </CardFooter>
         </form>
@@ -315,30 +315,30 @@ export function StudyRoomClient() {
 
       {isLoading && (
         <div className="text-center py-6">
-          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-          <p className="mt-2 text-lg text-muted-foreground">Gemini is thinking...</p>
+          <Loader2 className="h-10 sm:h-12 w-10 sm:w-12 animate-spin text-primary mx-auto" />
+          <p className="mt-2 text-md sm:text-lg text-muted-foreground">Gemini is thinking...</p>
         </div>
       )}
 
       {studyData && (
         <Card className="shadow-xl border-primary/50">
           <CardHeader>
-            <CardTitle className="font-headline text-2xl flex items-center"><Sparkles className="mr-2 h-7 w-7 text-accent" /> AI Tutor Response</CardTitle>
+            <CardTitle className="font-headline text-xl sm:text-2xl flex items-center"><Sparkles className="mr-2 h-6 sm:h-7 w-6 sm:w-7 text-accent" /> AI Tutor Response</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div>
-              <h3 className="font-semibold text-xl text-foreground mb-2">Answer to Your Doubt:</h3>
-              <div className="prose prose-sm sm:prose lg:prose-lg dark:prose-invert max-w-none p-4 bg-foreground/5 rounded-md shadow">
+              <h3 className="font-semibold text-lg sm:text-xl text-foreground mb-2">Answer to Your Doubt:</h3>
+              <div className="prose prose-xs sm:prose-sm lg:prose-base dark:prose-invert max-w-none p-3 sm:p-4 bg-foreground/5 rounded-md shadow">
                 <p className="text-foreground/90 whitespace-pre-wrap">{studyData.answer}</p>
               </div>
             </div>
 
             <div>
-                <h3 className="font-semibold text-xl text-foreground mb-2">Flashcard Status:</h3>
+                <h3 className="font-semibold text-lg sm:text-xl text-foreground mb-2">Flashcard Status:</h3>
                 <Alert>
-                    <Lightbulb className="h-5 w-5" />
-                    <AlertTitle className="font-semibold">Recommendation & Outcome</AlertTitle>
-                    <AlertDescription className="whitespace-pre-wrap mt-1">
+                    <Lightbulb className="h-4 sm:h-5 w-4 sm:w-5" />
+                    <AlertTitle className="font-semibold text-sm sm:text-base">Recommendation & Outcome</AlertTitle>
+                    <AlertDescription className="whitespace-pre-wrap mt-1 text-xs sm:text-sm">
                         {studyData.flashcardRecommendation}
                     </AlertDescription>
                 </Alert>
@@ -346,8 +346,8 @@ export function StudyRoomClient() {
             
             {studyData.flashcards && Array.isArray(studyData.flashcards) && studyData.flashcards.length > 0 && (
               <div>
-                <h3 className="font-semibold text-xl text-foreground mb-3">Generated Flashcards:</h3>
-                <div className="grid md:grid-cols-2 gap-4">
+                <h3 className="font-semibold text-lg sm:text-xl text-foreground mb-3">Generated Flashcards:</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {studyData.flashcards.map((flashcard: Flashcard, index: number) => (
                     <FlashcardDisplay key={index} flashcard={flashcard} />
                   ))}
@@ -356,11 +356,11 @@ export function StudyRoomClient() {
             )}
             {studyData.flashcards && typeof studyData.flashcards === 'string' && ( 
                  <div>
-                    <h3 className="font-semibold text-xl text-foreground mb-3">Generated Flashcards (Raw Data):</h3>
+                    <h3 className="font-semibold text-lg sm:text-xl text-foreground mb-3">Generated Flashcards (Raw Data):</h3>
                     <Alert variant="default" className="bg-amber-50 border-amber-300 dark:bg-amber-900/30 dark:border-amber-700">
-                        <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                        <AlertTitle className="font-semibold text-amber-700 dark:text-amber-300">Flashcard Parsing Issue</AlertTitle>
-                        <AlertDescription className="text-amber-700/90 dark:text-amber-300/90 mt-1">
+                        <AlertCircle className="h-4 sm:h-5 w-4 sm:w-5 text-amber-600 dark:text-amber-400" />
+                        <AlertTitle className="font-semibold text-sm sm:text-base text-amber-700 dark:text-amber-300">Flashcard Parsing Issue</AlertTitle>
+                        <AlertDescription className="text-xs sm:text-sm text-amber-700/90 dark:text-amber-300/90 mt-1">
                             The AI provided flashcard data as a string, but we expected a structured array of question/answer pairs.
                             You can see the raw data below to copy or format it manually. This usually happens if the notes are not well-suited for distinct flashcard generation or if the AI could not extract clear pairs.
                         </AlertDescription>
@@ -371,7 +371,7 @@ export function StudyRoomClient() {
             
             {studyData.practiceQuestions && studyData.practiceQuestions.length > 0 && (
               <div>
-                <h3 className="font-semibold text-xl text-foreground mb-3">Practice Questions:</h3>
+                <h3 className="font-semibold text-lg sm:text-xl text-foreground mb-3">Practice Questions:</h3>
                 <div className="space-y-4">
                   {studyData.practiceQuestions.map((pq, index) => (
                     <PracticeQuestionCard key={index} questionItem={pq} index={index} />
@@ -381,11 +381,11 @@ export function StudyRoomClient() {
             )}
             {(!studyData.practiceQuestions || studyData.practiceQuestions.length === 0) && (
               <div>
-                <h3 className="font-semibold text-xl text-foreground mb-2">Practice Questions Status:</h3>
+                <h3 className="font-semibold text-lg sm:text-xl text-foreground mb-2">Practice Questions Status:</h3>
                 <Alert>
-                  <HelpCircleIcon className="h-5 w-5" />
-                  <AlertTitle className="font-semibold">No Practice Questions Generated</AlertTitle>
-                  <AlertDescription className="whitespace-pre-wrap mt-1">
+                  <HelpCircleIcon className="h-4 sm:h-5 w-4 sm:w-5" />
+                  <AlertTitle className="font-semibold text-sm sm:text-base">No Practice Questions Generated</AlertTitle>
+                  <AlertDescription className="whitespace-pre-wrap mt-1 text-xs sm:text-sm">
                     The AI determined that practice questions were not suitable for the provided material, or no material was suitable for them.
                   </AlertDescription>
                 </Alert>
@@ -397,4 +397,3 @@ export function StudyRoomClient() {
     </div>
   );
 }
-
