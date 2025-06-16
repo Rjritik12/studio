@@ -4,7 +4,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BadgePercent, Star, ShieldCheck, UserCheck, MessageSquare, UserPlus, Rss, Edit3, BarChartHorizontal } from "lucide-react"; 
+import { BadgePercent, Star, ShieldCheck, UserCheck, MessageSquare, UserPlus, Rss, Edit3, BarChartHorizontal, ArrowLeft, MoreHorizontal } from "lucide-react"; 
 import Image from "next/image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useParams, useRouter } from 'next/navigation';
@@ -39,16 +39,24 @@ export default function UserProfilePage() {
   const avatarFallback = username.substring(0, 1).toUpperCase();
   const profileAvatarUrl = (authUser?.photoURL && (authUser.displayName === username || authUser.email?.split('@')[0] === username))
                            ? authUser.photoURL 
-                           : `https://placehold.co/128x128.png?text=${avatarFallback}`;
+                           : `https://placehold.co/96x96.png?text=${avatarFallback}`; // Adjusted placeholder size
   
+  const currentDisplayName = (authUser && (authUser.displayName === username || authUser.email?.split('@')[0] === username))
+                           ? authUser.displayName || username
+                           : username.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()); // Mock display name from username
+
   const isOwnPublicProfile = authUser && (authUser.displayName === username || authUser.email?.split('@')[0] === username);
+  
+  // Mock Bio - in a real app this would come from user data
+  const currentBio = `Learning enthusiast exploring ${username}. Sharing notes and insights on various topics. Currently focusing on EduVerse! 📚✨\nDM for collabs or study groups! 👇`;
+
 
   useEffect(() => {
     const generatedPosts: Post[] = [
       {
         id: `post1-public-profile-${username}`,
         userName: username,
-        userAvatar: profileAvatarUrl,
+        userAvatar: profileAvatarUrl, // Use the consistent profileAvatarUrl
         content: `This is a mock post from ${username}'s public profile! Exploring new study techniques.`,
         type: 'note',
         likes: Math.floor(Math.random() * 70) + 5,
@@ -59,7 +67,7 @@ export default function UserProfilePage() {
       {
         id: `post2-public-profile-${username}`,
         userName: username,
-        userAvatar: profileAvatarUrl,
+        userAvatar: profileAvatarUrl, // Use the consistent profileAvatarUrl
         content: `Sharing a cool link I found about space exploration, viewed from ${username}'s profile.`,
         type: 'link',
         linkUrl: 'https://example.com/space-exploration-profile',
@@ -76,9 +84,9 @@ export default function UserProfilePage() {
       xp: Math.floor(Math.random() * 2500) + 800,
       level: Math.floor(Math.random() * 12) + 5,
       badges: ["Quiz Master", "Avid Learner", "Top Contributor"].sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 2) + 1),
-      postsCount: activePosts.length + Math.floor(Math.random() * 10),
-      followersCount: Math.floor(Math.random() * 700) + 50,
-      followingCount: Math.floor(Math.random() * 300) + 20,
+      postsCount: Math.floor(Math.random() * 200) + 10, // Updated to match Instagram numbers
+      followersCount: Math.floor(Math.random() * 3000) + 500, // Updated
+      followingCount: Math.floor(Math.random() * 1000) + 100, // Updated
     });
     setIsFollowing(Math.random() < 0.3); 
 
@@ -102,71 +110,93 @@ export default function UserProfilePage() {
   };
   
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6">
-      <header className="text-center mb-6 md:mb-10">
-        <UserCheck className="mx-auto h-12 w-12 md:h-16 md:w-16 text-primary mb-3" />
-        <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-3">{username}'s Profile</h1>
-        <p className="text-lg sm:text-xl text-foreground/80 max-w-xl mx-auto">
-          Discover {username}'s contributions and achievements in EduVerse.
-        </p>
-      </header>
+    <div className="container mx-auto py-4 px-2 sm:px-4 md:px-6"> {/* Reduced top padding */}
+      {/* New Page Header Bar */}
+      <div className="flex items-center justify-between mb-4">
+        <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Go back">
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h2 className="font-headline text-base sm:text-lg font-semibold text-foreground text-center truncate px-2">
+          {username} {/* This is the handle like 'steve_smith49' */}
+        </h2>
+        <Button variant="ghost" size="icon" aria-label="Options" disabled> {/* Placeholder for options menu */}
+          <MoreHorizontal className="h-5 w-5" />
+        </Button>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 items-start">
-        <Card className="lg:col-span-1 shadow-xl border-2 border-primary/30">
-          <CardHeader className="items-center text-center p-4 md:p-6">
-            <Avatar className={cn("mb-3 sm:mb-4 border-4 border-primary shadow-md", "w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32")}>
-              <AvatarImage src={profileAvatarUrl} alt={username} data-ai-hint="profile picture user" />
-              <AvatarFallback className="text-2xl sm:text-3xl md:text-4xl">{avatarFallback}</AvatarFallback>
-            </Avatar>
-            <CardTitle className="font-headline text-xl md:text-2xl">{username}</CardTitle>
-            <CardDescription>Level {mockUserStats.level} EduVerse Explorer</CardDescription>
-          </CardHeader>
-          <CardContent className="text-sm text-foreground/80 p-4 md:p-6">
-            <div className="flex flex-row justify-around items-center mb-4">
-              <div className="text-center">
-                <p className="font-bold text-base md:text-lg text-foreground">{mockUserStats.postsCount}</p>
-                <p className="text-xs text-muted-foreground">Posts</p>
-              </div>
-              <div className="text-center">
-                <p className="font-bold text-base md:text-lg text-foreground">{mockUserStats.followersCount}</p>
-                <p className="text-xs text-muted-foreground">Followers</p>
-              </div>
-              <div className="text-center">
-                <p className="font-bold text-base md:text-lg text-foreground">{mockUserStats.followingCount}</p>
-                <p className="text-xs text-muted-foreground">Following</p>
+        <Card className="lg:col-span-1 shadow-lg">
+          <CardContent className="p-3 sm:p-4"> {/* Reduced padding */}
+            {/* Top section: Avatar + Stats */}
+            <div className="flex flex-row items-center gap-3 sm:gap-4 mb-3">
+              <Avatar className="w-16 h-16 sm:w-20 sm:h-20 border-2 border-muted shadow-sm">
+                <AvatarImage src={profileAvatarUrl} alt={username} data-ai-hint="user profile avatar"/>
+                <AvatarFallback className="text-2xl sm:text-3xl">{avatarFallback}</AvatarFallback>
+              </Avatar>
+              <div className="flex flex-1 justify-around items-center text-center">
+                <div>
+                  <p className="font-semibold text-sm sm:text-base text-foreground">{mockUserStats.postsCount}</p>
+                  <p className="text-xs text-muted-foreground">posts</p>
+                </div>
+                <div>
+                  <p className="font-semibold text-sm sm:text-base text-foreground">{mockUserStats.followersCount}</p>
+                  <p className="text-xs text-muted-foreground">followers</p>
+                </div>
+                <div>
+                  <p className="font-semibold text-sm sm:text-base text-foreground">{mockUserStats.followingCount}</p>
+                  <p className="text-xs text-muted-foreground">following</p>
+                </div>
               </div>
             </div>
-            <Separator className="my-3" />
-            {isOwnPublicProfile ? (
-                 <Button variant="outline" className="w-full" asChild>
-                    <Link href="/profile"> 
-                        <Edit3 className="mr-2 h-4 w-4" /> Edit Your Profile & Settings
-                    </Link>
+
+            {/* Name and Bio Section */}
+            <div className="space-y-0.5 sm:space-y-1"> {/* Reduced space */}
+              <p className="font-semibold text-sm text-foreground">{currentDisplayName}</p>
+              <p className="text-xs text-muted-foreground">EduVerse Learner ✨</p>
+              <p className="text-xs text-foreground/90 whitespace-pre-wrap break-words">
+                {currentBio}
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="mt-3 flex flex-row gap-2">
+              {isOwnPublicProfile ? (
+                 <Button variant="outline" className="flex-1 text-xs h-8" asChild>
+                    <Link href="/profile"> Edit Profile</Link>
                 </Button>
-            ) : authUser && !authLoading ? (
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                <Button onClick={handleFollowToggle} className="flex-1">
-                  {isFollowing ? <UserCheck className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />}
-                  {isFollowing ? "Following" : "Follow"}
-                </Button>
-                <Button variant="outline" asChild className="flex-1">
-                  <Link href={`/messages/${encodeURIComponent(username)}`}>
-                    <MessageSquare className="mr-2 h-4 w-4" /> Message
-                  </Link>
-                </Button>
-              </div>
-            ) : !authLoading && !authUser ? (
-                 <p className="text-xs text-center text-muted-foreground">
-                    <Link href="/login" className="text-primary hover:underline">Login</Link> to follow or message {username}.
+              ) : authUser && !authLoading ? (
+                <>
+                  <Button 
+                    onClick={handleFollowToggle} 
+                    className={cn(
+                      "flex-1 text-xs h-8", 
+                      isFollowing ? "bg-secondary text-secondary-foreground hover:bg-secondary/80" : "bg-primary text-primary-foreground hover:bg-primary/90"
+                    )}
+                  >
+                    {isFollowing ? "Following" : "Follow"}
+                  </Button>
+                  <Button variant="outline" asChild className="flex-1 text-xs h-8">
+                    <Link href={`/messages/${encodeURIComponent(username)}`}>Message</Link>
+                  </Button>
+                  {/* Optional: Add Person Icon Button - Mock
+                  <Button variant="outline" size="icon" className="h-8 w-8">
+                     <UserPlus className="h-3.5 w-3.5" />
+                  </Button> 
+                  */}
+                </>
+              ) : !authLoading && !authUser ? (
+                 <p className="text-xs text-center text-muted-foreground w-full py-2">
+                    <Link href="/login" className="text-primary hover:underline">Login</Link> to interact.
                 </p>
-            ) : null }
+              ) : null }
+            </div>
           </CardContent>
         </Card>
 
         <div className="lg:col-span-2 space-y-6 md:space-y-8">
             <Card className="shadow-xl">
               <CardHeader>
-                <CardTitle className="font-headline text-lg md:text-xl flex items-center"><BarChartHorizontal className="mr-2 h-5 w-5 text-primary" /> Stats & Achievements</CardTitle>
+                <CardTitle className="font-headline text-lg md:text-xl flex items-center"><BarChartHorizontal className="mr-2 h-5 w-5 text-primary" /> EduVerse Stats</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 md:space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
