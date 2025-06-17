@@ -128,8 +128,80 @@ export const mockLearningModules: LearningModule[] = [
       }
     ],
   },
+  {
+    id: 'class-10-science',
+    title: 'Class 10 Science Foundation',
+    description: 'Fundamental concepts in Physics, Chemistry, and Biology for Class 10 students, aligned with common curricula.',
+    difficulty: 'easy',
+    icon: 'BookOpen', // Using a generic science icon
+    dataAiHint: 'science textbook class10',
+    sections: [
+      {
+        id: 'chem-reactions-equations',
+        title: 'Chemical Reactions and Equations',
+        topicForAI: 'Class 10 Chemistry: Chemical Reactions, Types of Reactions (Combination, Decomposition, Displacement, Double Displacement, Redox), Balancing Chemical Equations',
+        theory: 'This chapter introduces chemical reactions and how to represent them. Key topics:\n- Chemical reaction: Process involving rearrangement of atoms to form new substances.\n- Chemical equation: Symbolic representation of a chemical reaction using formulae and symbols.\n- Balanced chemical equation: Equation where the number of atoms of each element is equal on both reactant and product sides, satisfying the law of conservation of mass.\n- Types of chemical reactions:\n  - Combination reaction: Two or more reactants combine to form a single product.\n  - Decomposition reaction: A single reactant breaks down into two or more simpler products (thermal, electrolytic, photolytic decomposition).\n  - Displacement reaction: A more reactive element displaces a less reactive element from its compound.\n  - Double displacement reaction: Exchange of ions between two reactants, often forming a precipitate (precipitation reaction) or neutralization.\n  - Oxidation and Reduction (Redox) reactions: Concept of oxidation (gain of oxygen, loss of hydrogen, loss of electrons) and reduction (loss of oxygen, gain of hydrogen, gain of electrons). Oxidizing and reducing agents. Examples of redox reactions in everyday life (corrosion, rancidity).'
+      },
+      {
+        id: 'acids-bases-salts',
+        title: 'Acids, Bases and Salts',
+        topicForAI: 'Class 10 Chemistry: Acids, Bases, Salts, pH Scale, Indicators, Properties and Uses',
+        theory: 'This chapter covers the properties and reactions of acids, bases, and salts. Key concepts:\n- Acids: Substances that produce H+ ions in aqueous solution. Properties (sour taste, turn blue litmus red, react with metals to produce H2 gas, react with metal carbonates/bicarbonates to produce CO2 gas, react with bases to form salt and water).\n- Bases: Substances that produce OH- ions in aqueous solution (Arrhenius concept) or accept H+ ions (Bronsted-Lowry concept). Properties (bitter taste, turn red litmus blue, feel soapy, react with acids to form salt and water).\n- Indicators: Substances that change color in acidic or basic media (litmus, methyl orange, phenolphthalein, olfactory indicators).\n- Strength of acids and bases: Concept of strong and weak acids/bases based on degree of dissociation. pH scale: A measure of hydrogen ion concentration, ranging from 0 to 14. pH < 7 (acidic), pH = 7 (neutral), pH > 7 (basic). Importance of pH in everyday life (digestion, tooth decay, soil, aquatic life).\n- Salts: Compounds formed by the reaction between an acid and a base (neutralization). Types of salts (acidic, basic, neutral). Common salts and their uses (e.g., NaCl, NaOH, bleaching powder, baking soda, washing soda, Plaster of Paris) - preparation, properties, and uses.'
+      },
+      {
+        id: 'light-reflection-refraction',
+        title: 'Light - Reflection and Refraction',
+        topicForAI: 'Class 10 Physics: Light Reflection and Refraction, Spherical Mirrors, Lenses, Mirror Formula, Lens Formula, Magnification, Power of Lens',
+        theory: 'This chapter explores the phenomena of light, focusing on reflection and refraction. Key concepts include:\n- Nature of light: Dual nature (wave and particle), rectilinear propagation.\n- Reflection of light: Laws of reflection. Image formation by plane mirrors (characteristics of image). Spherical mirrors: concave and convex mirrors. Terms related to spherical mirrors (pole, center of curvature, radius of curvature, principal axis, principal focus, focal length). Ray diagrams for image formation by spherical mirrors for different positions of the object. Mirror formula (1/v + 1/u = 1/f) and magnification (m = -v/u = h_i/h_o).\n- Refraction of light: Cause of refraction (change in speed of light). Laws of refraction (Snell\'s law: sin i/sin r = constant = refractive index). Refractive index (absolute and relative). Refraction through a rectangular glass slab. Apparent depth.\n- Refraction by spherical lenses: Convex and concave lenses. Terms related to spherical lenses (optical centre, principal axis, principal focus, focal length). Ray diagrams for image formation by spherical lenses for different positions of the object. Lens formula (1/v - 1/u = 1/f) and magnification (m = v/u = h_i/h_o). Power of a lens (P = 1/f, where f is in meters). Combination of lenses (simple cases).'
+      },
+      {
+        id: 'life-processes',
+        title: 'Life Processes',
+        topicForAI: 'Class 10 Biology: Life Processes (Nutrition, Respiration, Transportation, Excretion) in Plants and Animals',
+        theory: 'This chapter deals with the basic processes essential for maintaining life. Key topics:\n- Concept of life processes: Basic functions performed by living organisms to maintain life (nutrition, respiration, transport, excretion, control and coordination, growth, movement, reproduction).\n- Nutrition: Process of taking in food and utilizing it for energy, growth, and repair. Modes of nutrition: Autotrophic (photosynthesis in plants - raw materials, site, main events) and Heterotrophic (holozoic, saprophytic, parasitic). Nutrition in Amoeba. Nutrition in human beings: human digestive system (alimentary canal and digestive glands), process of digestion of carbohydrates, proteins, and fats.\n- Respiration: Process of releasing energy from food. Types: aerobic (in presence of oxygen) and anaerobic (in absence of oxygen). Breakdown of glucose by various pathways. Human respiratory system: structure and function. Mechanism of breathing. Gaseous exchange in plants (stomata) and animals.\n- Transportation: Movement of substances from one part of the body to another. Transportation in human beings: blood (composition and functions), heart (structure and pumping mechanism), blood vessels (arteries, veins, capillaries), double circulation, lymphatic system. Transportation in plants: transport of water (xylem), transport of food (phloem - translocation).\n- Excretion: Process of removal of metabolic waste products from the body. Excretion in human beings: human excretory system (kidneys, ureters, urinary bladder, urethra), structure of nephron, mechanism of urine formation. Excretion in plants: removal of gaseous wastes, other wastes (resins, gums, stored in old xylem, falling leaves).'
+      }
+    ]
+  },
+  {
+    id: 'programming-basics',
+    title: 'Basic Programming Concepts',
+    description: 'An introduction to fundamental programming concepts like variables, control flow, loops, and functions, explained generally.',
+    difficulty: 'easy',
+    icon: 'Code2', // Lucide icon for code
+    dataAiHint: 'computer code screen',
+    sections: [
+      {
+        id: 'intro-programming',
+        title: 'Introduction to Programming',
+        topicForAI: 'Basic Programming Concepts: What is Programming, Programming Languages (Low-level, High-level), Compilers and Interpreters, Algorithms and Flowcharts',
+        theory: 'Programming is the process of creating a set of instructions that tell a computer how to perform a task. Key concepts:\n- What is a program? A sequence of instructions written to perform a specified task with a computer.\n- Programming Languages: Tools used to write programs. \n  - Low-level languages (e.g., machine code, assembly language): Closer to hardware, difficult for humans.\n  - High-level languages (e.g., Python, Java, C++, JavaScript): Easier for humans to read and write, need translation to machine code.\n- Translators: \n  - Compiler: Translates the entire high-level program into machine code at once.\n  - Interpreter: Translates and executes the program line by line.\n- Algorithm: A step-by-step procedure for solving a problem or accomplishing a task.\n- Flowchart: A graphical representation of an algorithm using standard symbols.'
+      },
+      {
+        id: 'variables-data-types',
+        title: 'Variables and Data Types',
+        topicForAI: 'Basic Programming Concepts: Variables, Data Types (Integers, Floats, Strings, Booleans), Type Casting, Constants',
+        theory: 'Variables are used to store information that can be referenced and manipulated in a computer program. Data types define the kind of values a variable can hold. Key topics:\n- Variables: Named storage locations in memory. Rules for naming variables.\n- Data Types: Classification of data. Common types include:\n  - Integers: Whole numbers (e.g., 5, -10, 0).\n  - Floating-point numbers (Floats/Doubles): Numbers with a decimal point (e.g., 3.14, -0.5).\n  - Strings: Sequences of characters (e.g., "hello", "world").\n  - Booleans: Represent truth values, either true or false.\n- Type Casting/Conversion: Changing a variable from one data type to another.\n- Constants: Variables whose values cannot be changed once assigned (concept varies by language).'
+      },
+      {
+        id: 'control-flow-if-else',
+        title: 'Control Flow (If/Else Statements)',
+        topicForAI: 'Basic Programming Concepts: Conditional Statements, If, Else If, Else, Nested If, Logical Operators (AND, OR, NOT)',
+        theory: 'Control flow statements allow programs to make decisions and execute different blocks of code based on certain conditions. Key concepts:\n- Conditional Statements: Used to execute code based on whether a condition is true or false.\n- `if` statement: Executes a block of code if a specified condition is true.\n- `else if` (or `elif`) statement: Allows checking for multiple conditions if the preceding `if` or `else if` conditions are false.\n- `else` statement: Executes a block of code if all preceding `if` and `else if` conditions are false.\n- Nested `if` statements: An `if` statement inside another `if` statement.\n- Logical Operators: Used to combine or modify conditions:\n  - `AND` (&& or `and`): True if both operands are true.\n  - `OR` (|| or `or`): True if at least one operand is true.\n  - `NOT` (! or `not`): Reverses the truth value of an operand.'
+      },
+      {
+        id: 'loops-for-while',
+        title: 'Loops (For/While)',
+        topicForAI: 'Basic Programming Concepts: Loops, For Loop, While Loop, Do-While Loop, Break and Continue Statements, Nested Loops',
+        theory: 'Loops are used to execute a block of code repeatedly as long as a certain condition is met, or for a specific number of times. Key concepts:\n- `for` loop: Typically used when the number of iterations is known beforehand. Consists of initialization, condition, and increment/decrement.\n- `while` loop: Executes a block of code as long as a specified condition is true. The condition is checked before each iteration.\n- `do-while` loop (less common in some languages like Python): Similar to a `while` loop, but the condition is checked after the block of code is executed, ensuring at least one execution.\n- `break` statement: Terminates the loop immediately.\n- `continue` statement: Skips the current iteration and proceeds to the next iteration of the loop.\n- Nested loops: A loop inside another loop.'
+      },
+      {
+        id: 'functions-procedures',
+        title: 'Functions/Procedures',
+        topicForAI: 'Basic Programming Concepts: Functions, Defining Functions, Calling Functions, Parameters and Arguments, Return Values, Scope of Variables (Local, Global)',
+        theory: 'Functions (also called procedures or subroutines) are blocks of reusable code that perform a specific task. Key concepts:\n- Defining a function: Giving a name to a block of code and specifying its parameters.\n- Calling a function: Executing the code within the function.\n- Parameters: Variables listed inside the parentheses in the function definition, acting as placeholders for values that will be passed to the function.\n- Arguments: The actual values passed to the function when it is called.\n- Return values: Functions can optionally send a value back to the caller using a `return` statement.\n- Scope of variables: Determines the accessibility of variables.\n  - Local variables: Defined inside a function and accessible only within that function.\n  - Global variables: Defined outside any function and accessible throughout the program (use with caution).'
+      }
+    ]
+  }
 ];
-
     
-
     
