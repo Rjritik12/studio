@@ -6,7 +6,7 @@ import { tutorStudySession, TutorStudySessionInput, TutorStudySessionOutput } fr
 import { getQuizQuestionHint, GetQuizQuestionHintInput, GetQuizQuestionHintOutput } from "@/ai/flows/get-quiz-question-hint";
 import { generateSingleQuizQuestion, GenerateSingleQuizQuestionInput, GenerateSingleQuizQuestionOutput } from "@/ai/flows/generate-single-quiz-question";
 import { exploreConcept } from "@/ai/flows/explore-concept-flow";
-import type { ExploreConceptInput, ExploreConceptOutput } from "@/lib/types";
+import type { ExploreConceptInput, ExploreConceptOutput, QuizQuestion } from "@/lib/types";
 
 
 import { z } from "zod";
@@ -168,5 +168,33 @@ export async function handleExploreConcept(formData: FormData): Promise<ExploreC
         errorMessage = e;
     }
     return { error: errorMessage };
+  }
+}
+
+
+const sectionQuizSchema = z.object({
+  topic: z.string().min(1, "Topic is required for section quiz"),
+  difficulty: z.enum(["easy", "medium", "hard"]),
+  numQuestions: z.coerce.number().min(1).max(5), // Mini-quiz, e.g., 3-5 questions
+});
+export type HandleGenerateSectionQuizInput = z.infer<typeof sectionQuizSchema>;
+
+export async function handleGenerateSectionQuiz(input: HandleGenerateSectionQuizInput): Promise<{ questions: QuizQuestion[] } | { error: string }> {
+  const validatedFields = sectionQuizSchema.safeParse(input);
+
+  if (!validatedFields.success) {
+    return { error: "Invalid input for section quiz generation." };
+  }
+
+  try {
+    const quizInput = validatedFields.data as GenerateQuizQuestionsInput; // Re-use same input type for Genkit flow
+    const quizData = await generateQuizQuestions(quizInput);
+    if (!quizData.questions || quizData.questions.length === 0) {
+      return { error: `No questions were generated for the topic: "${quizInput.topic}". Please try a broader topic or check AI capabilities.` };
+    }
+    return { questions: quizData.questions };
+  } catch (e) {
+    console.error("Error generating section quiz questions:", e);
+    return { error: "Failed to generate section quiz questions. Please try again." };
   }
 }

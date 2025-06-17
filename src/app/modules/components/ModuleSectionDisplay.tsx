@@ -1,65 +1,111 @@
 
 "use client";
 
-import { useState } from 'react';
-import type { ModuleSection, QuizQuestion, GenerateSingleQuizQuestionInput } from '@/lib/types';
+import { useState, type FormEvent } from 'react';
+import type { ModuleSection, QuizQuestion, GenerateQuizQuestionsInput } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Lightbulb, BookText, CheckCircle, XCircle, SigmaSquare, Brain } from 'lucide-react';
-import { handleFlipQuestion } from '@/lib/actions';
+import { Loader2, Lightbulb, BookText, CheckCircle, XCircle, SigmaSquare, Brain, ChevronRight, ChevronLeft, RotateCcw } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area'; // Added ScrollArea import
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { handleGenerateSectionQuiz } from '@/lib/actions'; // New action
+import { Progress } from '@/components/ui/progress'; // For quiz progress
 
 interface ModuleSectionDisplayProps {
   section: ModuleSection;
   moduleDifficulty: 'easy' | 'medium' | 'hard';
 }
 
+const NUM_MINI_QUIZ_QUESTIONS = 3; // Number of questions for the mini-quiz
+
 export function ModuleSectionDisplay({ section, moduleDifficulty }: ModuleSectionDisplayProps) {
-  const [practiceQuestion, setPracticeQuestion] = useState<QuizQuestion | null>(null);
-  const [isLoadingQuestion, setIsLoadingQuestion] = useState(false);
-  const [errorQuestion, setErrorQuestion] = useState<string | null>(null);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  const [answerIsCorrect, setAnswerIsCorrect] = useState<boolean | null>(null);
+  // State for the mini-quiz
+  const [miniQuizQuestions, setMiniQuizQuestions] = useState<QuizQuestion[] | null>(null);
+  const [currentMiniQuizQuestionIndex, setCurrentMiniQuizQuestionIndex] = useState(0);
+  const [miniQuizSelectedAnswers, setMiniQuizSelectedAnswers] = useState<Record<number, string | null>>({});
+  const [miniQuizAnswerStatuses, setMiniQuizAnswerStatuses] = useState<Record<number, 'correct' | 'incorrect' | null>>({});
+  const [miniQuizScore, setMiniQuizScore] = useState(0);
+  const [miniQuizStage, setMiniQuizStage] = useState<'idle' | 'loading' | 'playing' | 'results'>('idle');
+  const [errorMiniQuiz, setErrorMiniQuiz] = useState<string | null>(null);
+  const [currentQuestionAnswered, setCurrentQuestionAnswered] = useState(false);
 
-  const generateQuestion = async () => {
-    setIsLoadingQuestion(true);
-    setErrorQuestion(null);
-    setPracticeQuestion(null);
-    setSelectedAnswer(null);
-    setAnswerIsCorrect(null);
 
-    const input: GenerateSingleQuizQuestionInput = {
-      topic: section.topicForAI,
-      difficulty: moduleDifficulty,
-      // existingQuestions: practiceQuestion ? [practiceQuestion.question] : [], // To avoid immediate repetition if desired
-    };
+  const startMiniQuiz = async () => {
+    setMiniQuizStage('loading');
+    setErrorMiniQuiz(null);
+    setMiniQuizQuestions(null);
+    setCurrentMiniQuizQuestionIndex(0);
+    setMiniQuizSelectedAnswers({});
+    setMiniQuizAnswerStatuses({});
+    setMiniQuizScore(0);
+    setCurrentQuestionAnswered(false);
 
     try {
-      const result = await handleFlipQuestion(input); // Using the flip action to get one question
-      if ('error' in result || !result.question) {
-        setErrorQuestion(result.error || "Failed to generate practice question.");
+      const result = await handleGenerateSectionQuiz({
+        topic: section.topicForAI,
+        difficulty: moduleDifficulty,
+        numQuestions: NUM_MINI_QUIZ_QUESTIONS,
+      });
+
+      if ('error' in result || !result.questions || result.questions.length === 0) {
+        setErrorMiniQuiz(result.error || "Failed to generate mini-quiz questions. Please try again later.");
+        setMiniQuizStage('idle');
       } else {
-        setPracticeQuestion(result.question);
+        setMiniQuizQuestions(result.questions);
+        setMiniQuizStage('playing');
       }
     } catch (e) {
-      setErrorQuestion("An unexpected error occurred while fetching the question.");
-    } finally {
-      setIsLoadingQuestion(false);
+      console.error("Error starting mini-quiz:", e);
+      setErrorMiniQuiz("An unexpected error occurred while fetching questions for the mini-quiz.");
+      setMiniQuizStage('idle');
     }
   };
 
-  const handleAnswerSelection = (value: string) => {
-    if (!practiceQuestion) return;
-    setSelectedAnswer(value);
-    setAnswerIsCorrect(value === practiceQuestion.correctAnswer);
+  const handleMiniQuizAnswerSelection = (value: string) => {
+    if (currentQuestionAnswered) return;
+    setMiniQuizSelectedAnswers(prev => ({ ...prev, [currentMiniQuizQuestionIndex]: value }));
+  };
+  
+  const submitMiniQuizAnswer = () => {
+    if (!miniQuizQuestions || currentQuestionAnswered) return;
+    const currentQuestion = miniQuizQuestions[currentMiniQuizQuestionIndex];
+    const selectedAnswer = miniQuizSelectedAnswers[currentMiniQuizQuestionIndex];
+
+    if (!selectedAnswer) {
+      // Optionally, prompt user to select an answer
+      return;
+    }
+
+    const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
+    setMiniQuizAnswerStatuses(prev => ({ ...prev, [currentMiniQuizQuestionIndex]: isCorrect ? 'correct' : 'incorrect' }));
+    if (isCorrect) {
+      setMiniQuizScore(prevScore => prevScore + 1);
+    }
+    setCurrentQuestionAnswered(true);
   };
 
+  const goToNextMiniQuizQuestion = () => {
+    if (!miniQuizQuestions || currentMiniQuizQuestionIndex >= miniQuizQuestions.length - 1) {
+      setMiniQuizStage('results'); // All questions answered, go to results
+    } else {
+      setCurrentMiniQuizQuestionIndex(prevIndex => prevIndex + 1);
+      setCurrentQuestionAnswered(false); // Reset for the new question
+    }
+  };
+  
+  const resetMiniQuiz = () => {
+    startMiniQuiz();
+  }
+
+  const currentQuestionForDisplay = miniQuizQuestions ? miniQuizQuestions[currentMiniQuizQuestionIndex] : null;
+  const currentSelectedAnswerForDisplay = miniQuizSelectedAnswers[currentMiniQuizQuestionIndex];
+  const currentAnswerStatusForDisplay = miniQuizAnswerStatuses[currentMiniQuizQuestionIndex];
+
   return (
-    <ScrollArea className="max-h-[65vh] pr-3"> {/* Added ScrollArea and max height */}
+    <ScrollArea className="max-h-[65vh] pr-3">
       <div className="space-y-6 py-4">
         <div>
           <h4 className="font-semibold text-lg text-foreground mb-2 flex items-center">
@@ -90,55 +136,108 @@ export function ModuleSectionDisplay({ section, moduleDifficulty }: ModuleSectio
 
         <div>
           <h4 className="font-semibold text-lg text-foreground mb-3 flex items-center">
-            <Brain className="mr-2 h-5 w-5 text-primary" /> Practice Question
+            <Brain className="mr-2 h-5 w-5 text-primary" /> Test Your Understanding
           </h4>
-          <Button onClick={generateQuestion} disabled={isLoadingQuestion} className="mb-4">
-            {isLoadingQuestion && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {practiceQuestion ? "Generate New Question" : "Generate Practice Question"}
-          </Button>
+          
+          {miniQuizStage === 'idle' && (
+            <Button onClick={startMiniQuiz} className="mb-4">
+              Start Mini-Quiz ({NUM_MINI_QUIZ_QUESTIONS} Questions)
+            </Button>
+          )}
 
-          {errorQuestion && <p className="text-sm text-destructive">{errorQuestion}</p>}
+          {miniQuizStage === 'loading' && (
+            <div className="flex items-center justify-center py-6">
+              <Loader2 className="mr-2 h-8 w-8 animate-spin text-primary" />
+              <p className="text-muted-foreground">Generating mini-quiz...</p>
+            </div>
+          )}
 
-          {practiceQuestion && !isLoadingQuestion && (
+          {errorMiniQuiz && miniQuizStage === 'idle' && (
+            <p className="text-sm text-destructive mb-4">{errorMiniQuiz}</p>
+          )}
+
+          {miniQuizStage === 'playing' && currentQuestionForDisplay && (
             <Card className="bg-card shadow-sm">
               <CardHeader className="pb-3">
-                <CardDescription className="text-sm font-medium text-muted-foreground">Question:</CardDescription>
-                <CardTitle className="text-md text-card-foreground">{practiceQuestion.question}</CardTitle>
+                <div className="flex justify-between items-center">
+                    <CardDescription className="text-xs font-medium text-muted-foreground">
+                        Question {currentMiniQuizQuestionIndex + 1} of {miniQuizQuestions?.length}
+                    </CardDescription>
+                    <Progress value={((currentMiniQuizQuestionIndex + 1) / (miniQuizQuestions?.length || 1)) * 100} className="w-1/2 h-2" />
+                </div>
+                <CardTitle className="text-md text-card-foreground pt-2">{currentQuestionForDisplay.question}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <RadioGroup
-                  onValueChange={handleAnswerSelection}
-                  value={selectedAnswer || ""}
-                  disabled={selectedAnswer !== null}
+                  onValueChange={handleMiniQuizAnswerSelection}
+                  value={currentSelectedAnswerForDisplay || ""}
+                  disabled={currentQuestionAnswered}
                 >
-                  {practiceQuestion.options.map((option, optIndex) => (
-                    <div key={optIndex} className="flex items-center space-x-2">
-                      <RadioGroupItem value={option} id={`${section.id}-q-opt${optIndex}`} />
+                  {currentQuestionForDisplay.options.map((option, optIndex) => (
+                    <div key={optIndex} className={cn(
+                        "flex items-center space-x-3 p-3 rounded-md border transition-colors",
+                        currentQuestionAnswered && option === currentQuestionForDisplay.correctAnswer && "bg-green-100 border-green-400 dark:bg-green-900/30 dark:border-green-700",
+                        currentQuestionAnswered && currentSelectedAnswerForDisplay === option && option !== currentQuestionForDisplay.correctAnswer && "bg-red-100 border-red-400 dark:bg-red-900/30 dark:border-red-700",
+                        !currentQuestionAnswered && currentSelectedAnswerForDisplay === option && "bg-primary/10 border-primary",
+                        !currentQuestionAnswered && "hover:bg-muted/50 cursor-pointer"
+                      )}
+                      onClick={() => !currentQuestionAnswered && handleMiniQuizAnswerSelection(option)}
+                    >
+                      <RadioGroupItem 
+                        value={option} 
+                        id={`${section.id}-mq-opt${optIndex}`} 
+                        checked={currentSelectedAnswerForDisplay === option}
+                        disabled={currentQuestionAnswered}
+                      />
                       <Label
-                        htmlFor={`${section.id}-q-opt${optIndex}`}
+                        htmlFor={`${section.id}-mq-opt${optIndex}`}
                         className={cn(
-                          "text-sm cursor-pointer",
-                          selectedAnswer === option && answerIsCorrect === true && "text-green-600 font-semibold",
-                          selectedAnswer === option && answerIsCorrect === false && "text-red-600 font-semibold",
-                          selectedAnswer !== null && option === practiceQuestion.correctAnswer && selectedAnswer !== option && "text-green-600 font-semibold",
-                          selectedAnswer !== null && "cursor-default"
+                          "text-sm flex-1",
+                          !currentQuestionAnswered && "cursor-pointer",
+                           currentQuestionAnswered && option === currentQuestionForDisplay.correctAnswer && "text-green-700 dark:text-green-300 font-semibold",
+                           currentQuestionAnswered && currentSelectedAnswerForDisplay === option && option !== currentQuestionForDisplay.correctAnswer && "text-red-700 dark:text-red-300 font-semibold"
                         )}
                       >
                         {option}
-                        {selectedAnswer === option && answerIsCorrect === true && <CheckCircle className="inline ml-2 h-4 w-4 text-green-600" />}
-                        {selectedAnswer === option && answerIsCorrect === false && <XCircle className="inline ml-2 h-4 w-4 text-red-600" />}
-                        {selectedAnswer !== null && option === practiceQuestion.correctAnswer && selectedAnswer !== option && <CheckCircle className="inline ml-2 h-4 w-4 text-green-600" />}
                       </Label>
+                      {currentQuestionAnswered && option === currentQuestionForDisplay.correctAnswer && <CheckCircle className="ml-auto h-5 w-5 text-green-600" />}
+                      {currentQuestionAnswered && currentSelectedAnswerForDisplay === option && option !== currentQuestionForDisplay.correctAnswer && <XCircle className="ml-auto h-5 w-5 text-red-600" />}
                     </div>
                   ))}
                 </RadioGroup>
-                {selectedAnswer !== null && answerIsCorrect === false && (
-                  <p className="text-xs text-red-700 font-medium">Correct answer: {practiceQuestion.correctAnswer}</p>
-                )}
-                {selectedAnswer !== null && answerIsCorrect === true && (
-                  <p className="text-xs text-green-700 font-medium">You got it right!</p>
-                )}
               </CardContent>
+              <CardFooter className="flex justify-end gap-2 mt-2">
+                {!currentQuestionAnswered ? (
+                  <Button onClick={submitMiniQuizAnswer} disabled={!currentSelectedAnswerForDisplay}>
+                    Submit Answer
+                  </Button>
+                ) : (
+                  <Button onClick={goToNextMiniQuizQuestion}>
+                    {currentMiniQuizQuestionIndex < (miniQuizQuestions?.length || 0) - 1 ? "Next Question" : "Finish Quiz"}
+                    <ChevronRight className="ml-1 h-4 w-4" />
+                  </Button>
+                )}
+              </CardFooter>
+            </Card>
+          )}
+
+          {miniQuizStage === 'results' && miniQuizQuestions && (
+            <Card className="bg-card shadow-md text-center">
+              <CardHeader>
+                <CardTitle className="font-headline text-xl text-primary">Mini-Quiz Results</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-lg">You scored <span className="font-bold text-accent">{miniQuizScore}</span> out of <span className="font-bold">{miniQuizQuestions.length}</span>!</p>
+                {miniQuizScore === miniQuizQuestions.length && <p className="text-green-600 font-semibold">Excellent work! 🎉</p>}
+                {miniQuizScore < miniQuizQuestions.length && miniQuizScore >= miniQuizQuestions.length / 2 && <p className="text-orange-500 font-semibold">Good effort, keep practicing!</p>}
+                {miniQuizScore < miniQuizQuestions.length / 2 && <p className="text-red-600 font-semibold">Review the material and try again!</p>}
+              </CardContent>
+              <CardFooter className="flex flex-col sm:flex-row justify-center gap-3">
+                <Button onClick={resetMiniQuiz} variant="outline">
+                    <RotateCcw className="mr-2 h-4 w-4"/> Retry Mini-Quiz
+                </Button>
+                <Button onClick={() => setMiniQuizStage('idle')}>Back to Section</Button>
+              </CardFooter>
             </Card>
           )}
         </div>
