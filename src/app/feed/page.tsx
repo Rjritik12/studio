@@ -206,11 +206,11 @@ export default function FeedPage() {
 
   return (
     <TooltipProvider>
-      <div className="container mx-auto py-8 px-4 relative">
-        <header className="w-full py-10 md:py-12 lg:py-16 bg-gradient-to-br from-primary to-accent/80 rounded-lg shadow-xl text-center mb-8">
-          <div className="container mx-auto px-4 md:px-6">
-            <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-primary-foreground mb-3">Community Feed</h1>
-            <p className="text-base sm:text-lg text-primary-foreground/90 max-w-xl mx-auto">
+      <div className="py-6 sm:py-8"> {/* Adjusted page padding */}
+        <header className="w-full py-6 sm:py-8 md:py-10 lg:py-12 bg-gradient-to-br from-primary to-accent/80 rounded-lg shadow-xl text-center mb-8">
+          <div className="container mx-auto px-4 md:px-6"> {/* Container for text centering */}
+            <h1 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-primary-foreground mb-3">Community Feed</h1>
+            <p className="text-sm sm:text-base md:text-lg text-primary-foreground/90 max-w-xl mx-auto">
               Share notes, ask questions, and connect with fellow learners. Posts vanish after 48 hours!
             </p>
           </div>
@@ -263,7 +263,7 @@ export default function FeedPage() {
         <Tooltip>
             <TooltipTrigger asChild>
                 <Button
-                    className="fixed bottom-22 right-6 md:bottom-8 md:right-8 h-12 w-12 md:h-14 md:w-14 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center"
+                    className="fixed bottom-[calc(4rem+1rem)] right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center"
                     size="icon"
                     onClick={() => {
                         if (authLoading) return;
@@ -275,7 +275,7 @@ export default function FeedPage() {
                     }}
                     aria-label="Create new post"
                     >
-                    <Plus className="h-6 w-6 md:h-7 md:w-7" />
+                    <Plus className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7" />
                 </Button>
             </TooltipTrigger>
             <TooltipContent side="left" className="mr-2">
@@ -287,7 +287,7 @@ export default function FeedPage() {
         <Dialog open={isCreatePostDialogOpen} onOpenChange={setIsCreatePostDialogOpen}>
             <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                <DialogTitle className="font-headline text-xl flex items-center">
+                <DialogTitle className="font-headline text-lg sm:text-xl flex items-center">
                     <StickyNote className="mr-2 h-6 w-6 text-primary" /> Create New Post
                 </DialogTitle>
                 <DialogDescription>Share your thoughts, notes, or questions with the community.</DialogDescription>
@@ -381,4 +381,3 @@ export default function FeedPage() {
     
 
     
-

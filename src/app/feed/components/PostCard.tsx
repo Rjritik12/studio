@@ -249,16 +249,16 @@ export const PostCard = memo(function PostCard({ post }: PostCardProps) {
               value={replyText[comment.id] || ''}
               onChange={(e) => handleReplyTextChange(comment.id, e.target.value)}
               rows={1}
-              className="flex-1 resize-none bg-background focus:border-primary transition-colors text-xs min-h-[36px] h-9 leading-tight"
+              className="flex-1 resize-none bg-background focus:border-primary transition-colors text-xs min-h-[32px] h-8 sm:min-h-[36px] sm:h-9 leading-tight"
             />
             <Button 
               onClick={() => handlePostReply(comment.id)} 
               disabled={!replyText[comment.id]?.trim()} 
               size="icon" 
-              className="self-start bg-primary hover:bg-primary/90 text-primary-foreground h-9 w-9"
+              className="self-start bg-primary hover:bg-primary/90 text-primary-foreground h-8 w-8 sm:h-9 sm:w-9"
               aria-label="Post reply"
             >
-              <Send className="h-3.5 w-3.5" />
+              <Send className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
             </Button>
           </div>
         )}
@@ -282,7 +282,7 @@ export const PostCard = memo(function PostCard({ post }: PostCardProps) {
           </Avatar>
           <div className="flex-1">
               <Link href={`/profile/${encodeURIComponent(post.userName)}`} className="hover:underline">
-                <CardTitle className="text-base font-semibold text-foreground">{post.userName}</CardTitle>
+                <CardTitle className="text-sm sm:text-base font-semibold text-foreground">{post.userName}</CardTitle>
               </Link>
             <CardDescription className="text-xs text-muted-foreground">
               {timeAgo} &bull; Expires in {timeLeft}
@@ -397,16 +397,16 @@ export const PostCard = memo(function PostCard({ post }: PostCardProps) {
               value={topLevelCommentText}
               onChange={(e) => setTopLevelCommentText(e.target.value)}
               rows={1}
-              className="flex-1 resize-none bg-background focus:border-primary transition-colors text-sm min-h-[40px] h-10 leading-tight"
+              className="flex-1 resize-none bg-background focus:border-primary transition-colors text-sm min-h-[36px] h-9 sm:min-h-[40px] sm:h-10 leading-tight"
             />
             <Button 
               onClick={handlePostTopLevelComment} 
               disabled={!topLevelCommentText.trim()} 
               size="icon" 
-              className="self-start bg-primary hover:bg-primary/90 text-primary-foreground h-10 w-10"
+              className="self-start bg-primary hover:bg-primary/90 text-primary-foreground h-9 w-9 sm:h-10 sm:w-10"
               aria-label="Post comment"
             >
-              <Send className="h-4 w-4" />
+              <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
           </div>
         </div>
@@ -415,4 +415,5 @@ export const PostCard = memo(function PostCard({ post }: PostCardProps) {
   );
 });
 PostCard.displayName = 'PostCard';
+
 
