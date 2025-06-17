@@ -7,7 +7,7 @@ import type { LearningModule } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BookOpen, ChevronRight, CircleHelp, Atom, Dna } from 'lucide-react';
+import { ArrowLeft, BookOpen, ChevronRight, CircleHelp, Atom, Dna, Calculator } from 'lucide-react'; // Added Calculator
 import { ModuleSectionDisplay } from '../components/ModuleSectionDisplay';
 import Link from 'next/link';
 
@@ -15,6 +15,7 @@ const iconMap: { [key: string]: React.ElementType } = {
   Atom: Atom,
   Dna: Dna,
   BookOpen: BookOpen,
+  Calculator: Calculator, // Added Calculator to map
   Default: BookOpen,
 };
 

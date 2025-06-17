@@ -87,7 +87,7 @@ export interface LearningModule {
   title: string;
   description: string;
   difficulty: 'easy' | 'medium' | 'hard'; // Default difficulty for practice questions
-  icon?: string; // Optional: Lucide icon name
+  icon?: string; // Optional: Lucide icon name (e.g., "Atom", "Dna", "Calculator")
   sections: ModuleSection[];
   dataAiHint?: string; // For placeholder image on module listing
 }

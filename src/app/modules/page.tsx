@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, BookOpen, Atom, Dna } from 'lucide-react';
+import { ArrowRight, BookOpen, Atom, Dna, Calculator } from 'lucide-react'; // Added Calculator
 import { mockLearningModules } from '@/data/learning-modules';
 import Image from 'next/image';
 import type { LearningModule } from '@/lib/types';
@@ -11,6 +11,7 @@ const iconMap: { [key: string]: React.ElementType } = {
   Atom: Atom,
   Dna: Dna,
   BookOpen: BookOpen,
+  Calculator: Calculator, // Added Calculator to map
   Default: BookOpen,
 };
 
@@ -68,3 +69,4 @@ export default function LearningModulesPage() {
     </div>
   );
 }
+
