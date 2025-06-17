@@ -80,6 +80,7 @@ export interface ModuleSection {
   title: string;
   topicForAI: string; // Specific topic string for AI question generation
   theory: string; // Placeholder for theory content
+  keyFormulasAndConcepts?: string; // New field for important formulas and concepts
 }
 
 export interface LearningModule {
@@ -92,3 +93,4 @@ export interface LearningModule {
   dataAiHint?: string; // For placeholder image on module listing
 }
 
+    

@@ -5,11 +5,12 @@ import { useState } from 'react';
 import type { ModuleSection, QuizQuestion, GenerateSingleQuizQuestionInput } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Lightbulb, BookText, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, Lightbulb, BookText, CheckCircle, XCircle, SigmaSquare, Brain } from 'lucide-react'; // Added SigmaSquare, Brain
 import { handleFlipQuestion } from '@/lib/actions'; // Reusing this to generate a single question
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { Separator } from '@/components/ui/separator'; // Added Separator
 
 interface ModuleSectionDisplayProps {
   section: ModuleSection;
@@ -69,9 +70,25 @@ export function ModuleSectionDisplay({ section, moduleDifficulty }: ModuleSectio
         </div>
       </div>
 
+      {section.keyFormulasAndConcepts && (
+        <div>
+          <Separator className="my-4" />
+          <h4 className="font-semibold text-lg text-foreground mb-2 flex items-center">
+            <SigmaSquare className="mr-2 h-5 w-5 text-primary" /> Key Formulas & Concepts
+          </h4>
+          <div className="p-4 bg-accent/10 dark:bg-accent/20 rounded-md shadow-sm border border-accent/30">
+            <p className="text-sm text-foreground/80 whitespace-pre-wrap font-code">
+              {section.keyFormulasAndConcepts}
+            </p>
+          </div>
+        </div>
+      )}
+      
+      <Separator className="my-4" />
+
       <div>
         <h4 className="font-semibold text-lg text-foreground mb-3 flex items-center">
-          <Lightbulb className="mr-2 h-5 w-5 text-primary" /> Practice Question
+          <Brain className="mr-2 h-5 w-5 text-primary" /> Practice Question
         </h4>
         <Button onClick={generateQuestion} disabled={isLoadingQuestion} className="mb-4">
           {isLoadingQuestion && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -126,3 +143,4 @@ export function ModuleSectionDisplay({ section, moduleDifficulty }: ModuleSectio
     </div>
   );
 }
+    
