@@ -4,7 +4,7 @@
 import { useState, type FormEvent } from 'react';
 import type { ModuleSection, QuizQuestion, GenerateQuizQuestionsInput } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Lightbulb, BookText, CheckCircle, XCircle, SigmaSquare, Brain, ChevronRight, ChevronLeft, RotateCcw } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
@@ -245,4 +245,6 @@ export function ModuleSectionDisplay({ section, moduleDifficulty }: ModuleSectio
     </ScrollArea>
   );
 }
+    
+
     

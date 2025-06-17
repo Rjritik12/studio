@@ -3,6 +3,7 @@ import type { GenerateQuizQuestionsOutput } from '@/ai/flows/generate-quiz-quest
 import type { TutorStudySessionOutput } from '@/ai/flows/tutor-study-session';
 import type { GetQuizQuestionHintInput, GetQuizQuestionHintOutput } from '@/ai/flows/get-quiz-question-hint';
 import type { GenerateSingleQuizQuestionInput, GenerateSingleQuizQuestionOutput as SingleQuestionOutput, SingleQuizQuestion as NewSingleQuizQuestion } from '@/ai/flows/generate-single-quiz-question';
+import type { HandleGenerateSectionQuizInput as SectionQuizInputType } from '@/lib/actions';
 
 
 export interface QuizQuestion {
@@ -92,5 +93,9 @@ export interface LearningModule {
   sections: ModuleSection[];
   dataAiHint?: string; // For placeholder image on module listing
 }
+
+// Type for mini-quiz input in ModuleSectionDisplay calling the server action
+export type HandleGenerateSectionQuizInput = SectionQuizInputType;
+    
 
     
