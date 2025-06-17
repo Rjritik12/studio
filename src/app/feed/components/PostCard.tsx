@@ -206,11 +206,11 @@ export const PostCard = memo(function PostCard({ post }: PostCardProps) {
         <AvatarImage src={comment.avatar} alt={comment.author} data-ai-hint="user avatar generic"/>
         <AvatarFallback>{comment.author.substring(0,1)}</AvatarFallback>
       </Avatar>
-      <div className="flex-1">
+      <div className="flex-1 min-w-0"> {/* Added min-w-0 for flex child shrinkage */}
         <div className={cn("p-2.5 rounded-lg bg-background shadow-sm", isReply ? "text-xs" : "text-sm")}>
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-card-foreground text-xs">{comment.author}</span>
-            <span className="text-xs text-muted-foreground">{formatTimeAgo(comment.createdAt)}</span>
+            <span className="font-semibold text-card-foreground text-xs truncate">{comment.author}</span> {/* Added truncate */}
+            <span className="text-xs text-muted-foreground shrink-0">{formatTimeAgo(comment.createdAt)}</span>
           </div>
           <p className="whitespace-pre-wrap break-words text-card-foreground/90 mt-1">{comment.text}</p>
         </div>
@@ -276,13 +276,13 @@ export const PostCard = memo(function PostCard({ post }: PostCardProps) {
     <TooltipProvider>
       <Card className="w-full shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out">
         <CardHeader className="flex flex-row items-start gap-3 p-3 sm:p-4 pb-3">
-          <Avatar className="h-10 w-10 border">
+          <Avatar className="h-10 w-10 border shrink-0">
             <AvatarImage src={post.userAvatar} alt={post.userName} data-ai-hint="user avatar" />
             <AvatarFallback>{post.userName.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
-          <div className="flex-1">
-              <Link href={`/profile/${encodeURIComponent(post.userName)}`} className="hover:underline">
-                <CardTitle className="text-sm sm:text-base font-semibold text-foreground">{post.userName}</CardTitle>
+          <div className="flex-1 min-w-0"> {/* Added min-w-0 here for flex child shrinkage */}
+              <Link href={`/profile/${encodeURIComponent(post.userName)}`} className="block hover:underline w-full"> {/* Made Link block to help with truncation */}
+                <CardTitle className="text-sm sm:text-base font-semibold text-foreground truncate">{post.userName}</CardTitle> {/* Added truncate */}
               </Link>
             <CardDescription className="text-xs text-muted-foreground">
               {timeAgo} &bull; Expires in {timeLeft}
@@ -290,7 +290,7 @@ export const PostCard = memo(function PostCard({ post }: PostCardProps) {
           </div>
           <Tooltip>
             <TooltipTrigger asChild>
-                <div className="bg-primary/10 p-1.5 rounded-full">
+                <div className="bg-primary/10 p-1.5 rounded-full shrink-0"> {/* Added shrink-0 */}
                     <PostIcon className="h-5 w-5 text-primary" />
                 </div>
             </TooltipTrigger>
@@ -327,7 +327,7 @@ export const PostCard = memo(function PostCard({ post }: PostCardProps) {
           )}
         </CardContent>
         <CardFooter className="flex justify-between items-center p-3 sm:p-4 pt-3 border-t">
-          <div className="flex gap-4 text-muted-foreground">
+          <div className="flex gap-3 text-muted-foreground"> {/* Reduced gap from 4 to 3 */}
             <Button 
               variant="ghost" 
               size="sm" 
@@ -415,6 +415,3 @@ export const PostCard = memo(function PostCard({ post }: PostCardProps) {
   );
 });
 PostCard.displayName = 'PostCard';
-
-
-
