@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, LayoutGrid, HelpCircle, UserCircle, LogIn, MessageSquare, Users } from 'lucide-react'; // Added Users icon
+import { Home, LayoutGrid, HelpCircle, UserCircle, LogIn, MessageSquare, Users, BookCopy } from 'lucide-react'; 
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 
@@ -14,29 +14,29 @@ export function AppFooter() {
   // Base items available to all or when logged out (if not auth-specific)
   const navItemsBase = [
     { href: '/', label: 'Home', icon: Home },
-    { href: '/feed', label: 'Feed', icon: LayoutGrid },
+    { href: '/modules', label: 'Learn', icon: BookCopy }, // New Learn/Modules link
     { href: '/quiz', label: 'Quiz', icon: HelpCircle },
+    { href: '/feed', label: 'Feed', icon: LayoutGrid },
   ];
 
   // Items specifically for logged-in users
   const getLoggedInItems = () => {
     const publicProfileLink = user ? `/profile/${encodeURIComponent(user.displayName || user.email?.split('@')[0] || 'me')}` : '/login';
     
-    // Manually construct the order: Home, AI Study, Quiz, Feed, Profile
+    // Order: Home, Learn, Quiz, Feed, Profile
     return [
-      navItemsBase.find(item => item.label === 'Home')!, // Home
-      { href: '/study-room', label: 'AI Study', icon: Users }, // AI Study Room
-      navItemsBase.find(item => item.label === 'Quiz')!, // Quiz
-      navItemsBase.find(item => item.label === 'Feed')!, // Feed
-      { href: publicProfileLink, label: 'Profile', icon: UserCircle }, // Profile
-    ].filter(Boolean); // Filter out any undefined items if labels change in navItemsBase
+      navItemsBase.find(item => item.label === 'Home')!, 
+      navItemsBase.find(item => item.label === 'Learn')!, 
+      navItemsBase.find(item => item.label === 'Quiz')!, 
+      navItemsBase.find(item => item.label === 'Feed')!, 
+      { href: publicProfileLink, label: 'Profile', icon: UserCircle }, 
+    ].filter(Boolean); 
   };
 
   // Items for logged-out users
   const loggedOutItems = [
     ...navItemsBase,
     { href: '/login', label: 'Login', icon: LogIn },
-    // Add a placeholder or another relevant item if needed to fill up to 4-5 items for logged out users
   ];
 
   if (loading) {
@@ -55,11 +55,7 @@ export function AppFooter() {
   }
 
   const currentNavItems = user ? getLoggedInItems() : loggedOutItems;
-  // Ensure we display a consistent number of items, typically 5 for a footer like this.
   const displayItems = [...currentNavItems].slice(0,5); 
-   if (displayItems.length < 5 && !user) {
-    // Example: Add a generic link or an empty placeholder if needed for layout consistency for logged-out users
-   }
 
 
   return (
@@ -69,11 +65,10 @@ export function AppFooter() {
           const Icon = item.icon;
           let isActive = pathname === item.href;
 
-          // More specific active state logic for nested routes
            if (item.href !== '/' && pathname.startsWith(item.href)) {
             isActive = true;
           }
-          if (item.label === 'Home' && pathname === '/') { // Ensure Home is only active for exact match
+          if (item.label === 'Home' && pathname === '/') { 
               isActive = true;
           } else if (item.label === 'Home' && pathname !== '/') {
               isActive = false;
@@ -85,7 +80,7 @@ export function AppFooter() {
               href={item.href}
               key={item.label}
               className={cn(
-                "flex flex-col items-center justify-center p-1 text-xs transition-colors w-1/5", // Ensure w-1/5 for 5 items
+                "flex flex-col items-center justify-center p-1 text-xs transition-colors w-1/5", 
                 isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
               )}
             >

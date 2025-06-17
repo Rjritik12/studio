@@ -73,3 +73,22 @@ export interface MockStudyGroup {
   avatarUrl: string;
   createdBy: string; // User who created it (mock)
 }
+
+// Types for Learning Modules
+export interface ModuleSection {
+  id: string;
+  title: string;
+  topicForAI: string; // Specific topic string for AI question generation
+  theory: string; // Placeholder for theory content
+}
+
+export interface LearningModule {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: 'easy' | 'medium' | 'hard'; // Default difficulty for practice questions
+  icon?: string; // Optional: Lucide icon name
+  sections: ModuleSection[];
+  dataAiHint?: string; // For placeholder image on module listing
+}
+
