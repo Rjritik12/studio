@@ -100,6 +100,9 @@ export function StoryViewer({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="p-0 m-0 max-w-full sm:max-w-md md:max-w-lg lg:max-w-xl w-screen h-screen sm:h-[90vh] sm:max-h-[700px] sm:rounded-lg flex flex-col overflow-hidden bg-black">
+        <DialogHeader className="sr-only">
+          <DialogTitle>{`${currentStory.username}'s Story`}</DialogTitle>
+        </DialogHeader>
         <div className="relative flex-grow w-full h-full flex items-center justify-center">
           {/* Story Image */}
           <Image
@@ -170,3 +173,4 @@ export function StoryViewer({
     </Dialog>
   );
 }
+
