@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { MessageCircle, Heart, Share2, LinkIcon as LinkIconLucide, Image as ImageIconLucide, StickyNote, HelpCircle, Smile, Send, MessageSquare } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useState, memo } from 'react'; // Added memo
+import { useEffect, useState, memo } from 'react';
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from '@/hooks/use-toast';
@@ -275,7 +275,7 @@ export const PostCard = memo(function PostCard({ post }: PostCardProps) {
   return (
     <TooltipProvider>
       <Card className="w-full shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out">
-        <CardHeader className="flex flex-row items-start gap-3 pb-3">
+        <CardHeader className="flex flex-row items-start gap-3 p-3 sm:p-4 pb-3">
           <Avatar className="h-10 w-10 border">
             <AvatarImage src={post.userAvatar} alt={post.userName} data-ai-hint="user avatar" />
             <AvatarFallback>{post.userName.substring(0, 2).toUpperCase()}</AvatarFallback>
@@ -299,7 +299,7 @@ export const PostCard = memo(function PostCard({ post }: PostCardProps) {
             </TooltipContent>
           </Tooltip>
         </CardHeader>
-        <CardContent className="pb-4">
+        <CardContent className="p-3 sm:p-4 pt-0 pb-4">
           {hasContent && (
             <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words">{post.content}</p>
           )}
@@ -326,7 +326,7 @@ export const PostCard = memo(function PostCard({ post }: PostCardProps) {
             </div>
           )}
         </CardContent>
-        <CardFooter className="flex justify-between items-center pt-3 border-t">
+        <CardFooter className="flex justify-between items-center p-3 sm:p-4 pt-3 border-t">
           <div className="flex gap-4 text-muted-foreground">
             <Button 
               variant="ghost" 
@@ -361,7 +361,7 @@ export const PostCard = memo(function PostCard({ post }: PostCardProps) {
           </Tooltip>
         </CardFooter>
 
-        <div className="px-6 pt-4 pb-4 border-t bg-muted/20">
+        <div className="p-3 sm:p-4 border-t bg-muted/20">
           {(newComments.length > 0 || post.commentsCount > 0) && (
             <h4 className="text-xs font-medium mb-3 text-muted-foreground uppercase tracking-wider">
               Comments ({localCommentsCount})
@@ -415,5 +415,6 @@ export const PostCard = memo(function PostCard({ post }: PostCardProps) {
   );
 });
 PostCard.displayName = 'PostCard';
+
 
 

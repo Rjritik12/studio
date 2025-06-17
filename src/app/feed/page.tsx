@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useMemo } from 'react'; // Added useMemo
+import { useState, useEffect, useMemo } from 'react'; 
 import { CreatePostForm } from './components/CreatePostForm';
 import { PostCard } from './components/PostCard';
 import type { Post } from '@/lib/types';
@@ -57,7 +57,6 @@ export default function FeedPage() {
   const [isCreatePostDialogOpen, setIsCreatePostDialogOpen] = useState(false);
 
 
-  // Replaced useEffect with useMemo for uniqueUserStories
   const uniqueUserStories = useMemo(() => {
     return mockStoriesData.reduce((acc, story) => {
       if (!acc.find(s => s.username === story.username)) {
@@ -206,9 +205,9 @@ export default function FeedPage() {
 
   return (
     <TooltipProvider>
-      <div className="py-6 sm:py-8"> {/* Adjusted page padding */}
+      <div className="py-6 sm:py-8">
         <header className="w-full py-6 sm:py-8 md:py-10 lg:py-12 bg-gradient-to-br from-primary to-accent/80 rounded-lg shadow-xl text-center mb-8">
-          <div className="container mx-auto px-4 md:px-6"> {/* Container for text centering */}
+          <div className="container mx-auto px-4 md:px-6">
             <h1 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-primary-foreground mb-3">Community Feed</h1>
             <p className="text-sm sm:text-base md:text-lg text-primary-foreground/90 max-w-xl mx-auto">
               Share notes, ask questions, and connect with fellow learners. Posts vanish after 48 hours!
@@ -339,7 +338,7 @@ export default function FeedPage() {
           </div>
         </div>
 
-        <div className="w-full md:max-w-2xl md:mx-auto space-y-6 pb-20">
+        <div className="w-full md:max-w-2xl md:mx-auto space-y-6">
           {activePosts.map(post => (
             <PostCard key={post.id} post={post} />
           ))}
@@ -381,3 +380,4 @@ export default function FeedPage() {
     
 
     
+
