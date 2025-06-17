@@ -24,6 +24,7 @@ import { CreateStoryDialog } from './components/CreateStoryDialog';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 
 interface MockStory extends StoryItem {
   hasUnread: boolean;
@@ -203,11 +204,34 @@ export default function FeedPage() {
 
   const activePosts = posts.filter(post => post.expiresAt > Date.now());
 
+  // Order stories: Current user (if exists and has stories), then unread, then others
+  const orderedUniqueUserStories = useMemo(() => {
+    if (authLoading) return []; // Don't sort until auth is loaded
+    
+    const currentUserStory = authUser && currentUserHasStories 
+      ? uniqueUserStories.find(s => s.username === currentUserNameOrDefault)
+      : null;
+
+    const otherStories = uniqueUserStories.filter(s => !currentUserStory || s.username !== currentUserStory.username);
+    
+    const unreadStories = otherStories.filter(s => s.hasUnread);
+    const readStories = otherStories.filter(s => !s.hasUnread);
+
+    let finalOrder: MockStory[] = [];
+    if (currentUserStory) {
+      finalOrder.push(currentUserStory);
+    }
+    finalOrder = finalOrder.concat(unreadStories, readStories);
+    return finalOrder;
+
+  }, [uniqueUserStories, authUser, authLoading, currentUserHasStories, currentUserNameOrDefault]);
+
+
   return (
     <TooltipProvider>
-      <div className="py-6 sm:py-8">
+      <div className="py-6 sm:py-8"> {/* Removed container, mx-auto, px-4; AppLayout provides page padding */}
         <header className="w-full py-6 sm:py-8 md:py-10 lg:py-12 bg-gradient-to-br from-primary to-accent/80 rounded-lg shadow-xl text-center mb-8">
-          <div className="container mx-auto px-4 md:px-6">
+          <div className="container mx-auto px-4 md:px-6"> {/* Keep container here for header content centering */}
             <h1 className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-primary-foreground mb-3">Community Feed</h1>
             <p className="text-sm sm:text-base md:text-lg text-primary-foreground/90 max-w-xl mx-auto">
               Share notes, ask questions, and connect with fellow learners. Posts vanish after 48 hours!
@@ -231,12 +255,12 @@ export default function FeedPage() {
                   onClick={handleAddStoryClick}
                 />
               )}
-              {uniqueUserStories.map(story => (
+              {orderedUniqueUserStories.map(story => (
                 <StoryBubble 
                   key={story.username}
                   username={story.username}
                   avatarUrl={story.avatarUrl}
-                  hasUnread={mockStoriesData.some(s => s.username === story.username && s.hasUnread)}
+                  hasUnread={mockStoriesData.some(s => s.username === story.username && s.hasUnread)} // Check original data for unread status
                   onClick={() => handleStoryBubbleClick(story.username)}
                 />
               ))}
@@ -262,7 +286,10 @@ export default function FeedPage() {
         <Tooltip>
             <TooltipTrigger asChild>
                 <Button
-                    className="fixed bottom-[calc(4rem+1rem)] right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center"
+                    className={cn(
+                      "fixed bottom-[calc(4rem+1rem)] right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center",
+                      "transition-transform duration-200 ease-in-out hover:scale-110"
+                    )}
                     size="icon"
                     onClick={() => {
                         if (authLoading) return;
@@ -380,4 +407,5 @@ export default function FeedPage() {
     
 
     
+
 

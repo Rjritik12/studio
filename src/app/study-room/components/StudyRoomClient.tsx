@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Sparkles, Wand2, Lightbulb, AlertCircle, Camera, Upload, Trash2, VideoOff, HelpCircleIcon } from 'lucide-react';
+import { Loader2, Sparkles, Wand2, Lightbulb, AlertCircle, Camera, Upload, Trash2, VideoOff, HelpCircleIcon, BookOpen, FileText, ListChecks } from 'lucide-react';
 import { handleStudySession } from '@/lib/actions';
 import type { Flashcard, StudyRoomData } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -327,16 +327,20 @@ export function StudyRoomClient() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div>
-              <h3 className="font-semibold text-lg sm:text-xl text-foreground mb-2">Answer to Your Doubt:</h3>
+              <h3 className="font-semibold text-lg sm:text-xl text-foreground mb-2 flex items-center">
+                <FileText className="mr-2 h-5 sm:h-6 w-5 sm:h-6 text-primary" /> Answer to Your Doubt:
+              </h3>
               <div className="prose prose-xs sm:prose-sm lg:prose-base dark:prose-invert max-w-none p-3 sm:p-4 bg-foreground/5 rounded-md shadow">
                 <p className="text-foreground/90 whitespace-pre-wrap">{studyData.answer}</p>
               </div>
             </div>
 
             <div>
-                <h3 className="font-semibold text-lg sm:text-xl text-foreground mb-2">Flashcard Status:</h3>
+                <h3 className="font-semibold text-lg sm:text-xl text-foreground mb-2 flex items-center">
+                  <Lightbulb className="mr-2 h-5 sm:h-6 w-5 sm:h-6 text-primary" /> Flashcard Status:
+                </h3>
                 <Alert>
-                    <Lightbulb className="h-4 sm:h-5 w-4 sm:w-5" />
+                    <Lightbulb className="h-4 sm:h-5 w-4 sm:h-5" />
                     <AlertTitle className="font-semibold text-sm sm:text-base">Recommendation & Outcome</AlertTitle>
                     <AlertDescription className="whitespace-pre-wrap mt-1 text-xs sm:text-sm">
                         {studyData.flashcardRecommendation}
@@ -346,7 +350,9 @@ export function StudyRoomClient() {
             
             {studyData.flashcards && Array.isArray(studyData.flashcards) && studyData.flashcards.length > 0 && (
               <div>
-                <h3 className="font-semibold text-lg sm:text-xl text-foreground mb-3">Generated Flashcards:</h3>
+                <h3 className="font-semibold text-lg sm:text-xl text-foreground mb-3 flex items-center">
+                  <BookOpen className="mr-2 h-5 sm:h-6 w-5 sm:h-6 text-primary" /> Generated Flashcards:
+                </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {studyData.flashcards.map((flashcard: Flashcard, index: number) => (
                     <FlashcardDisplay key={index} flashcard={flashcard} />
@@ -356,9 +362,11 @@ export function StudyRoomClient() {
             )}
             {studyData.flashcards && typeof studyData.flashcards === 'string' && ( 
                  <div>
-                    <h3 className="font-semibold text-lg sm:text-xl text-foreground mb-3">Generated Flashcards (Raw Data):</h3>
+                    <h3 className="font-semibold text-lg sm:text-xl text-foreground mb-3 flex items-center">
+                      <BookOpen className="mr-2 h-5 sm:h-6 w-5 sm:h-6 text-primary" /> Generated Flashcards (Raw Data):
+                    </h3>
                     <Alert variant="default" className="bg-amber-50 border-amber-300 dark:bg-amber-900/30 dark:border-amber-700">
-                        <AlertCircle className="h-4 sm:h-5 w-4 sm:w-5 text-amber-600 dark:text-amber-400" />
+                        <AlertCircle className="h-4 sm:h-5 w-4 sm:h-5 text-amber-600 dark:text-amber-400" />
                         <AlertTitle className="font-semibold text-sm sm:text-base text-amber-700 dark:text-amber-300">Flashcard Parsing Issue</AlertTitle>
                         <AlertDescription className="text-xs sm:text-sm text-amber-700/90 dark:text-amber-300/90 mt-1">
                             The AI provided flashcard data as a string, but we expected a structured array of question/answer pairs.
@@ -371,7 +379,9 @@ export function StudyRoomClient() {
             
             {studyData.practiceQuestions && studyData.practiceQuestions.length > 0 && (
               <div>
-                <h3 className="font-semibold text-lg sm:text-xl text-foreground mb-3">Practice Questions:</h3>
+                <h3 className="font-semibold text-lg sm:text-xl text-foreground mb-3 flex items-center">
+                  <ListChecks className="mr-2 h-5 sm:h-6 w-5 sm:h-6 text-primary" /> Practice Questions:
+                </h3>
                 <div className="space-y-4">
                   {studyData.practiceQuestions.map((pq, index) => (
                     <PracticeQuestionCard key={index} questionItem={pq} index={index} />
@@ -381,7 +391,9 @@ export function StudyRoomClient() {
             )}
             {(!studyData.practiceQuestions || studyData.practiceQuestions.length === 0) && (
               <div>
-                <h3 className="font-semibold text-lg sm:text-xl text-foreground mb-2">Practice Questions Status:</h3>
+                <h3 className="font-semibold text-lg sm:text-xl text-foreground mb-2 flex items-center">
+                  <ListChecks className="mr-2 h-5 sm:h-6 w-5 sm:h-6 text-primary" /> Practice Questions Status:
+                </h3>
                 <Alert>
                   <HelpCircleIcon className="h-4 sm:h-5 w-4 sm:w-5" />
                   <AlertTitle className="font-semibold text-sm sm:text-base">No Practice Questions Generated</AlertTitle>
@@ -397,3 +409,4 @@ export function StudyRoomClient() {
     </div>
   );
 }
+

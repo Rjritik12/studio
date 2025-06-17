@@ -116,3 +116,4 @@ export function QuizSetup({ onQuizSetup, isLoading, error }: QuizSetupProps) {
     </Card>
   );
 }
+

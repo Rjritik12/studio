@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef, type ChangeEvent, type FormEvent } from 'react';
@@ -363,13 +364,13 @@ export default function HomePage() {
 
             {solutionText && !isProcessingSolution && (
                 <Card className="mt-6 shadow-xl border-green-500/50">
-                    <CardHeader className="bg-green-500/10 dark:bg-green-700/20">
+                    <CardHeader className="bg-green-100/80 dark:bg-green-900/30 rounded-t-lg">
                         <CardTitle className="font-headline text-2xl text-green-700 dark:text-green-400 flex items-center">
-                            <Sparkles className="mr-2 h-7 w-7" /> AI Generated Solution
+                            <Sparkles className="mr-3 h-7 w-7 text-green-600 dark:text-green-500" /> AI Generated Solution
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-6">
-                        <div className="prose prose-sm sm:prose lg:prose-lg dark:prose-invert max-w-none text-foreground/90 whitespace-pre-wrap">
+                        <div className="prose prose-sm sm:prose lg:prose-lg dark:prose-invert max-w-none text-foreground/90 whitespace-pre-wrap break-words">
                             {solutionText}
                         </div>
                     </CardContent>
@@ -425,3 +426,4 @@ export default function HomePage() {
       </main>
     </div>
   );
+
