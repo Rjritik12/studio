@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -19,8 +20,7 @@ const nextConfig: NextConfig = {
     ],
     // Required for 'next export' if using next/image with default loader.
     // Capacitor works best with fully static assets.
-    // Consider unoptimized: true if you have issues with images in the exported app.
-    // For now, we keep it optimized and you can adjust if needed.
+    unoptimized: true, // Disable Image Optimization API for static export
   },
   // Enable static export for Capacitor
   output: 'export',
