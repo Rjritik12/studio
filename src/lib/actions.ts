@@ -1,10 +1,10 @@
 
 "use server";
 
-import { generateQuizQuestions, GenerateQuizQuestionsInput, GenerateQuizQuestionsOutput } from "@/ai/flows/generate-quiz-questions";
-import { tutorStudySession, TutorStudySessionInput, TutorStudySessionOutput } from "@/ai/flows/tutor-study-session"; 
-import { getQuizQuestionHint, GetQuizQuestionHintInput, GetQuizQuestionHintOutput } from "@/ai/flows/get-quiz-question-hint";
-import { generateSingleQuizQuestion, GenerateSingleQuizQuestionInput, GenerateSingleQuizQuestionOutput } from "@/ai/flows/generate-single-quiz-question";
+import { generateQuizQuestions, type GenerateQuizQuestionsInput, type GenerateQuizQuestionsOutput } from "@/ai/flows/generate-quiz-questions";
+import { tutorStudySession, type TutorStudySessionInput, type TutorStudySessionOutput } from "@/ai/flows/tutor-study-session";
+import { getQuizQuestionHint, type GetQuizQuestionHintInput, type GetQuizQuestionHintOutput } from "@/ai/flows/get-quiz-question-hint";
+import { generateSingleQuizQuestion, type GenerateSingleQuizQuestionInput, type GenerateSingleQuizQuestionOutput } from "@/ai/flows/generate-single-quiz-question";
 import { exploreConcept } from "@/ai/flows/explore-concept-flow";
 import type { ExploreConceptInput, ExploreConceptOutput, QuizQuestion } from "@/lib/types";
 
@@ -20,6 +20,19 @@ const quizSetupSchema = z.object({
 export interface HandleQuizSetupResult extends GenerateQuizQuestionsOutput {
   topic?: string;
   difficulty?: 'easy' | 'medium' | 'hard';
+}
+
+function getErrorMessage(error: unknown, defaultMessage: string): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string' && error.trim() !== '') {
+    return error;
+  }
+  if (typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string') {
+    return error.message;
+  }
+  return defaultMessage;
 }
 
 
@@ -46,18 +59,17 @@ export async function handleQuizSetup(formData: FormData): Promise<HandleQuizSet
     }
     return { error: errorMessages.join('; ') || "Validation failed. Please check your inputs." };
   }
-  
+
   try {
     const quizInput = validatedFields.data as GenerateQuizQuestionsInput;
     const quizData = await generateQuizQuestions(quizInput);
     if (!quizData.questions || quizData.questions.length === 0) {
       return { error: "No questions were generated. Please try different settings or topic." };
     }
-    // Return topic and difficulty along with questions for context in UI
     return { ...quizData, topic: quizInput.topic, difficulty: quizInput.difficulty };
   } catch (e) {
     console.error("Error generating quiz questions:", e);
-    return { error: "Failed to generate quiz questions. Please try again." };
+    return { error: getErrorMessage(e, "Failed to generate quiz questions. Please try again.") };
   }
 }
 
@@ -65,14 +77,14 @@ export async function handleQuizSetup(formData: FormData): Promise<HandleQuizSet
 const studySessionSchema = z.object({
   notes: z.string(),
   doubt: z.string().min(1, "Doubt cannot be empty"),
-  imageDataUri: z.string().optional(), 
+  imageDataUri: z.string().optional(),
 });
 
 export async function handleStudySession(formData: FormData): Promise<TutorStudySessionOutput | { error: string }> {
   const rawFormData = {
     notes: formData.get("notes"),
     doubt: formData.get("doubt"),
-    imageDataUri: formData.get("imageDataUri") as string | undefined, 
+    imageDataUri: formData.get("imageDataUri") as string | undefined,
   };
 
   const validatedFields = studySessionSchema.safeParse(rawFormData);
@@ -105,13 +117,7 @@ export async function handleStudySession(formData: FormData): Promise<TutorStudy
     return studyData;
   } catch (e) {
     console.error("Error in AI study session:", e);
-    let errorMessage = "Failed to process study session. Please try again.";
-    if (e instanceof Error) {
-        errorMessage = e.message;
-    } else if (typeof e === 'string') {
-        errorMessage = e;
-    }
-    return { error: errorMessage };
+    return { error: getErrorMessage(e, "Failed to process study session. Please try again.") };
   }
 }
 
@@ -121,7 +127,7 @@ export async function handleGetQuizHint(input: GetQuizQuestionHintInput): Promis
     return hintData;
   } catch (e) {
     console.error("Error generating hint:", e);
-    return { error: "Failed to generate hint. Please try again." };
+    return { error: getErrorMessage(e, "Failed to generate hint. Please try again.") };
   }
 }
 
@@ -134,11 +140,10 @@ export async function handleFlipQuestion(input: GenerateSingleQuizQuestionInput)
     return newQuestionData;
   } catch (e) {
     console.error("Error flipping question:", e);
-    return { error: "Failed to flip question. Please try again." };
+    return { error: getErrorMessage(e, "Failed to flip question. Please try again.") };
   }
 }
 
-// Server action for Concept Explorer
 const exploreConceptClientSchema = z.object({
   concept: z.string().min(1, "Concept cannot be empty."),
 });
@@ -155,19 +160,11 @@ export async function handleExploreConcept(formData: FormData): Promise<ExploreC
   }
 
   try {
-    // The Genkit flow itself uses Zod for input validation based on ExploreConceptInputSchema,
-    // so we are passing the validated client-side data.
     const result = await exploreConcept(validatedFields.data as ExploreConceptInput);
     return result;
   } catch (e) {
     console.error("Error exploring concept:", e);
-    let errorMessage = "Failed to explore concept. Please try again.";
-     if (e instanceof Error) {
-        errorMessage = e.message;
-    } else if (typeof e === 'string') {
-        errorMessage = e;
-    }
-    return { error: errorMessage };
+    return { error: getErrorMessage(e, "Failed to explore concept. Please try again.") };
   }
 }
 
@@ -175,7 +172,7 @@ export async function handleExploreConcept(formData: FormData): Promise<ExploreC
 const sectionQuizSchema = z.object({
   topic: z.string().min(1, "Topic is required for section quiz"),
   difficulty: z.enum(["easy", "medium", "hard"]),
-  numQuestions: z.coerce.number().min(1).max(5), // Mini-quiz, e.g., 3-5 questions
+  numQuestions: z.coerce.number().min(1).max(5),
 });
 export type HandleGenerateSectionQuizInput = z.infer<typeof sectionQuizSchema>;
 
@@ -187,7 +184,7 @@ export async function handleGenerateSectionQuiz(input: HandleGenerateSectionQuiz
   }
 
   try {
-    const quizInput = validatedFields.data as GenerateQuizQuestionsInput; // Re-use same input type for Genkit flow
+    const quizInput = validatedFields.data as GenerateQuizQuestionsInput;
     const quizData = await generateQuizQuestions(quizInput);
     if (!quizData.questions || quizData.questions.length === 0) {
       return { error: `No questions were generated for the topic: "${quizInput.topic}". Please try a broader topic or check AI capabilities.` };
@@ -195,8 +192,6 @@ export async function handleGenerateSectionQuiz(input: HandleGenerateSectionQuiz
     return { questions: quizData.questions };
   } catch (e) {
     console.error("Error generating section quiz questions:", e);
-    return { error: "Failed to generate section quiz questions. Please try again." };
+    return { error: getErrorMessage(e, "Failed to generate section quiz questions. Please try again.") };
   }
 }
-
-    
