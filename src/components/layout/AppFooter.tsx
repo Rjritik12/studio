@@ -63,17 +63,8 @@ export function AppFooter() {
       <nav className="flex justify-around items-center h-full">
         {displayItems.map((item) => {
           const Icon = item.icon;
-          let isActive = pathname === item.href;
-
-           if (item.href !== '/' && pathname.startsWith(item.href)) {
-            isActive = true;
-          }
-          if (item.label === 'Home' && pathname === '/') { 
-              isActive = true;
-          } else if (item.label === 'Home' && pathname !== '/') {
-              isActive = false;
-          }
-
+          // Exact match for home, startsWith for others
+          const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
 
           return (
             <Link
@@ -93,3 +84,4 @@ export function AppFooter() {
     </footer>
   );
 }
+

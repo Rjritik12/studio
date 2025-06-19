@@ -73,3 +73,4 @@ const solveImageProblemFlow = ai.defineFlow(
     return output;
   }
 );
+

@@ -300,7 +300,7 @@ export default function HomePage() {
                             <div className="space-y-3 flex flex-col items-center">
                                 <Label className="text-lg font-medium">Image Preview:</Label>
                                 <div className="relative w-full max-w-md border rounded-md overflow-hidden shadow-md bg-muted">
-                                    <Image src={imagePreview} alt="Problem preview" width={600} height={400} className="object-contain aspect-video w-full" data-ai-hint="problem preview" />
+                                    <Image src={imagePreview} alt="Problem preview" width={600} height={400} className="object-contain aspect-video w-full" data-ai-hint="problem equation diagram" />
                                 </div>
                             </div>
                         )}
@@ -426,4 +426,5 @@ export default function HomePage() {
       </main>
     </div>
   );
+
 
