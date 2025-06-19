@@ -193,8 +193,9 @@ export function QuizGame({ questions: initialQuestions, onGameEnd }: QuizGamePro
             const numOptions = optionsToPoll.length;
 
             if (numOptions === 0) {
-                setLifelines(prev => ({ ...prev, [type]: { used: true, isLoading: false }}));
-                break;
+                toast({ title: "Audience Poll Error", description: "No options available to poll.", variant: "destructive" });
+                setLifelines(prev => ({ ...prev, [type]: { used: true, isLoading: false }})); // Mark as used to prevent re-trigger
+                return; 
             }
             
             let percentages = new Array(numOptions).fill(0);

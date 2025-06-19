@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(result.user);
       return result.user;
     } catch (e: any) {
-      console.error("Google Sign-In Raw Error Object:", e); // Log the full error object
+      console.error("Google Sign-In Raw Error Object:", e);
       
       let errorMessage = 'Failed to sign in with Google. Please try again.';
       if (e.code) {
@@ -58,23 +58,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             errorMessage = 'Network error. Please check your internet connection and try again.';
             break;
           case 'auth/operation-not-allowed':
-            errorMessage = 'Google Sign-In is not enabled for this Firebase project. Please check your Firebase console.';
+            errorMessage = 'Google Sign-In is not enabled. Please check your Firebase project configuration.';
             break;
           case 'auth/invalid-credential':
           case 'auth/user-disabled':
           case 'auth/account-exists-with-different-credential':
-            errorMessage = e.message || 'An authentication error occurred.';
+             errorMessage = e.message || `An authentication error occurred (Code: ${e.code}).`;
             break;
-          default:
-            // For "auth/internal-error" or other generic/uncommon Firebase errors, 
-            // or "the requested action is invalid" which doesn't have a specific Firebase code but is often related to config.
-            errorMessage = `An error occurred (Code: ${e.code || 'unknown'}): ${e.message || 'Please check console for details and ensure your Firebase project is correctly configured (e.g., Authorized Domains for mobile access).'}`;
+          default: // Covers 'auth/internal-error' and other less common Firebase errors
+            errorMessage = e.message ? `Google Sign-In Error: ${e.message}` : `An unexpected error occurred during Google Sign-In (Code: ${e.code || 'unknown'}). Ensure your Firebase project and Authorized Domains are correctly configured.`;
         }
-      } else if (e.message && e.message.includes("the requested action is invalid")) {
-        // Catching the specific string if no code is present
-         errorMessage = "The sign-in action is invalid. This often means the domain you're using on mobile isn't authorized in your Firebase project settings.";
-      } else if (e.message) {
-        errorMessage = e.message;
+      } else if (e.message) { // Non-Firebase specific errors or when code is not present
+        errorMessage = e.message.includes("the requested action is invalid") 
+            ? "The sign-in action is invalid. Ensure the domain is authorized in Firebase for mobile/web access."
+            : `Google Sign-In Error: ${e.message}`;
       }
       
       setError(errorMessage);
