@@ -16,3 +16,4 @@ export default function IndividualModulePage({ params }: { params: { moduleId: s
   // The actual UI rendering and client-side logic is deferred to the client component
   return <ModuleDisplayClient params={params} />;
 }
+
