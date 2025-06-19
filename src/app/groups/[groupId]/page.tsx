@@ -1,14 +1,16 @@
 
-"use client";
+"use client"; // Keep this if using client-side hooks like useParams, useRouter
 
 import { useParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MessageSquare, Users, Settings, AlertCircle } from "lucide-react";
-import Link from 'next/link';
+// Link from next/link is fine in client components if not part of generateStaticParams in the same file
+import Link from 'next/link'; 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 // For static export, if this page is to be pre-rendered for specific groupIds
+// This function must be outside the component and exported.
 export async function generateStaticParams() {
   // Provide a few mock group IDs to pre-render.
   // In a real app, these might come from a build-time data source or be empty if
@@ -25,7 +27,8 @@ export async function generateStaticParams() {
 export default function GroupDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const groupId = typeof params.groupId === 'string' ? params.groupId : "unknown-group";
+  // Ensure groupId is treated as a string, even if params.groupId could be string | string[]
+  const groupId = Array.isArray(params.groupId) ? params.groupId[0] : params.groupId || "unknown-group";
   
   // In a real app, you'd fetch group details based on groupId
   const mockGroupName = groupId.replace('group-', '').split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ').replace(/-\d+$/, '').replace(/-msg$/,'');

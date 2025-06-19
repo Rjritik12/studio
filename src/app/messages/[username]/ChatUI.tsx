@@ -1,17 +1,15 @@
 
 "use client";
 
-import { useParams, useRouter } from 'next/navigation'; // Keep useRouter for client-side navigation
+import { useParams, useRouter } from 'next/navigation'; 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Send, Paperclip, Smile, AlertCircle, IndianRupee, Clock } from "lucide-react";
-// Link from next/link is fine in client components
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-// Mock message structure
 interface MockMessage {
   id: string;
   text: string;
@@ -19,13 +17,12 @@ interface MockMessage {
   timestamp: string;
 }
 
-// Interface for the props that ChatUI will receive
 interface ChatUIProps {
   params: { username: string };
 }
 
 export function ChatUI({ params }: ChatUIProps) {
-  const router = useRouter(); // useRouter can be used here
+  const router = useRouter(); 
   const username = typeof params.username === 'string' ? decodeURIComponent(params.username) : "User";
 
   const mockMessages: MockMessage[] = [

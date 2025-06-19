@@ -1,5 +1,5 @@
 
-"use client";
+"use client"; // Keep this if using client-side hooks like useParams, useRouter
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,7 @@ import type { Post } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 // For static export, if this page is to be pre-rendered for specific usernames
+// This function must be outside the component and exported.
 export async function generateStaticParams() {
   // Provide a few mock usernames to pre-render.
   // In a real app, these might come from a build-time data source or be empty if
@@ -26,25 +27,27 @@ export async function generateStaticParams() {
     { username: 'Alice' },
     { username: 'BobCoder' },
     { username: 'TechGuru' },
-    { username: 'me' }, // A common placeholder for the current user's own profile link
+    { username: encodeURIComponent('me') }, // Special "me" slug
   ];
 }
 
 export default function UserProfilePage() {
   const params = useParams();
-  const usernameParam = typeof params.username === 'string' ? decodeURIComponent(params.username) : "User";
+  const router = useRouter();
   const { toast } = useToast();
   const { user: authUser, loading: authLoading } = useAuth();
-  const router = useRouter();
 
-  // Use a state for username to handle potential 'me' or encoded values
-  const [profileUsername, setProfileUsername] = useState(usernameParam);
+  // Ensure usernameParam is treated as a string
+  const usernameParam = Array.isArray(params.username) ? params.username[0] : params.username || "User";
+  const [profileUsername, setProfileUsername] = useState(decodeURIComponent(usernameParam));
+
 
   useEffect(() => {
-    if (authUser && (usernameParam === 'me' || usernameParam === authUser.email?.split('@')[0] || usernameParam === authUser.displayName)) {
+    const decodedParam = decodeURIComponent(usernameParam);
+    if (authUser && (decodedParam === 'me' || decodedParam === authUser.email?.split('@')[0] || decodedParam === authUser.displayName)) {
       setProfileUsername(authUser.displayName || authUser.email?.split('@')[0] || "User");
     } else {
-      setProfileUsername(usernameParam);
+      setProfileUsername(decodedParam);
     }
   }, [authUser, usernameParam]);
 
