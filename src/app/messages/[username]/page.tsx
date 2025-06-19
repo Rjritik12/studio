@@ -19,4 +19,3 @@ export default function ChatPage({ params }: { params: { username: string } }) {
   // The actual UI rendering is deferred to the client component
   return <ChatUI params={params} />;
 }
-
