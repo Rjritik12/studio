@@ -10,22 +10,24 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import type { ExploreConceptInput, ExploreConceptOutput } from '@/lib/types';
+import type { ExploreConceptInput as ExploreConceptInputType, ExploreConceptOutput as ExploreConceptOutputType } from '@/lib/types'; // Renamed to avoid conflict
 
-// Internal schema, not exported
+// Internal schema, not exported but used for Genkit flow definition
 const ExploreConceptInputSchema = z.object({
   concept: z.string().min(1, { message: "Concept cannot be empty." }).describe('The concept or keyword to be explained.'),
 });
 
-// Internal schema, not exported
+// Internal schema, not exported but used for Genkit flow definition
 const ExploreConceptOutputSchema = z.object({
   explanation: z.string().describe('A concise explanation of the concept.'),
   relatedTerms: z.array(z.string()).describe('A list of 3-5 key terms related to the concept.'),
   analogy: z.string().optional().describe('A simple analogy or example to help understand the concept, if applicable.'),
 });
 
-export async function exploreConcept(input: ExploreConceptInput): Promise<ExploreConceptOutput> {
-  return exploreConceptFlow(input);
+export async function exploreConcept(input: ExploreConceptInputType): Promise<ExploreConceptOutputType> {
+  // The public-facing function uses types from lib/types for external contracts
+  // It calls the internal Genkit flow which will validate against its own Zod schema
+  return exploreConceptFlow(input as z.infer<typeof ExploreConceptInputSchema>);
 }
 
 const prompt = ai.definePrompt({
@@ -50,7 +52,7 @@ const exploreConceptFlow = ai.defineFlow(
     inputSchema: ExploreConceptInputSchema,
     outputSchema: ExploreConceptOutputSchema,
   },
-  async (input: ExploreConceptInput): Promise<ExploreConceptOutput> => {
+  async (input: z.infer<typeof ExploreConceptInputSchema>): Promise<z.infer<typeof ExploreConceptOutputSchema>> => {
     const {output} = await prompt(input);
     if (!output) {
         throw new Error("AI failed to generate a valid response for the concept exploration.");

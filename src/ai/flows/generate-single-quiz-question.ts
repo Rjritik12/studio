@@ -80,8 +80,11 @@ const generateSingleQuizQuestionFlow = ai.defineFlow(
     inputSchema: GenerateSingleQuizQuestionInputSchema,
     outputSchema: GenerateSingleQuizQuestionOutputSchema,
   },
-  async input => {
+  async (input: z.infer<typeof GenerateSingleQuizQuestionInputSchema>): Promise<z.infer<typeof GenerateSingleQuizQuestionOutputSchema>> => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+        throw new Error("AI failed to generate a single quiz question.");
+    }
+    return output;
   }
 );

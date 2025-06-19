@@ -77,7 +77,7 @@ const tutorStudySessionFlow = ai.defineFlow(
     inputSchema: TutorStudySessionInputSchema,
     outputSchema: TutorStudySessionOutputSchema,
   },
-  async input => {
+  async (input: z.infer<typeof TutorStudySessionInputSchema>): Promise<z.infer<typeof TutorStudySessionOutputSchema>> => {
     const {output} = await tutorPrompt(input);
     if (!output) {
       throw new Error("AI failed to generate a valid response matching the output schema.");
@@ -85,4 +85,3 @@ const tutorStudySessionFlow = ai.defineFlow(
     return output;
   }
 );
-

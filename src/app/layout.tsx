@@ -18,8 +18,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // HSL(220, 75%, 55%) from globals.css --primary is approx #4066D9
-  const primaryThemeColor = "#4066D9"; 
+  // PRD Primary: #3498DB
+  const primaryThemeColor = "#3498DB"; 
 
   return (
     <html lang="en" suppressHydrationWarning>

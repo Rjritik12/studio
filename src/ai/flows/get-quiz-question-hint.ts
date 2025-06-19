@@ -53,8 +53,11 @@ const getQuizQuestionHintFlow = ai.defineFlow(
     inputSchema: GetQuizQuestionHintInputSchema,
     outputSchema: GetQuizQuestionHintOutputSchema,
   },
-  async input => {
+  async (input: z.infer<typeof GetQuizQuestionHintInputSchema>): Promise<z.infer<typeof GetQuizQuestionHintOutputSchema>> => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+        throw new Error("AI failed to generate a hint for the quiz question.");
+    }
+    return output;
   }
 );

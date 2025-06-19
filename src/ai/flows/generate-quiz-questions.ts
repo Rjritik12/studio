@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -88,8 +89,11 @@ const generateQuizQuestionsFlow = ai.defineFlow(
     inputSchema: GenerateQuizQuestionsInputSchema,
     outputSchema: GenerateQuizQuestionsOutputSchema,
   },
-  async input => {
+  async (input: z.infer<typeof GenerateQuizQuestionsInputSchema>): Promise<z.infer<typeof GenerateQuizQuestionsOutputSchema>> => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+        throw new Error("AI failed to generate quiz questions.");
+    }
+    return output;
   }
 );
