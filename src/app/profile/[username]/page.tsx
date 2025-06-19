@@ -17,13 +17,37 @@ import { PostCard } from "@/app/feed/components/PostCard";
 import type { Post } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+// For static export, if this page is to be pre-rendered for specific usernames
+export async function generateStaticParams() {
+  // Provide a few mock usernames to pre-render.
+  // In a real app, these might come from a build-time data source or be empty if
+  // all profile pages are expected to be dynamically generated.
+  return [
+    { username: 'Alice' },
+    { username: 'BobCoder' },
+    { username: 'TechGuru' },
+    { username: 'me' }, // A common placeholder for the current user's own profile link
+  ];
+}
 
 export default function UserProfilePage() {
   const params = useParams();
-  const username = typeof params.username === 'string' ? decodeURIComponent(params.username) : "User";
+  const usernameParam = typeof params.username === 'string' ? decodeURIComponent(params.username) : "User";
   const { toast } = useToast();
   const { user: authUser, loading: authLoading } = useAuth();
   const router = useRouter();
+
+  // Use a state for username to handle potential 'me' or encoded values
+  const [profileUsername, setProfileUsername] = useState(usernameParam);
+
+  useEffect(() => {
+    if (authUser && (usernameParam === 'me' || usernameParam === authUser.email?.split('@')[0] || usernameParam === authUser.displayName)) {
+      setProfileUsername(authUser.displayName || authUser.email?.split('@')[0] || "User");
+    } else {
+      setProfileUsername(usernameParam);
+    }
+  }, [authUser, usernameParam]);
+
 
   const [isFollowing, setIsFollowing] = useState(false);
   const [mockUserStats, setMockUserStats] = useState({
@@ -36,24 +60,24 @@ export default function UserProfilePage() {
   });
   const [mockUserPosts, setMockUserPosts] = useState<Post[]>([]);
 
-  const avatarFallback = username.substring(0, 1).toUpperCase();
-  const profileAvatarUrl = (authUser?.photoURL && (authUser.displayName === username || authUser.email?.split('@')[0] === username))
+  const avatarFallback = profileUsername.substring(0, 1).toUpperCase();
+  const profileAvatarUrl = (authUser?.photoURL && (authUser.displayName === profileUsername || authUser.email?.split('@')[0] === profileUsername))
                            ? authUser.photoURL 
                            : `https://placehold.co/96x96.png?text=${avatarFallback}`; 
   
-  const currentDisplayName = (authUser && (authUser.displayName === username || authUser.email?.split('@')[0] === username))
-                           ? authUser.displayName || username
-                           : username.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()); 
+  const currentDisplayName = (authUser && (authUser.displayName === profileUsername || authUser.email?.split('@')[0] === profileUsername))
+                           ? authUser.displayName || profileUsername
+                           : profileUsername.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()); 
 
-  const isOwnPublicProfile = authUser && (authUser.displayName === username || authUser.email?.split('@')[0] === username);
+  const isOwnPublicProfile = authUser && (authUser.displayName === profileUsername || authUser.email?.split('@')[0] === profileUsername);
   
   useEffect(() => {
     const generatedPosts: Post[] = [
       {
-        id: `post1-public-profile-${username}`,
-        userName: username,
+        id: `post1-public-profile-${profileUsername}`,
+        userName: profileUsername,
         userAvatar: profileAvatarUrl, 
-        content: `This is a mock post from ${username}'s public profile! Exploring new study techniques.`,
+        content: `This is a mock post from ${profileUsername}'s public profile! Exploring new study techniques.`,
         type: 'note',
         likes: Math.floor(Math.random() * 70) + 5,
         commentsCount: Math.floor(Math.random() * 15) + 2,
@@ -61,10 +85,10 @@ export default function UserProfilePage() {
         expiresAt: Date.now() + (48 * 3600000) - Math.floor(Math.random() * 20 * 3600000), 
       },
       {
-        id: `post2-public-profile-${username}`,
-        userName: username,
+        id: `post2-public-profile-${profileUsername}`,
+        userName: profileUsername,
         userAvatar: profileAvatarUrl, 
-        content: `Sharing a cool link I found about space exploration, viewed from ${username}'s profile.`,
+        content: `Sharing a cool link I found about space exploration, viewed from ${profileUsername}'s profile.`,
         type: 'link',
         linkUrl: 'https://example.com/space-exploration-profile',
         likes: Math.floor(Math.random() * 40) + 3,
@@ -86,7 +110,7 @@ export default function UserProfilePage() {
     });
     setIsFollowing(Math.random() < 0.3); 
 
-  }, [username, profileAvatarUrl]);
+  }, [profileUsername, profileAvatarUrl]);
 
   const handleFollowToggle = () => {
      if (authLoading) return;
@@ -100,8 +124,8 @@ export default function UserProfilePage() {
       followersCount: isFollowing ? prev.followersCount -1 : prev.followersCount + 1
     }));
     toast({
-      title: !isFollowing ? `Followed ${username}` : `Unfollowed ${username}`,
-      description: !isFollowing ? `You are now following ${username}. (Prototype)` : `You are no longer following ${username}. (Prototype)`,
+      title: !isFollowing ? `Followed ${profileUsername}` : `Unfollowed ${profileUsername}`,
+      description: !isFollowing ? `You are now following ${profileUsername}. (Prototype)` : `You are no longer following ${profileUsername}. (Prototype)`,
     });
   };
   
@@ -112,7 +136,7 @@ export default function UserProfilePage() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h2 className="font-headline text-base sm:text-lg font-semibold text-foreground text-center truncate px-2">
-          {username}
+          {currentDisplayName}
         </h2>
         <Button variant="ghost" size="icon" aria-label="Options" disabled>
           <MoreHorizontal className="h-5 w-5" />
@@ -124,7 +148,7 @@ export default function UserProfilePage() {
           <CardContent className="p-3 sm:p-4 space-y-3">
             <div className="flex flex-row items-center gap-3 sm:gap-4">
               <Avatar className="w-16 h-16 sm:w-20 sm:h-20 border-2 border-muted shadow-sm">
-                <AvatarImage src={profileAvatarUrl} alt={username} data-ai-hint="user profile avatar"/>
+                <AvatarImage src={profileAvatarUrl} alt={profileUsername} data-ai-hint="user profile avatar"/>
                 <AvatarFallback className="text-2xl sm:text-3xl">{avatarFallback}</AvatarFallback>
               </Avatar>
               <div className="flex flex-1 justify-around items-center text-center">
@@ -194,7 +218,7 @@ export default function UserProfilePage() {
                     {isFollowing ? "Following" : "Follow"}
                   </Button>
                   <Button variant="outline" asChild className="flex-1 text-xs h-8">
-                    <Link href={`/messages/${encodeURIComponent(username)}`}>Message</Link>
+                    <Link href={`/messages/${encodeURIComponent(profileUsername)}`}>Message</Link>
                   </Button>
                 </>
               ) : !authLoading && !authUser ? (
@@ -210,7 +234,7 @@ export default function UserProfilePage() {
             <Card className="shadow-xl w-full"> 
               <CardHeader>
                 <CardTitle className="font-headline text-lg md:text-xl flex items-center">
-                  <Rss className="mr-2 h-5 w-5 text-primary" /> Recent Posts by {username}
+                  <Rss className="mr-2 h-5 w-5 text-primary" /> Recent Posts by {currentDisplayName}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 md:space-y-6">
@@ -219,7 +243,7 @@ export default function UserProfilePage() {
                     <PostCard key={post.id} post={post} />
                   ))
                 ) : (
-                  <p className="text-sm text-muted-foreground text-center py-4">No recent active posts to display for {username} in this mock view.</p>
+                  <p className="text-sm text-muted-foreground text-center py-4">No recent active posts to display for {currentDisplayName} in this mock view.</p>
                 )}
               </CardContent>
             </Card>
@@ -230,10 +254,9 @@ export default function UserProfilePage() {
         <UserCheck className="h-5 w-5 text-primary" /> 
         <AlertTitle className="font-headline text-primary">Public Profile View</AlertTitle>
         <AlertDescription className="text-foreground/80">
-          This is {username}'s public profile. Social features like following, messaging, and posts are prototyped with mock data.
+          This is {currentDisplayName}'s public profile. Social features like following, messaging, and posts are prototyped with mock data.
         </AlertDescription>
       </Alert>
     </div>
   );
 }
-    

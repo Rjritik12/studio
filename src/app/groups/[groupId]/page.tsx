@@ -8,13 +8,27 @@ import { ArrowLeft, MessageSquare, Users, Settings, AlertCircle } from "lucide-r
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
+// For static export, if this page is to be pre-rendered for specific groupIds
+export async function generateStaticParams() {
+  // Provide a few mock group IDs to pre-render.
+  // In a real app, these might come from a build-time data source or be empty if
+  // all group pages are expected to be dynamically generated on the client or server.
+  return [
+    { groupId: 'group-jee-physics-msg' },
+    { groupId: 'group-neet-biology-msg' },
+    { groupId: 'group-class10-math-msg' },
+    // Add more mock group IDs if needed for pre-rendering
+  ];
+}
+
+
 export default function GroupDetailPage() {
   const params = useParams();
   const router = useRouter();
   const groupId = typeof params.groupId === 'string' ? params.groupId : "unknown-group";
   
   // In a real app, you'd fetch group details based on groupId
-  const mockGroupName = groupId.replace('group-', '').split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ').replace(/-\d+$/, '');
+  const mockGroupName = groupId.replace('group-', '').split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ').replace(/-\d+$/, '').replace(/-msg$/,'');
 
 
   return (
