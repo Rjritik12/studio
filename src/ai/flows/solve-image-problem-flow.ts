@@ -64,8 +64,6 @@ const solveImageProblemFlow = ai.defineFlow(
     outputSchema: SolveImageProblemOutputSchema,
   },
   async (input: z.infer<typeof SolveImageProblemInputSchema>): Promise<z.infer<typeof SolveImageProblemOutputSchema>> => {
-    // Ensure the default Gemini Flash model is used if it's capable, or specify gemini-pro-vision for older genkit versions if needed.
-    // The global `ai` object in genkit.ts is configured with gemini-2.0-flash which supports multimodal input.
     const {output} = await prompt(input);
     if (!output) {
         throw new Error("AI failed to generate a valid solution matching the output schema.");
@@ -73,4 +71,3 @@ const solveImageProblemFlow = ai.defineFlow(
     return output;
   }
 );
-

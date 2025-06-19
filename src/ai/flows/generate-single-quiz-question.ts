@@ -47,7 +47,7 @@ const subjectMatterExpertTool = ai.defineTool({
     topic: z.string().describe('The specific topic to provide information on.'),
   }),
   outputSchema: z.string(),
-  async handler(input) {
+  async handler(input: z.infer<typeof subjectMatterExpertTool.inputSchema>) {
     // In a real application, this would fetch data from a database or external API.
     // For this example, we'll just return a placeholder.
     return `Detailed information about ${input.topic} to help generate a unique question.`;
@@ -88,4 +88,3 @@ const generateSingleQuizQuestionFlow = ai.defineFlow(
     return output;
   }
 );
-

@@ -7,7 +7,7 @@ import type { LearningModule } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BookOpen, ChevronRight, CircleHelp, Atom, Dna, Calculator, Code2 } from 'lucide-react'; // Added Code2
+import { ArrowLeft, BookOpen, ChevronRight, CircleHelp, Atom, Dna, Calculator, Code2 } from 'lucide-react';
 import { ModuleSectionDisplay } from '../components/ModuleSectionDisplay';
 import Link from 'next/link';
 
@@ -16,9 +16,16 @@ const iconMap: { [key: string]: React.ElementType } = {
   Dna: Dna,
   BookOpen: BookOpen,
   Calculator: Calculator,
-  Code2: Code2, // Added Code2 to map
+  Code2: Code2,
   Default: BookOpen,
 };
+
+// For static export, if this page is to be pre-rendered for specific moduleIds
+export async function generateStaticParams() {
+  // Provide a few mock module IDs to pre-render.
+  // In a real app, these might come from a build-time data source.
+  return mockLearningModules.map(module => ({ moduleId: module.id }));
+}
 
 
 export default function IndividualModulePage() {

@@ -1,8 +1,6 @@
 
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, type Auth } from 'firebase/auth'; // Added GoogleAuthProvider
-// import { getFirestore } from "firebase/firestore"; // Example for Firestore
-// import { getStorage } from "firebase/storage"; // Example for Storage
+import { getAuth, GoogleAuthProvider, type Auth } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -15,10 +13,21 @@ const firebaseConfig = {
 };
 
 // Log the projectId to help debug configuration issues
-console.log("Firebase Initializing with Project ID:", firebaseConfig.projectId);
-if (!firebaseConfig.apiKey) {
+if (process.env.NODE_ENV === 'development') {
+    console.log("Firebase Initializing with Config:", {
+        apiKeyExists: !!firebaseConfig.apiKey,
+        authDomain: firebaseConfig.authDomain,
+        projectId: firebaseConfig.projectId,
+        appIdExists: !!firebaseConfig.appId
+    });
+}
+
+
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
   console.error(
-    "Firebase API Key is missing. Check your .env.local file, ensure it's prefixed with NEXT_PUBLIC_, and restart your dev server."
+    "Firebase API Key or Project ID is missing. This is critical for Firebase services to work. " +
+    "Check your .env.local file (or environment variables for deployment), ensure they are prefixed with NEXT_PUBLIC_, " +
+    "and restart your development server if changes were made."
   );
 }
 
@@ -31,8 +40,5 @@ if (!getApps().length) {
 }
 
 const auth: Auth = getAuth(app);
-// const db = getFirestore(app); // Example for Firestore
-// const storage = getStorage(app); // Example for Storage
 
-export { app, auth, GoogleAuthProvider /*, db, storage */ }; // Export GoogleAuthProvider
-
+export { app, auth, GoogleAuthProvider };
